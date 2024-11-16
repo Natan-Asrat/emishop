@@ -82,17 +82,6 @@ const openProductDetails = (product) => {
   product.startViewTime = startTime
 }
 
-const decrementQuantity = (product) => {
-  if (product.quantity > 1) {
-    product.quantity--
-  }
-}
-const incrementQuantity = (product) => {
-  if (product.quantity < product.stockLeft) {
-    product.quantity++
-  }
-}
-
 const closeProductDetails = () => {
   if (selectedProduct.value) {
     const endTime = Date.now()
