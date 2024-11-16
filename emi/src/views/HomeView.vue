@@ -4,8 +4,7 @@
     <Navbar />
     <RecentlyViewed />
   </NavbarWrapper>
-  <!-- <FeedList /> -->
-   <div style="margin-top: 200px; height: 200vh">jeyy</div>
+  <FeedList />
 </template>
 <script>
 import Navbar from '@/components/Navbar.vue';

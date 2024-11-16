@@ -12,7 +12,7 @@
         >
           <SearchIcon class="h-6 w-6" />
         </button>
-        <div v-show="isSearchExpanded" class="absolute search-bar-wrapper">
+        <div v-show="isSearchExpanded" class="absolute search-bar-wrapper ">
           <input
             ref="searchInput"
             v-model="searchQuery"

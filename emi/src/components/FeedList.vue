@@ -1,52 +1,75 @@
 <template>
-  <main ref="mainContent" class=" pb-20">
-    <!-- Vertically Scrollable Product Feed -->
-    <div class="px-4 py-6 space-y-6 overflow-y-auto h-[calc(100vh-8rem)]">
-      <div v-for="product in products" :key="product.id" class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden product" :data-product-id="product.id" >
-        <img :src="product.image" :alt="product.name" class="w-full h-48 object-cover" @click="openProductDetails(product)" />
-        <div class="p-4">
-          <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ product.name }}</h2>
-          <p class="text-gray-600 dark:text-gray-400 mt-1">Price: ${{ product.price.toFixed(2) }}</p>
-          <p class="text-sm text-gray-500 dark:text-gray-500 mt-1">
-            Stock: {{ product.stockLeft }} / {{ product.totalStock }}
-          </p>
-          <div class="mt-4 flex items-center justify-between">
-            <div class="flex items-center">
-              <button
-                @click="decrementQuantity(product)"
-                class="bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 h-8 w-8 rounded-l"
-              >
-                -
-              </button>
-              <input
-                type="number"
-                v-model.number="product.quantity"
-                min="1"
-                :max="product.stockLeft"
-                class="h-8 w-12 text-center border-t border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300"
-              />
-              <button
-                @click="incrementQuantity(product)"
-                class="bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 h-8 w-8 rounded-r"
-              >
-                +
-              </button>
-            </div>
-            <button
-              @click="reserveProduct(product)"
-              class="bg-indigo-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              Reserve
-            </button>
-          </div>
-        </div>
-      </div>
+  <main ref="mainContent" class="pb-20">
+    <div class="px-4 py-6 space-y-6 overflow-y-auto" style="margin-top: 265px">
+      <FeedItem
+        v-for="product in products"
+        :key="product.id"
+        :product="product"
+        @viewDetails="openProductDetails"
+        @reserve="reserveProduct"
+      />
     </div>
   </main>
 </template>
 <script setup>
 import { ref } from 'vue'
-const products = ref([])
+import FeedItem from './FeedItem.vue';
+const products = ref([
+    {
+      id: 1,
+      name: "Stylish Watch",
+      price: 199.99,
+      image: "https://placehold.co/300",
+      images: [
+        "https://placehold.co/300",
+        "https://placehold.co/300",
+        "https://placehold.co/300"
+      ],
+      stockLeft: 5,
+      totalStock: 10,
+      quantity: 1,
+      description: "A sleek and modern watch that combines style with functionality.",
+      sellerName: "John Doe",
+      sellerAvatar: "https://placehold.co/40",
+      postedDate: "2023-05-15"
+    },
+    {
+      id: 2,
+      name: "Wireless Earbuds",
+      price: 89.99,
+      image: "https://placehold.co/300",
+      images: [
+        "https://placehold.co/300",
+        "https://placehold.co/300",
+        "https://placehold.co/300"
+      ],
+      stockLeft: 8,
+      totalStock: 15,
+      quantity: 1,
+      description: "High-quality wireless earbuds with noise-cancelling technology.",
+      sellerName: "Jane Smith",
+      sellerAvatar: "https://placehold.co/40",
+      postedDate: "2023-05-14"
+    },
+    {
+      id: 3,
+      name: "Smart Home Speaker",
+      price: 129.99,
+      image: "https://placehold.co/300",
+      images: [
+        "https://placehold.co/300",
+        "https://placehold.co/300",
+        "https://placehold.co/300"
+      ],
+      stockLeft: 3,
+      totalStock: 8,
+      quantity: 1,
+      description: "A powerful smart speaker with voice control and excellent sound quality.",
+      sellerName: "Mike Johnson",
+      sellerAvatar: "https://placehold.co/40",
+      postedDate: "2023-05-13"
+    },
+  ])
 const selectedProduct = ref(null)
 const isReserving = ref(false);
 const requiredCoins = ref(0)
