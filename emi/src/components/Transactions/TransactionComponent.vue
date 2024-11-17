@@ -1,0 +1,180 @@
+<template>
+  <div
+  :class="['rounded-lg shadow-md overflow-hidden', getCardColor(transaction)]">
+  <div class="p-4 flex items-start space-x-4">
+    <div :class="['p-2 rounded-full', getIconBackground(transaction)]">
+      <component :is="getIcon(transaction)" class="h-6 w-6 text-white" />
+    </div>
+    <div class="flex-grow">
+      <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+        {{ transaction.post.title }}
+      </h3>
+      <p class="text-sm text-gray-600 dark:text-gray-400">
+        {{  formatDate(transaction.created_at) }}
+      </p>
+      <p class="text-sm font-medium text-gray-900 dark:text-gray-100 mt-1">
+        {{  transaction.coins_spent }} coins
+      </p>
+      <p :class="['text-xs mt-1', getStatusColor(transaction)]">
+        {{ getStatusText(transaction) }}
+      </p>
+    </div>
+    <div class="text-right">
+      <p class="text-sm font-medium text-gray-900 dark:text-gray-100">
+        Quantity: {{  transaction.quantity }}
+      </p>
+    </div>
+  </div>
+  <div v-if="showActions(transaction)" class="px-4 pb-4 flex justify-end space-x-2">
+    <button
+    @click="navigateToChat(transaction)"
+    class="px-3 py-1 bg-blue-500 text-white rounded-full text-sm flex items-center space-x-1"
+    >
+      <MessageCircle class="h-4 w-4" />
+      <span>Message</span>
+    </button>
+    <button
+    v-if="canReceive(transaction)"
+    @click="handleAction(transaction, 'complete')"
+    class="px-3 py-1 bg-green-500 text-white rounded-full text-sm">
+
+    >
+    Received
+    </button>
+    <button v-if="canCancel(transaction)"
+            @click="handleAction(transaction, 'cancel')"
+            class="px-3 py-1 bg-red-500 text-white rounded-full text-sm">
+      Cancel
+    </button>
+    <button v-if="canReport(transaction)"
+            @click="handleAction(transaction, 'report')"
+            class="px-3 py-1 bg-yellow-500 text-white rounded-full text-sm">
+      Report
+    </button>
+  </div>
+  </div>
+</template>
+<script setup>
+import { useRouter } from 'vue-router';
+import axios from 'axios';
+import { CheckCircle, XCircle, AlertTriangle, ShoppingCart } from 'lucide-vue-next';
+const emit = defineEmits(['setTransaction'])
+const props = defineProps({
+  transaction: {
+    type: Object,
+    required: true
+  },
+  index: {
+    type: Number,
+    required: true
+  }
+})
+const router = useRouter();
+
+const showActions = (transaction) => {
+  return transaction.status === 'pending' && transaction.seller_accepted;
+};
+const getCardColor = (transaction) => {
+  if (transaction.status === 'reported') return 'bg-red-50 dark:bg-red-900/20';
+  if (transaction.status === 'cancelled') return 'bg-gray-50 dark:bg-gray-800/50';
+  return 'bg-white dark:bg-gray-800';
+};
+const getIconBackground = (transaction) => {
+  if (transaction.status === 'completed') return 'bg-green-500';
+  if (transaction.status === 'cancelled') return 'bg-red-500';
+  if (transaction.status === 'reported') return 'bg-yellow-500';
+  return 'bg-blue-500';
+};
+const getIcon = (transaction) => {
+  if (transaction.status === 'completed') return CheckCircle;
+  if (transaction.status === 'cancelled') return XCircle;
+  if (transaction.status === 'reported') return AlertTriangle;
+  return ShoppingCart;
+};
+
+const formatDate = (date) => {
+  return new Date(date).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
+const getStatusColor = (transaction) => {
+  if (transaction.status === 'completed') return 'text-green-600 dark:text-green-400';
+  if (transaction.status === 'cancelled') return 'text-red-600 dark:text-red-400';
+  if (transaction.status === 'reported') return 'text-yellow-600 dark:text-yellow-400';
+  return 'text-blue-600 dark:text-blue-400';
+};
+const getStatusText = (transaction) => {
+  if (transaction.status === 'reported') return 'Under Review';
+  if (transaction.status === 'cancelled') {
+    return transaction.cancelled_by === transaction.buyer.id
+      ? 'You cancelled this reservation'
+      : 'Seller cancelled - Coins refunded';
+  }
+  if (transaction.status === 'pending') {
+    return transaction.seller_accepted
+      ? 'Accepted by seller'
+      : 'Waiting for seller acceptance';
+  }
+  return 'Completed';
+};
+const navigateToChat = (transaction) => {
+  router.push({
+    path: '/chat',
+    query: {
+      username: transaction.post.user.username,
+      itemId: transaction.id
+    }
+  });
+};
+
+const canReceive = (transaction) => {
+  return transaction.status === 'pending' && transaction.seller_accepted;
+};
+
+const canCancel = (transaction) => {
+  return transaction.status === 'pending';
+};
+
+const canReport = (transaction) => {
+  return transaction.status === 'pending' && transaction.seller_accepted;
+};
+const handleAction = async (transaction, action) => {
+  try {
+    switch (action) {
+      case 'complete':
+        axios.post(`api/transaction/reservations/${transaction.id}/complete/`)
+        .then(
+          response => {
+            setTransaction(response.data);
+          }
+        );
+        break;
+      case 'cancel':
+        axios.post(`api/transaction/reservations/${transaction.id}/cancel/`)
+        .then(
+          response => {
+            setTransaction(response.data);
+          }
+        );
+        break;
+      case 'report':
+        axios.post(`api/transaction/reservations/${transaction.id}/report/`)
+        .then(
+          response => {
+            setTransaction(response.data);
+          }
+        );
+        break;
+    }
+  } catch (error) {
+    console.error(`Error performing ${action}:`, error);
+  }
+};
+const setTransaction = (data) => {
+  emit('setTransaction', data, props.index);
+}
+</script>

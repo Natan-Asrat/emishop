@@ -2,82 +2,53 @@
   <main ref="mainContent" class="pb-20">
     <div class="px-4 py-6 space-y-6 overflow-y-auto" style="margin-top: 265px">
       <FeedItem
-        v-for="product in products"
+        v-for="(product, index) in feedPostStore.posts"
         :key="product.id"
         :product="product"
+        :index="index"
         @viewDetails="openProductDetails"
         @reserve="reserveProduct"
+        @updateQuantity="feedPostStore.updateProductQuantity"
+        @incrementQuantity="feedPostStore.incrementProductQuantity"
+        @decrementQuantity="feedPostStore.decrementProductQuantity"
       />
+      <SelectedProduct :isReserving="isReserving" :selectedProduct="selectedProduct" @reserveProduct="reserveProduct" @closeProductDetails="closeProductDetails" />
     </div>
   </main>
 </template>
 <script setup>
-import { ref } from 'vue'
 import FeedItem from './FeedItem.vue';
-const products = ref([
-    {
-      id: 1,
-      name: "Stylish Watch",
-      price: 199.99,
-      image: "https://placehold.co/300",
-      images: [
-        "https://placehold.co/300",
-        "https://placehold.co/300",
-        "https://placehold.co/300"
-      ],
-      stockLeft: 5,
-      totalStock: 10,
-      quantity: 1,
-      description: "A sleek and modern watch that combines style with functionality.",
-      sellerName: "John Doe",
-      sellerAvatar: "https://placehold.co/40",
-      postedDate: "2023-05-15"
-    },
-    {
-      id: 2,
-      name: "Wireless Earbuds",
-      price: 89.99,
-      image: "https://placehold.co/300",
-      images: [
-        "https://placehold.co/300",
-        "https://placehold.co/300",
-        "https://placehold.co/300"
-      ],
-      stockLeft: 8,
-      totalStock: 15,
-      quantity: 1,
-      description: "High-quality wireless earbuds with noise-cancelling technology.",
-      sellerName: "Jane Smith",
-      sellerAvatar: "https://placehold.co/40",
-      postedDate: "2023-05-14"
-    },
-    {
-      id: 3,
-      name: "Smart Home Speaker",
-      price: 129.99,
-      image: "https://placehold.co/300",
-      images: [
-        "https://placehold.co/300",
-        "https://placehold.co/300",
-        "https://placehold.co/300"
-      ],
-      stockLeft: 3,
-      totalStock: 8,
-      quantity: 1,
-      description: "A powerful smart speaker with voice control and excellent sound quality.",
-      sellerName: "Mike Johnson",
-      sellerAvatar: "https://placehold.co/40",
-      postedDate: "2023-05-13"
-    },
-  ])
+import axios from 'axios';
+import { useRouter } from 'vue-router';
+import { onMounted, onUnmounted, nextTick, watch, ref, defineEmits  } from 'vue';
+import { useFeedPostStore } from '@/stores/feedPost';
+import { useRecommendationStore } from '@/stores/recommendation';
+import SelectedProduct from '@/components/Feed/SelectedProduct.vue';
+
+const recommendationStore = useRecommendationStore();
+const feedPostStore = useFeedPostStore();
+const props = defineProps({
+  reachedLast: {
+    type: Boolean,
+    required: true,
+  }
+})
+const emits = defineEmits(['resetLastElement'])
+const showInsufficientCoinsModal = ref(false)
+const userCoins = ref(5)
+
 const selectedProduct = ref(null)
 const isReserving = ref(false);
-const requiredCoins = ref(0)
-const postInteractions = ref({})
+const router = useRouter();
+const isLoading = ref(false);
+const hasMore = ref(true)
+const page = ref(1)
+const userEmbedding = ref(new Array(recommendationStore.EMBEDDING_SIZE).fill(0))
 
+const requiredCoins = ref(0)
 const openProductDetails = (product) => {
   selectedProduct.value = product
-  updatePostInteraction(product.id, 'detailView')
+  recommendationStore.updatePostInteraction(product.id, 'detailView')
   const startTime = Date.now()
   product.startViewTime = startTime
 }
@@ -86,59 +57,38 @@ const closeProductDetails = () => {
   if (selectedProduct.value) {
     const endTime = Date.now()
     const timeSpent = (endTime - selectedProduct.value.startViewTime) / 1000 // Convert to seconds
-    console.log(`Time spent on product ${selectedProduct.value.id}: ${timeSpent} seconds`)
-    updateInteractionTime(selectedProduct.value.id, timeSpent)
+    recommendationStore.updateInteractionTime(selectedProduct.value.id, timeSpent)
   }
   selectedProduct.value = null
 }
-const updateInteractionTime = (postId, time) => {
-  if (!interactionTimes.value[postId]) {
-    interactionTimes.value[postId] = 0
-  }
-  interactionTimes.value[postId] += time
-  console.log(`Total time on ${postId}: ${interactionTimes.value[postId]}` )
-
-}
-const updatePostInteraction = (postId, interactionType, quantity = 1) => {
-  if (!postInteractions.value[postId]) {
-    postInteractions.value[postId] = 0
-  }
-  const interaction = INTERACTION_WEIGHTS[interactionType] * quantity
-  postInteractions.value[postId] += interaction
-}
 const reserveProduct = async (product) => {
-  console.log("prod", product)
-  const requiredCoins = Math.ceil(product.price * 0.01 * product.quantity);
+  const req = Math.ceil(product.price * 0.01 * product.quantity);
 
-  if (userCoins.value < requiredCoins) {
-    requiredCoins.value = requiredCoins;
+  if (userCoins.value < req) {
+    requiredCoins.value = req;
     showInsufficientCoinsModal.value = true;
     return;
   }
 
   try {
     isReserving.value = true;
-
-    const response = await reservationApi.createReservation(product.id, product.quantity);
+    await axios.post(`api/transaction/reservations/`, {
+      post_id: product.id,
+      quantity: product.quantity,
+    });
 
     // Update local state
-    userCoins.value -= requiredCoins;
+    userCoins.value -= req;
     product.stockLeft -= product.quantity;
-    updatePostInteraction(product.id, 'reserve', product.quantity);
+    recommendationStore.updatePostInteraction(product.id, 'reserve', product.quantity);
 
-    // Close product details if open
     closeProductDetails();
-
-    // Subscribe to WebSocket updates for this reservation
-    // websocketService.subscribe('notification', handleReservationNotification);
-
-    // Navigate to transactions page
     router.push('/transactions');
 
   } catch (error) {
     console.error('Error creating reservation:', error);
     if (error.response?.data?.error === 'Insufficient coins') {
-      requiredCoins.value = requiredCoins;
+      requiredCoins.value = req;
       showInsufficientCoinsModal.value = true;
     } else if (error.response?.data?.error === 'Insufficient stock') {
       alert('This item is out of stock or quantity not available');
@@ -149,4 +99,100 @@ const reserveProduct = async (product) => {
     isReserving.value = false;
   }
 };
+
+const fetchPosts = async () => {
+  if (isLoading.value || !hasMore.value) return
+
+  isLoading.value = true
+  try {
+    const mainEmbeddings = JSON.parse(localStorage.getItem('mainEmbeddings') || '[]')
+    let response
+
+    if (mainEmbeddings !== null && mainEmbeddings.length >= 60) {
+      // If we have enough interaction data, send user embedding
+      // response = await axios.post(`${API_URL}/posts/feed/`, {
+      //   user_embedding: userEmbedding.value
+      // })
+      response = await axios.post(`api/post/posts/feed/`, {user_embedding: userEmbedding.value})
+    } else {
+      // Otherwise, get diverse results
+      response = await axios.get(`api/post/posts/feed/`)
+    }
+    const newProducts = response.data.map(post => ({
+      id: post.id,
+      name: post.title,
+      price: parseFloat(post.price),
+      image: post.images[0],
+      images: post.images, // Assuming single image for now
+      stockLeft: post.quantity,
+      totalStock: post.quantity,
+      quantity: 1,
+      description: post.title, // You might want to add description field in your model
+      sellerName: post.created_by.username,
+      sellerAvatar: "https://placehold.co/40", // You might want to add avatar in your UserProfile
+      postedDate: new Date(post.created_at).toLocaleDateString(),
+      embedding: post.embedding
+    }))
+    for(const product of newProducts){
+      recommendationStore.updatePostInteraction(product.id, 'view')
+
+    }
+
+    feedPostStore.addPosts(newProducts)
+    hasMore.value = newProducts.length > 0
+    page.value++
+  } catch (error) {
+    console.error('Error fetching posts:', error)
+  } finally {
+    isLoading.value = false
+  }
+}
+
+
+
+onMounted(async () => {
+  recommendationStore.loadUserData();
+  await fetchPosts()
+
+  nextTick(() => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+          const productId = entry.target.dataset.productId; // Ensure your elements have a data-product-id attribute
+          if (entry.isIntersecting) {
+              // Element is in the viewport
+              recommendationStore.updateVisibility(productId, true);
+          } else {
+              // Element has left the viewport
+              recommendationStore.updateVisibility(productId, false);
+          }
+      });
+  });
+
+  // Assuming you have elements with the class 'product' and data-product-id
+  const productElements = document.querySelectorAll('.product');
+  productElements.forEach((element) => observer.observe(element));
+  })
+})
+
+onUnmounted(() => {
+  recommendationStore.saveUserData()
+})
+
+watch(
+  () => props.reachedLast,
+  async (newVal) => {
+    if (newVal) {
+      if(newVal === true){
+        const topPosts =recommendationStore.calculateTopInteractedPosts()
+        recommendationStore.setTopPosts(topPosts)
+        recommendationStore.saveToTemporaryStore(feedPostStore.posts)
+        recommendationStore.updateMainListAndGenerateEmbedding()
+        await fetchPosts()
+        emits('resetLastElement')
+      }
+    }
+  }
+);
+watch([recommendationStore.postInteractions, recommendationStore.interactionTimes, recommendationStore.userEmbedding, recommendationStore.tempEmbeddings], recommendationStore.saveUserData, { deep: true })
+
 </script>

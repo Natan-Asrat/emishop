@@ -8,8 +8,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, nextTick } from 'vue';
-
+import { ref, onMounted, onUnmounted, nextTick, defineEmits } from 'vue';
+const emit = defineEmits(['reachedLastElement']);
 const navbarTransform = ref('0');
 const navbarRef = ref<HTMLElement>();
 
@@ -33,6 +33,11 @@ const handleScroll = () => {
     }
 
     lastScroll = currentScroll <= 0 ? 0 : currentScroll; // Prevent negative scroll values
+
+    // Check if the user has reached the bottom of the page
+    if ((document.documentElement.scrollHeight - window.scrollY) === window.innerHeight) {
+        emit('reachedLastElement');  // Emit or call a function when the last element is reached
+    }
 };
 
 onMounted(() => {

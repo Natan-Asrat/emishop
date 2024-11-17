@@ -5,6 +5,9 @@ from django.utils import timezone
 # Create your models here.
 
 class CustomUserManager(BaseUserManager):
+    def normalize_username(self, username):
+        # Normalize the username by converting it to lowercase
+        return username.lower()
     def create_user(self, username, password=None, **extra_fields):
         if not username:
             raise ValueError("The Username field must be set")
@@ -43,6 +46,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_superuser = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(default=timezone.now)
+    coins = models.IntegerField(default=0)
 
     objects = CustomUserManager()
 

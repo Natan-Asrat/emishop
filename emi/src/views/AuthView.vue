@@ -23,7 +23,7 @@
               <template v-if="isSignUp">
 
                 <div class="space-y-2">
-                <label for="avatar">Avatar</label>
+                <label for="avatar" class="text-sm font-medium text-gray-700 dark:text-gray-300">Avatar</label>
                 <input
                   type="file"
                   @change="handleFileChange"
@@ -44,7 +44,7 @@
                 />
               </div>
               <div class="space-y-2">
-                <label for="password">Password</label>
+                <label for="password" class="text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
                 <input
                   v-model="user.password1"
                   type="password"
@@ -55,7 +55,7 @@
               </div>
               <template v-if="isSignUp">
                 <div class="space-y-2">
-                  <label for="password2">Repeat password</label>
+                  <label for="password2" class="text-sm font-medium text-gray-700 dark:text-gray-300">Repeat password</label>
                   <input
                     v-model="user.password2"
                     type="password"

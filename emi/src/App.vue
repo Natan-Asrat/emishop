@@ -8,9 +8,6 @@ const userStore = useUserStore();
 const isAuthenticated = ref(false);
 const token = userStore.user.access;
 onMounted(() => {
-  console.log("token", token)
-  console.log("user", userStore.user)
-
   if (token) {
     axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
   } else {

@@ -83,7 +83,6 @@ const openBuyCoinsModal = () => {
 
 const toggleSearch = () => {
   isSearchExpanded.value = !isSearchExpanded.value
-  console.log("is", isSearchExpanded.value)
   if (isSearchExpanded.value) {
     nextTick(() => {
       searchInput.value?.focus
