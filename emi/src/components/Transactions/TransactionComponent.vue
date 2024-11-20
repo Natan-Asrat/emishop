@@ -1,25 +1,26 @@
 <template>
   <div
+   v-if="transaction"
   :class="['rounded-lg shadow-md overflow-hidden', getCardColor(transaction)]">
   <div class="p-4 flex items-start space-x-4">
     <div :class="['p-2 rounded-full', getIconBackground(transaction)]">
       <component :is="getIcon(transaction)" class="h-6 w-6 text-white" />
     </div>
     <div class="flex-grow">
-      <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+      <h3 v-if="transaction && transaction?.post && transaction?.post?.title" class="text-lg font-semibold text-gray-900 dark:text-gray-100">
         {{ transaction.post.title }}
       </h3>
-      <p class="text-sm text-gray-600 dark:text-gray-400">
+      <p v-if="transaction && transaction?.created_at" class="text-sm text-gray-600 dark:text-gray-400">
         {{  formatDate(transaction.created_at) }}
       </p>
-      <p class="text-sm font-medium text-gray-900 dark:text-gray-100 mt-1">
+      <p v-if="transaction && transaction?.coins_spent" class="text-sm font-medium text-gray-900 dark:text-gray-100 mt-1">
         {{  transaction.coins_spent }} coins
       </p>
-      <p :class="['text-xs mt-1', getStatusColor(transaction)]">
+      <p v-if="getStatusText(transaction)" :class="['text-xs mt-1', getStatusColor(transaction)]">
         {{ getStatusText(transaction) }}
       </p>
     </div>
-    <div class="text-right">
+    <div v-if="transaction?.quantity" class="text-right">
       <p class="text-sm font-medium text-gray-900 dark:text-gray-100">
         Quantity: {{  transaction.quantity }}
       </p>
@@ -57,8 +58,8 @@
 <script setup>
 import { useRouter } from 'vue-router';
 import axios from 'axios';
-import { CheckCircle, XCircle, AlertTriangle, ShoppingCart } from 'lucide-vue-next';
-const emit = defineEmits(['setTransaction'])
+import { CheckCircle, XCircle, AlertTriangle, ShoppingCart, MessageCircle } from 'lucide-vue-next';
+const emit = defineEmits(['setTransaction', 'removeTransaction'])
 const props = defineProps({
   transaction: {
     type: Object,
@@ -108,14 +109,14 @@ const getStatusColor = (transaction) => {
   return 'text-blue-600 dark:text-blue-400';
 };
 const getStatusText = (transaction) => {
-  if (transaction.status === 'reported') return 'Under Review';
-  if (transaction.status === 'cancelled') {
-    return transaction.cancelled_by === transaction.buyer.id
+  if (transaction?.status === 'reported') return 'Under Review';
+  if (transaction?.status === 'cancelled') {
+    return transaction?.cancelled_by?.id === transaction?.buyer?.id
       ? 'You cancelled this reservation'
       : 'Seller cancelled - Coins refunded';
   }
-  if (transaction.status === 'pending') {
-    return transaction.seller_accepted
+  if (transaction?.status === 'pending') {
+    return transaction?.seller_accepted
       ? 'Accepted by seller'
       : 'Waiting for seller acceptance';
   }
@@ -125,7 +126,7 @@ const navigateToChat = (transaction) => {
   router.push({
     path: '/chat',
     query: {
-      username: transaction.post.user.username,
+      username: transaction.post.created_by.username,
       itemId: transaction.id
     }
   });
@@ -176,5 +177,8 @@ const handleAction = async (transaction, action) => {
 };
 const setTransaction = (data) => {
   emit('setTransaction', data, props.index);
+}
+const removeTransaction = (id) => {
+  emit('removeTransaction', id)
 }
 </script>

@@ -5,7 +5,7 @@
         <div class="flex flex-col bg-white h-full dark:bg-gray-800 flex-grow">
           <HeaderComponent :recipientName="''" />
           <ReservationPreview v-if="reservation" :reservation="reservation"/>
-          <div class="flex-grow overflow-y-auto p-4" ref="messagesContainer">
+          <div class="flex-grow overflow-y-auto h-96 p-4" ref="messagesContainer">
             <ChatMessage
               v-for="message in messages"
               :key="message.id"
@@ -41,10 +41,12 @@ import ReservationPreview from '@/components/Chat/ReservationPreview.vue';
 import axios from 'axios'
 import { WS_BASE_URL } from '@/config';
 import { useUserStore } from '@/stores/user';
+import ChatMessage from '@/components/Chat/ChatMessage.vue';
 export default {
   components: {
     HeaderComponent,
-    ReservationPreview
+    ReservationPreview,
+    ChatMessage
   },
   data() {
     return {
@@ -63,9 +65,12 @@ export default {
   },
   mounted() {
     this.scrollToBottom();
-    const itemId = this.$route.params.itemId;
+    const itemId = this.$route.query.itemId;
     if(itemId) {
+      console.log("item id", itemId)
       this.fetchConversation(itemId)
+    }else{
+      console.log("no item id")
     }
   },
   watch: {
@@ -76,7 +81,13 @@ export default {
   methods: {
     scrollToBottom() {
       this.$nextTick(() => {
-        this.$refs.messagesContainer.scrollTop = this.$refs.messagesContainer.scrollHeight;
+        const container = this.$refs.messagesContainer;
+        if (container) {
+          container.scrollTo({
+            top: container.scrollHeight,
+            behavior: 'smooth'
+          });
+        }
       });
     },
     fetchConversation(itemId) {
@@ -86,6 +97,7 @@ export default {
           this.conversation = response.data.conversation;
           this.reservation = response.data.reservation;
           this.fetchMessages()
+          console.log("establishing")
           this.establishWebsocket()
         }
       )

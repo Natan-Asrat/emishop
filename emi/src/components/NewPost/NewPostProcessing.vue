@@ -31,9 +31,6 @@
                   Processing Tags
                 </DialogTitle>
                 <p class="mt-2 text-sm text-gray-400">
-                  Please wait while we generate embeddings for your tags...
-                </p>
-                <p class="mt-2 text-sm text-gray-400">
                   {{ progress }}
                 </p>
               </div>

@@ -1,8 +1,12 @@
 <template>
-  <div class="min-h-screen bg-gray-100 dark:bg-gray-900 p-4">
-    <h1 class="text-2xl text-gray-900 dark:text-gray-100 font-bold mb-6">Favourites</h1>
+  <div class="min-h-screen bg-gray-900 dark:bg-gray-100">
+    <NavbarWrapper class="bg-gray-100 dark:bg-gray-900 p-4">
+      <h1 class="text-2xl text-gray-900 dark:text-gray-100 font-bold mb-6">Favourites</h1>
+    <div v-if="isLoading" class='mb-5 text-center dark:text-gray-100'>Loading...</div>
     <TabsComponent :current-tab="currentTab" @setCurrentTab="setCurrentTab"/>
-    <div class="space-y-4">
+
+    </NavbarWrapper>
+    <div class="space-y-4 mt-6 dark:bg-gray-100 p-4 mb-12" style="margin-top: 160px">
       <FavouriteItem
         v-for="(product, index) in favouriteStore.posts"
         :key="product.id"
@@ -31,13 +35,16 @@ import { useUserStore } from '@/stores/user';
 import { useRecommendationStore } from '@/stores/recommendation';
 import axios from 'axios';
 import FooterComponent from '@/components/FooterComponent.vue';
+import NavbarWrapper from '@/components/NavbarWrapper.vue';
 export default {
   data() {
     return{
       currentTab: 'Favourites',
       isReserving: false,
       requiredCoins: 0,
-      showInsufficientCoinsModal: false
+      showInsufficientCoinsModal: false,
+      isLoading: false,
+      hasMore: true,
     }
   },
   setup() {
@@ -56,6 +63,7 @@ export default {
     TabsComponent,
     FavouriteItem,
     FooterComponent,
+    NavbarWrapper
   },
   methods: {
     setCurrentTab(tab) {
@@ -78,7 +86,7 @@ export default {
         });
 
         // Update local state
-        this.userStore.user.coins -= req;
+        this.userStore.refreshCoins()
         product.stockLeft -= product.quantity;
         this.recommendationStore.updatePostInteraction(product.id, 'reserve', product.quantity);
 
@@ -99,7 +107,43 @@ export default {
         this.isReserving = false;
       }
     },
+    async fetchPosts() {
+      if (this.isLoading || !this.hasMore) return
 
+      this.isLoading = true
+      try {
+        const response = await axios.get(`api/post/posts/favourites/`)
+
+        const newProducts = response.data.map(post => ({
+          id: post.id,
+          name: post.title,
+          price: parseFloat(post.price),
+          image: post.images[0],
+          images: post.images, // Assuming single image for now
+          stockLeft: post.quantity,
+          totalStock: post.initial_quantity,
+          liked: post.liked,
+          quantity: 1,
+          description: post.title, // You might want to add description field in your model
+          sellerName: post.created_by.username,
+          sellerAvatar: "https://placehold.co/40", // You might want to add avatar in your UserProfile
+          postedDate: new Date(post.created_at).toLocaleDateString(),
+          embedding: post.embedding
+        }))
+
+        this.favouriteStore.addPosts(newProducts)
+        // hasMore.value = newProducts.length > 0
+        // page.value++
+      } catch (error) {
+        console.error('Error fetching posts:', error)
+      } finally {
+        this.isLoading = false
+      }
+    }
+
+  },
+  async mounted() {
+    await this.fetchPosts()
   }
 }
 

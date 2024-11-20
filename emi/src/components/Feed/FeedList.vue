@@ -1,32 +1,37 @@
 <template>
   <main ref="mainContent" class="pb-20">
-    <div class="px-4 py-6 space-y-6 overflow-y-auto" style="margin-top: 265px">
-      <FeedItem
-        v-for="(product, index) in feedPostStore.posts"
-        :key="product.id"
-        :product="product"
-        :index="index"
-        @viewDetails="openProductDetails"
-        @reserve="reserveProduct"
-        @updateQuantity="feedPostStore.updateProductQuantity"
-        @incrementQuantity="feedPostStore.incrementProductQuantity"
-        @decrementQuantity="feedPostStore.decrementProductQuantity"
-      />
+    <div class="px-4 py-6 overflow-y-auto" style="margin-top: 265px">
+      <div class="space-y-6 " :class="{'mt-9': feedPostStore.isSearchExpanded}" >
+        <FeedItem
+          v-for="(product, index) in feedPostStore.isSearchExpanded && feedPostStore.searchResults.length > 0 ? feedPostStore.searchResults : feedPostStore.posts"
+          :key="product.id"
+          :product="product"
+          :index="index"
+          @setProduct="handleSetProduct"
+          @viewDetails="openProductDetails"
+          @reserve="reserveProduct"
+          @updateQuantity="feedPostStore.updateProductQuantity"
+          @incrementQuantity="feedPostStore.incrementQuantity"
+          @decrementQuantity="feedPostStore.decrementQuantity"
+        />
+      </div>
       <SelectedProduct :isReserving="isReserving" :selectedProduct="selectedProduct" @reserveProduct="reserveProduct" @closeProductDetails="closeProductDetails" />
     </div>
   </main>
 </template>
 <script setup>
-import FeedItem from './FeedItem.vue';
+import FeedItem from '@/components/Feed/FeedItem.vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 import { onMounted, onUnmounted, nextTick, watch, ref, defineEmits  } from 'vue';
 import { useFeedPostStore } from '@/stores/feedPost';
 import { useRecommendationStore } from '@/stores/recommendation';
+import { useUserStore } from '@/stores/user';
 import SelectedProduct from '@/components/Feed/SelectedProduct.vue';
 
 const recommendationStore = useRecommendationStore();
 const feedPostStore = useFeedPostStore();
+const userStore = useUserStore();
 const props = defineProps({
   reachedLast: {
     type: Boolean,
@@ -35,7 +40,6 @@ const props = defineProps({
 })
 const emits = defineEmits(['resetLastElement'])
 const showInsufficientCoinsModal = ref(false)
-const userCoins = ref(5)
 
 const selectedProduct = ref(null)
 const isReserving = ref(false);
@@ -45,6 +49,12 @@ const hasMore = ref(true)
 const page = ref(1)
 const userEmbedding = ref(new Array(recommendationStore.EMBEDDING_SIZE).fill(0))
 
+
+const handleSetProduct = (product, index) => {
+  console.log("set", product)
+  console.log("prev", feedPostStore.posts[index])
+  feedPostStore.changePost(product, index);
+}
 const requiredCoins = ref(0)
 const openProductDetails = (product) => {
   selectedProduct.value = product
@@ -64,7 +74,7 @@ const closeProductDetails = () => {
 const reserveProduct = async (product) => {
   const req = Math.ceil(product.price * 0.01 * product.quantity);
 
-  if (userCoins.value < req) {
+  if (userStore.user.coins < req) {
     requiredCoins.value = req;
     showInsufficientCoinsModal.value = true;
     return;
@@ -78,7 +88,7 @@ const reserveProduct = async (product) => {
     });
 
     // Update local state
-    userCoins.value -= req;
+    userStore.refreshCoins()
     product.stockLeft -= product.quantity;
     recommendationStore.updatePostInteraction(product.id, 'reserve', product.quantity);
 
@@ -118,6 +128,7 @@ const fetchPosts = async () => {
       // Otherwise, get diverse results
       response = await axios.get(`api/post/posts/feed/`)
     }
+    console.log("res", response.data)
     const newProducts = response.data.map(post => ({
       id: post.id,
       name: post.title,
@@ -125,7 +136,8 @@ const fetchPosts = async () => {
       image: post.images[0],
       images: post.images, // Assuming single image for now
       stockLeft: post.quantity,
-      totalStock: post.quantity,
+      totalStock: post.initial_quantity,
+      liked: post.liked,
       quantity: 1,
       description: post.title, // You might want to add description field in your model
       sellerName: post.created_by.username,

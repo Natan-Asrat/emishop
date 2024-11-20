@@ -212,7 +212,7 @@ export default {
       this.isProcessing = true;
       let processingComplete = false;
       try{
-        const tf = await import('@tensorflow/tfjs');
+        await import('@tensorflow/tfjs');
         const use = await import('@tensorflow-models/universal-sentence-encoder');
         const model = await use.load()
         this.progress = 'Generating embeddings'

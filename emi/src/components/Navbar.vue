@@ -12,8 +12,9 @@
         >
           <SearchIcon class="h-6 w-6" />
         </button>
-        <div v-show="isSearchExpanded" class="absolute search-bar-wrapper ">
-          <input
+        <div v-show="feedPostStore.isSearchExpanded" class="absolute search-bar-wrapper ">
+          <form @submit.prevent="search">
+            <input
             ref="searchInput"
             v-model="searchQuery"
             type="text"
@@ -21,6 +22,8 @@
             class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-700 rounded-full text-sm leading-5 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out"
             @blur="closeSearch"
           />
+          </form>
+
           <div class="absolute inset-y-0 left-5 flex items-center pointer-events-none">
             <SearchIcon class="h-5 w-5 text-gray-400" />
           </div>
@@ -33,7 +36,7 @@
       >
         <BellIcon class="h-6 w-6" />
       </router-link>
-      <span class="text-gray-700 dark:text-gray-200 text-sm">Coins: {{ userCoins }}</span>
+      <span class="text-gray-700 dark:text-gray-200 text-sm">Coins: {{ userStore.user.coins }}</span>
       <button
         @click="openBuyCoinsModal"
         class="bg-yellow-500 text-white px-3 py-1 rounded-full text-sm font-medium hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
@@ -48,14 +51,15 @@
 import { ref, onMounted, onUnmounted, nextTick } from 'vue';
 import logo from '@/assets/logo.png';
 import { SearchIcon, BellIcon } from 'lucide-vue-next'
-
+import { useUserStore } from '@/stores/user';
+import { useFeedPostStore } from '@/stores/feedPost';
+import axios from 'axios';
+const feedPostStore = useFeedPostStore();
 const navbarTransform = ref('0');
 const navbarRef = ref<HTMLElement>();
-const isSearchExpanded = ref(false);
 const searchInput = ref(null)
 const searchQuery = ref('')
-
-const userCoins = ref(5)
+const userStore = useUserStore()
 let lastScroll = 0;
 let isScrollingDown = false;
 
@@ -80,10 +84,41 @@ const handleScroll = () => {
 const openBuyCoinsModal = () => {
 
 }
+const search = () => {
+  if (searchQuery.value.trim()) {
+    axios.get(`/api/post/posts/?search=${searchQuery.value}`)
+    .then(response => {
+        // Handle the response (e.g., update the UI with search results)
+        const results = response.data.map(post => ({
+          id: post.id,
+          name: post.title,
+          price: parseFloat(post.price),
+          image: post.images[0],
+          images: post.images, // Assuming single image for now
+          stockLeft: post.quantity,
+          totalStock: post.initial_quantity,
+          liked: post.liked,
+          quantity: 1,
+          description: post.title, // You might want to add description field in your model
+          sellerName: post.created_by.username,
+          sellerAvatar: "https://placehold.co/40", // You might want to add avatar in your UserProfile
+          postedDate: new Date(post.created_at).toLocaleDateString(),
+          embedding: post.embedding
+        }))
+        feedPostStore.setSearchresults(results)
+      })
+      .catch(error => {
+        // Handle any errors
+        console.error("There was an error with the search:", error);
+      });
+  }else{
+    feedPostStore.setSearchresults([])
+  }
+}
 
 const toggleSearch = () => {
-  isSearchExpanded.value = !isSearchExpanded.value
-  if (isSearchExpanded.value) {
+  feedPostStore.toggleSearch()
+  if (feedPostStore.isSearchExpanded) {
     nextTick(() => {
       searchInput.value?.focus
     });
@@ -91,7 +126,7 @@ const toggleSearch = () => {
 }
 const closeSearch = () => {
   if (searchQuery.value === '') {
-    isSearchExpanded.value = false
+    feedPostStore.setSearchExpanded(false)
   }
 }
 

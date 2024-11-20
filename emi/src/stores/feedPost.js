@@ -3,9 +3,17 @@ import { defineStore } from "pinia";
 export const useFeedPostStore = defineStore({
   id: 'feed_posts',
   state: () => ({
-    posts: []
+    posts: [],
+    searchResults: [],
+    isSearchExpanded: false,
   }),
   actions: {
+    setSearchExpanded(expanded) {
+      this.isSearchExpanded = expanded;
+    },
+    toggleSearch() {
+      this.isSearchExpanded =!this.isSearchExpanded;
+    },
     replacePost(post) {
       const index = this.posts.findIndex(p => p.id === post.id);
       if (index !== -1) {
@@ -13,6 +21,9 @@ export const useFeedPostStore = defineStore({
       }else{
         this.addPost(post)
       }
+    },
+    setSearchresults (results) {
+      this.searchResults = results;
     },
     addPost(post) {
       this.posts.push(post);
@@ -22,6 +33,9 @@ export const useFeedPostStore = defineStore({
     },
     getPosts() {
       return this.posts;
+    },
+    changePost(post, index) {
+      this.posts[index] = post;
     },
     incrementQuantity(index) {
       if (this.posts[index].quantity < this.posts[index].stockLeft) {

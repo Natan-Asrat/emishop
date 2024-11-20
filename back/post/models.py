@@ -14,6 +14,7 @@ class Post(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2)
     currency = models.CharField(max_length=3)
     quantity = models.PositiveIntegerField()
+    initial_quantity = models.PositiveIntegerField()
     tags = ArrayField(models.CharField(max_length=50), blank=True, null=True)
     embedding = VectorField(
         dimensions=512,
@@ -23,6 +24,8 @@ class Post(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    likes_count = models.IntegerField(default=0)
+
     def get_required_coins(self):
         return math.ceil(float(self.price) * 0.01)
 
@@ -34,4 +37,15 @@ class PostImage(models.Model):
 
     def __str__(self):
         return f'Image for {self.post.title}'
-    
+
+
+class Like(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    liked_by = models.ForeignKey(
+        "account.User", related_name="likes", on_delete=models.CASCADE, null=True
+    )
+    post = models.ForeignKey(
+        "post.Post", related_name="likes", on_delete=models.CASCADE, null=True
+    )
+

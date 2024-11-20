@@ -6,6 +6,7 @@ from .models import Reservation
 class ReservationSerializer(serializers.ModelSerializer):
     buyer = UserSerializer(read_only=True)
     post = PostSerializer(read_only=True)
+    cancelled_by = UserSerializer(read_only=True)
 
     def to_representation(self, instance):
         
@@ -13,7 +14,6 @@ class ReservationSerializer(serializers.ModelSerializer):
         data['coins_spent'] = instance.coins_spent
         data['status'] = instance.status
         data['seller_accepted'] = instance.seller_accepted
-        data['cancelled_by'] = instance.cancelled_by
         return data
     class Meta:
         model = Reservation

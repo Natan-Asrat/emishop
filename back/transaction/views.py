@@ -10,14 +10,19 @@ from django.db import transaction
 from django.db.models import F
 from post.models import Post
 from notification.models import Notification, Conversation
+from django_filters.rest_framework import DjangoFilterBackend
+from notification.serializers import ConversationSerializer
+import logging
+logger = logging.getLogger(__name__)
 
 # Create your views here.
 class ReservationViewSet(viewsets.ModelViewSet):
     serializer_class = ReservationSerializer
-
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['status']
     def get_queryset(self):
         if self.action == 'list':
-            return Reservation.objects.filter(buyer=self.request.user).order_by('-created_at')[:10]
+            return Reservation.objects.filter(buyer=self.request.user).order_by('-created_at')
         return Reservation.objects.all()
     @transaction.atomic
     def create(self, request, *args, **kwargs):
@@ -94,8 +99,10 @@ class ReservationViewSet(viewsets.ModelViewSet):
             message=f'Your reservation for {reservation.post.title} has been accepted',
             reservation=reservation
         )
+
+        serializer = self.get_serializer(reservation)
+        return Response(serializer.data)
         
-        return Response({'status': 'accepted'})
 
     @action(detail=True, methods=['POST'])
     def complete(self, request, pk=None):
@@ -118,7 +125,8 @@ class ReservationViewSet(viewsets.ModelViewSet):
             reservation=reservation
         )
         
-        return Response({'status': 'completed'})
+        serializer = self.get_serializer(reservation)
+        return Response(serializer.data)
 
     @action(detail=True, methods=['POST'])
     def cancel(self, request, pk=None):
@@ -155,7 +163,8 @@ class ReservationViewSet(viewsets.ModelViewSet):
             reservation=reservation
         )
         
-        return Response({'status': 'cancelled'})
+        serializer = self.get_serializer(reservation)
+        return Response(serializer.data)
 
     @action(detail=True, methods=['POST'])
     def report(self, request, pk=None):
@@ -178,7 +187,8 @@ class ReservationViewSet(viewsets.ModelViewSet):
             reservation=reservation
         )
         
-        return Response({'status': 'reported'})
+        serializer = self.get_serializer(reservation)
+        return Response(serializer.data)
 
     @action(detail=True, methods=['GET'])
     def conversation(self, request, pk=None):

@@ -111,7 +111,6 @@ import { useToastStore } from '@/stores/toast'; // Adjust the path if necessary
 import { useUserStore } from '@/stores/user';
 const userStore = useUserStore();
 const toastStore = useToastStore();
-const BASE_URL = 'http://localhost:8080'
 
 const isSignUp = ref(false)
 
@@ -199,14 +198,17 @@ const handleAuth = async () => {
         password: user.password1,
       });
 
-      // userStore.setToken(response.data);
-      userStore.setUserInfo(response.data)
       userStore.setToken(response.data)
+      axios.defaults.headers.common["Authorization"] = `Bearer ${response.data.access}`;
+
       toastStore.showToast(5000, "You are logged in successfully!", "bg-emerald-green");
       if (response.status === 200) {
         userStore.setUserInfo(response.data)
         emit('auth-success')
-
+        const response2 = await axios.get("/api/account/users/me/")
+        if(response.status === 200){
+          userStore.setUserInfo(response2.data)
+        }
       } else {
         errors.general = "Something went wrong. Please try again!";
       }

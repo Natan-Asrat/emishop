@@ -1,16 +1,37 @@
 from django.shortcuts import render
 from rest_framework import viewsets
-from .models import Post
+from .models import Post, Like
+from django.db.models import OuterRef, Exists
 from .serializers import PostSerializer, PostCreateSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from pgvector.django import CosineDistance
 import json
 from rest_framework import status
+from notification.models import Notification
+from rest_framework.filters import SearchFilter
 
 # Create your views here.
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
+
+    filter_backends = (SearchFilter,)
+    search_fields = [
+        'title',
+        'tags',
+        'created_by__username',
+        'created_by__name', 
+    ]
+    def get_queryset(self):
+        queryset = self.queryset
+        if(self.action == 'create'):
+            return queryset
+        liked_subquery = Like.objects.filter(
+            post=OuterRef("pk"),  # Refers to the current post in the main queryset
+            liked_by=self.request.user,
+        )
+        queryset = queryset.annotate(liked=Exists(liked_subquery))
+        return queryset
 
     def get_serializer_class(self):
         if self.action == 'create':
@@ -22,10 +43,55 @@ class PostViewSet(viewsets.ModelViewSet):
         context.update({"request": self.request})
         return context
 
+    @action(detail=True, methods=["post"])
+    def like(self, request, pk=None):
+        post = self.get_object()
+        user = request.user
+        like, created = Like.objects.get_or_create(liked_by=user, post=post)
+        if created:
+            post.likes_count = post.likes.count()
+            post.save()
+        post.liked = True
+        serializer = self.get_serializer(post)
+        notification_message = f"{user.username} liked your post"
+        Notification.objects.create(
+            user=post.created_by,
+            type='like',
+            title="You've got a new like!",
+            message=notification_message,
+            post=post
+        )
+        return Response(serializer.data)
+
+    @action(detail=True, methods=["post"])
+    def unlike(self, request, pk=None):
+        post = self.get_object()
+        user = request.user
+        try:
+            like = Like.objects.get(liked_by=user, post=post)
+            like.delete()
+            post.liked = False
+
+            post.likes_count = post.likes.count()
+            post.save()
+            serializer = self.get_serializer(post)
+            return Response(serializer.data)
+        except:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+    @action(detail=False, methods=['GET'])
+    def favourites(self, request):
+        liked_posts = Post.objects.filter(likes__liked_by=request.user)
+        serializer = self.get_serializer(liked_posts, many=True)
+        return Response(serializer.data)
+
     @action(detail=False, methods=['POST', 'GET'])
     def feed(self, request):
         user_embedding = request.data.get('user_embedding')
         
+        liked_subquery = Like.objects.filter(
+            post=OuterRef("pk"),  # Refers to the current post in the main queryset
+            liked_by=request.user,
+        )
         if user_embedding:
             # Convert string to list of floats
             if isinstance(user_embedding, str):
@@ -33,12 +99,13 @@ class PostViewSet(viewsets.ModelViewSet):
             elif isinstance(user_embedding, list):
                 user_embedding = [float(x) for x in user_embedding]      
             posts = Post.objects.annotate(
-                similarity=CosineDistance('embedding', user_embedding)
+                similarity=CosineDistance('embedding', user_embedding),
+                liked=Exists(liked_subquery)
             ).order_by('similarity')[:1]
 
         else:
             # If no user embedding, return diverse range of posts
-            posts = Post.objects.order_by('?')[:20]
+            posts = Post.objects.order_by('?').annotate(liked=Exists(liked_subquery))[:20]
         serializer = self.get_serializer(posts, many=True)
         return Response(serializer.data)
 
@@ -73,6 +140,7 @@ class PostViewSet(viewsets.ModelViewSet):
             "currency": currency,
             "quantity": quantity,
             "tags": tags,
+            "initial_quantity": quantity,
             "embedding": embedding,
             # "images": images,
         })

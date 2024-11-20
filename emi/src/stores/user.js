@@ -17,7 +17,7 @@ export const useUserStore = defineStore({
   }),
 
   actions: {
-    initStore() {
+    async initStore() {
 
       if (localStorage.getItem("user.access")) {
 
@@ -29,9 +29,15 @@ export const useUserStore = defineStore({
         this.user.avatar = localStorage.getItem("user.avatar");
         this.user.isAuthenticated = true;
 
-        this.refreshToken();
-
+        await this.refreshToken();
+        await this.refreshCoins();
       }
+    },
+    async refreshCoins() {
+      const response = await axios.get(`api/account/users/me/`)
+      this.setUserInfo(response.data)
+      this.user.coins = response.data.coins;
+
     },
 
     setToken(data) {
@@ -62,7 +68,7 @@ export const useUserStore = defineStore({
     },
 
     setUserInfo(user) {
-
+      console.log("setting user")
       this.user.id = user.id;
       this.user.name = user.name;
       this.user.username = user.username;
@@ -72,27 +78,27 @@ export const useUserStore = defineStore({
       localStorage.setItem("user.name", this.user.name);
       localStorage.setItem("user.username", this.user.username);
       localStorage.setItem("user.avatar", this.user.avatar);
+      console.log("set", localStorage.getItem("user.id"))
 
     },
 
-    refreshToken() {
-      axios
+    async refreshToken() {
+      const response = await axios
         .post("/api/account/refresh/", {
           refresh: this.user.refresh,
         })
-        .then((response) => {
+      if(response) {
           this.user.access = response.data.access;
 
           localStorage.setItem("user.access", response.data.access);
 
           axios.defaults.headers.common["Authorization"] =
             "Bearer " + response.data.access;
-        })
-        .catch((error) => {
+      }else{
           console.log(error);
 
           this.removeToken();
-        });
+        }
     },
   },
 });

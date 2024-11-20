@@ -8,6 +8,7 @@ class Notification(models.Model):
     TYPE_CHOICES = [
         ('reservation', 'New Reservation'),
         ('message', 'New Message'),
+        ('like', 'New Like'),
         ('status_update', 'Status Update')
     ]
 
@@ -18,7 +19,7 @@ class Notification(models.Model):
     read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     reservation = models.ForeignKey('transaction.Reservation', on_delete=models.CASCADE, null=True, blank=True)
-
+    post = models.ForeignKey('post.Post', on_delete=models.CASCADE, null=True, blank=True)
     class Meta:
         ordering = ['-created_at']
 

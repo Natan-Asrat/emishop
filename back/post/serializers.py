@@ -5,10 +5,11 @@ from .models import Post, PostImage
 class PostSerializer(serializers.ModelSerializer):
     created_by = UserSerializer(read_only=True)
     images = serializers.SerializerMethodField()  # Change image_url to images
+    liked = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = Post
-        fields = ['id', 'created_by', 'title', 'images', 'price', 'currency', 'quantity', 'tags', 'embedding', 'created_at', 'updated_at']
+        fields = ['id', 'liked', 'created_by', 'title', 'images', 'price', 'currency', 'quantity', 'initial_quantity', 'tags', 'embedding', 'created_at', 'updated_at']
 
     def get_images(self, obj):
         # Get all related images for the post
@@ -23,7 +24,7 @@ class PostCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ['title', 'images', 'price', 'currency', 'quantity', 'tags', 'embedding']
+        fields = ['title', 'images', 'price', 'currency', 'initial_quantity', 'quantity', 'tags', 'embedding']
 
     def create(self, validated_data):
         images = validated_data.pop('images')

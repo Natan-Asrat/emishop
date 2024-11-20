@@ -99,6 +99,7 @@ class UserViewSet(
             "name": user.name,
             "username": user.username,
             "avatar": avatar_url,
+            "coins": user.coins
         }
 
         return JsonResponse(response_data)
