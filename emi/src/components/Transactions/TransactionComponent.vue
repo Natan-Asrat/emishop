@@ -26,43 +26,71 @@
       </p>
     </div>
   </div>
-  <div v-if="showActions(transaction)" class="px-4 pb-4 flex justify-end space-x-2">
-    <button
+
+  <div
+  v-if="showActions(transaction)"
+  class="px-4 pb-4 flex justify-end flex-wrap gap-2 items-center"
+>
+  <button
+    v-if="canAccept(transaction)"
+    @click="handleAction(transaction, 'accept')"
+    class="px-3 py-1 bg-green-500 text-white rounded-full text-sm flex items-center space-x-1"
+  >
+    <CheckCircle class="h-4 w-4" />
+    <span>Accept</span>
+  </button>
+  <button
     @click="navigateToChat(transaction)"
     class="px-3 py-1 bg-blue-500 text-white rounded-full text-sm flex items-center space-x-1"
-    >
-      <MessageCircle class="h-4 w-4" />
-      <span>Message</span>
-    </button>
-    <button
+  >
+    <MessageCircle class="h-4 w-4" />
+    <span>Message</span>
+  </button>
+  <button
+    v-if="canDeliver(transaction)"
+    @click="handleAction(transaction, 'complete')"
+    class="px-3 py-1 bg-purple-500 text-white rounded-full text-sm flex items-center space-x-1"
+  >
+    <Archive class="h-4 w-4" />
+    <span>Deliver</span>
+  </button>
+  <button
     v-if="canReceive(transaction)"
     @click="handleAction(transaction, 'complete')"
-    class="px-3 py-1 bg-green-500 text-white rounded-full text-sm">
+    class="px-3 py-1 bg-green-500 text-white rounded-full text-sm flex items-center space-x-1"
+  >
+    <span>Received</span>
+  </button>
+  <button
+    v-if="canCancel(transaction)"
+    @click="handleAction(transaction, 'cancel')"
+    class="px-3 py-1 bg-red-500 text-white rounded-full text-sm flex items-center space-x-1"
+  >
+    <span>Cancel</span>
+  </button>
+  <button
+    v-if="canReport(transaction)"
+    @click="handleAction(transaction, 'report')"
+    class="px-3 py-1 bg-yellow-500 text-white rounded-full text-sm flex items-center space-x-1"
+  >
+    <span>Report</span>
+  </button>
+</div>
 
-    >
-    Received
-    </button>
-    <button v-if="canCancel(transaction)"
-            @click="handleAction(transaction, 'cancel')"
-            class="px-3 py-1 bg-red-500 text-white rounded-full text-sm">
-      Cancel
-    </button>
-    <button v-if="canReport(transaction)"
-            @click="handleAction(transaction, 'report')"
-            class="px-3 py-1 bg-yellow-500 text-white rounded-full text-sm">
-      Report
-    </button>
-  </div>
   </div>
 </template>
 <script setup>
 import { useRouter } from 'vue-router';
 import axios from 'axios';
-import { CheckCircle, XCircle, AlertTriangle, ShoppingCart, MessageCircle } from 'lucide-vue-next';
+import { CheckCircle, XCircle, AlertTriangle, ShoppingCart, MessageCircle, Archive } from 'lucide-vue-next';
 const emit = defineEmits(['setTransaction', 'removeTransaction'])
 const props = defineProps({
   transaction: {
     type: Object,
+    required: true
+  },
+  trueForReservationFalseForOrder: {
+    type: Boolean,
     required: true
   },
   index: {
@@ -73,7 +101,7 @@ const props = defineProps({
 const router = useRouter();
 
 const showActions = (transaction) => {
-  return transaction.status === 'pending' && transaction.seller_accepted;
+  return (transaction.status === 'pending' && transaction.seller_accepted) || !props.trueForReservationFalseForOrder;
 };
 const getCardColor = (transaction) => {
   if (transaction.status === 'reported') return 'bg-red-50 dark:bg-red-900/20';
@@ -116,9 +144,14 @@ const getStatusText = (transaction) => {
       : 'Seller cancelled - Coins refunded';
   }
   if (transaction?.status === 'pending') {
-    return transaction?.seller_accepted
+    return !props.trueForReservationFalseForOrder ?
+    (
+    transaction?.seller_accepted
+      ? 'Waiting for you to deliver!'
+      : 'Waiting for your acceptance')
+     : (transaction?.seller_accepted
       ? 'Accepted by seller'
-      : 'Waiting for seller acceptance';
+      : 'Waiting for seller acceptance');
   }
   return 'Completed';
 };
@@ -133,26 +166,50 @@ const navigateToChat = (transaction) => {
 };
 
 const canReceive = (transaction) => {
-  return transaction.status === 'pending' && transaction.seller_accepted;
+  return transaction.status === 'pending' && transaction.seller_accepted && props.trueForReservationFalseForOrder;
 };
 
+const canAccept = (transaction) => {
+  return transaction.status === 'pending' && !props.trueForReservationFalseForOrder;
+}
+const canDeliver = (transaction) => {
+  return transaction.status === 'pending' && !props.trueForReservationFalseForOrder;
+}
+
 const canCancel = (transaction) => {
-  return transaction.status === 'pending';
+  return transaction.status === 'pending' || (!props.trueForReservationFalseForOrder && (transaction.status === 'accepted' && transaction.status === 'pending'));
 };
 
 const canReport = (transaction) => {
-  return transaction.status === 'pending' && transaction.seller_accepted;
+  return transaction.status === 'pending' && transaction.seller_accepted && props.trueForReservationFalseForOrder;
 };
 const handleAction = async (transaction, action) => {
   try {
     switch (action) {
-      case 'complete':
-        axios.post(`api/transaction/reservations/${transaction.id}/complete/`)
+      case 'accept':
+        axios.post(`api/transaction/orders/${transaction.id}/accept/`)
         .then(
           response => {
             setTransaction(response.data);
           }
         );
+        break
+      case 'complete':
+        if(props.trueForReservationFalseForOrder){
+          axios.post(`api/transaction/reservations/${transaction.id}/complete/`)
+          .then(
+            response => {
+              setTransaction(response.data);
+            }
+          );
+        }else{
+          axios.post(`api/transaction/orders/${transaction.id}/complete/`)
+          .then(
+            response => {
+              setTransaction(response.data);
+            }
+          );
+        }
         break;
       case 'cancel':
         axios.post(`api/transaction/reservations/${transaction.id}/cancel/`)

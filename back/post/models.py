@@ -7,6 +7,9 @@ from pgvector.django import VectorField
 import math
 import uuid
 from django.utils.timesince import timesince
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
+connected_users = {}
 # Create your models here.
 class Post(models.Model):
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
@@ -31,6 +34,14 @@ class Post(models.Model):
 
     def __str__(self):
         return self.title
+    @property
+    def created_at_formatted(self):
+        return timesince(self.created_at)
+    @property
+    def updated_at_formatted(self):
+        return timesince(self.updated_at)
+
+
 class PostImage(models.Model):
     post = models.ForeignKey(Post, related_name='images', on_delete=models.CASCADE)
     image = models.ImageField(upload_to='post_images/')
@@ -48,4 +59,28 @@ class Like(models.Model):
     post = models.ForeignKey(
         "post.Post", related_name="likes", on_delete=models.CASCADE, null=True
     )
+    @property
+    def created_at_formatted(self):
+        return timesince(self.created_at)
 
+
+
+
+
+@receiver(post_save, sender=Post)
+def notify_post_update(sender, instance, created, **kwargs):
+    # Only send notifications if this is an update (not a creation)
+    if not created:
+        channel_layer = get_channel_layer()
+        post_id = instance.id
+        post_message = f"post_{post_id}"
+        if post_message in connected_users:
+            for user_id in connected_users[post_message]:
+                async_to_sync(channel_layer.group_send)(
+                    f"notify_{user_id}",
+                    {
+                        "type": "notification_handler",
+                        "notification_type": "post",
+                        "post": instance,
+                    },
+                )

@@ -10,8 +10,6 @@ export const useFavouritesStore = defineStore({
       const index = this.posts.findIndex(p => p.id === post.id);
       if (index !== -1) {
         this.posts.splice(index, 1, post);
-      }else{
-        this.addPost(post)
       }
     },
     addPost(post) {
@@ -24,9 +22,6 @@ export const useFavouritesStore = defineStore({
     },
     addPosts(posts) {
       posts.forEach(post => this.addPost(post));
-    },
-    getPosts() {
-      return this.posts;
     },
     incrementQuantity(index) {
       if (this.posts[index].quantity < this.posts[index].stockLeft) {

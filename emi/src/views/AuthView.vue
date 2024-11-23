@@ -174,7 +174,7 @@ const handleAuth = async () => {
       });
 
       if (response.status === 201) {
-        toastStore.showToast(5000, "The user is registered. Please log in!", "bg-emerald-green");
+        toastStore.showToast(5000, "The user is registered. Please log in!", "bg-green-500 dark:bg-green-500");
 
         userStore.setUserInfo(response.data)
         isSignUp.value = false
@@ -201,7 +201,7 @@ const handleAuth = async () => {
       userStore.setToken(response.data)
       axios.defaults.headers.common["Authorization"] = `Bearer ${response.data.access}`;
 
-      toastStore.showToast(5000, "You are logged in successfully!", "bg-emerald-green");
+      toastStore.showToast(5000, "You are logged in successfully!", "bg-green-500 dark:bg-green-500");
       if (response.status === 200) {
         userStore.setUserInfo(response.data)
         emit('auth-success')

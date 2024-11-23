@@ -18,8 +18,6 @@ export const useFeedPostStore = defineStore({
       const index = this.posts.findIndex(p => p.id === post.id);
       if (index !== -1) {
         this.posts.splice(index, 1, post);
-      }else{
-        this.addPost(post)
       }
     },
     setSearchresults (results) {
@@ -30,9 +28,6 @@ export const useFeedPostStore = defineStore({
     },
     addPosts(p) {
       p.forEach(post => this.addPost(post));
-    },
-    getPosts() {
-      return this.posts;
     },
     changePost(post, index) {
       this.posts[index] = post;

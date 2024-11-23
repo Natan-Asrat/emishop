@@ -1,6 +1,6 @@
 <template>
-  <main ref="mainContent" class="pb-20">
-    <div class="px-4 py-6 overflow-y-auto" style="margin-top: 265px">
+  <main ref="mainContent" class="pb-20 bg-gray-200 dark:bg-gray-600">
+    <div class="px-4 overflow-y-auto" style="padding-top: 300px">
       <div class="space-y-6 " :class="{'mt-9': feedPostStore.isSearchExpanded}" >
         <FeedItem
           v-for="(product, index) in feedPostStore.isSearchExpanded && feedPostStore.searchResults.length > 0 ? feedPostStore.searchResults : feedPostStore.posts"

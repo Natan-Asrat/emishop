@@ -3,7 +3,7 @@
     <div class="max-w-3xl mx-auto">
       <div class="min-h-screen p-4 rounded-lg shadow-lg flex flex-col">
         <div class="flex flex-col bg-white h-full dark:bg-gray-800 flex-grow">
-          <HeaderComponent :recipientName="''" />
+          <HeaderComponent :recipientName="recipientName" />
           <ReservationPreview v-if="reservation" :reservation="reservation"/>
           <div class="flex-grow overflow-y-auto h-96 p-4" ref="messagesContainer">
             <ChatMessage
@@ -55,6 +55,7 @@ export default {
       conversation: null,
       newMessage: '',
       reservation: null,
+      recipientName: this.$route.query.username
     }
   },
   setup() {

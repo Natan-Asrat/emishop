@@ -1,5 +1,5 @@
 <template>
-  <div class="border-slate-700 px-4 py-3 flex items-center justify-between  p-4">
+  <div class="border-slate-700 px-4 py-3 bg-gray-100 dark:bg-gray-800 flex items-center justify-between  p-4">
     <div class="flex-shrink-0">
       <img class="h-12 w-12 rounded" :src="logo" alt="Logo" />
     </div>

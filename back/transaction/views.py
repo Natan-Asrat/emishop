@@ -58,11 +58,11 @@ class ReservationViewSet(viewsets.ModelViewSet):
         post.save()
         print("createing notification")
         # Create notification for seller
-        message = f'{request.user.username} has reserved {quantity} of {post.title}'
+        message = f'{request.user.username} has reserved {quantity} quantity of item {post.title}'
         Notification.objects.create(
             user=post.created_by,
             type='reservation',
-            title='New Reservation',
+            title='You have a new reservation!',
             message=message,
             reservation=reservation
         )
@@ -80,31 +80,6 @@ class ReservationViewSet(viewsets.ModelViewSet):
         return Response(response_data, status=status.HTTP_201_CREATED)
 
     @action(detail=True, methods=['POST'])
-    def accept(self, request, pk=None):
-        reservation = self.get_object()
-        if reservation.post.created_by != request.user:
-            return Response(
-                {'error': 'Not authorized'},
-                status=status.HTTP_403_FORBIDDEN
-            )
-        
-        reservation.seller_accepted = True
-        reservation.save()
-        
-        # Notify buyer
-        Notification.objects.create(
-            user=reservation.buyer,
-            type='status_update',
-            title='Reservation Accepted',
-            message=f'Your reservation for {reservation.post.title} has been accepted',
-            reservation=reservation
-        )
-
-        serializer = self.get_serializer(reservation)
-        return Response(serializer.data)
-        
-
-    @action(detail=True, methods=['POST'])
     def complete(self, request, pk=None):
         reservation = self.get_object()
         if reservation.buyer != request.user:
@@ -120,8 +95,8 @@ class ReservationViewSet(viewsets.ModelViewSet):
         Notification.objects.create(
             user=reservation.post.created_by,
             type='status_update',
-            title='Reservation Completed',
-            message=f'Reservation for {reservation.post.title} has been marked as received',
+            title='Reservation Completed!',
+            message=f'Received item {reservation.post.title} by buyer {reservation.buyer.username}!',
             reservation=reservation
         )
         
@@ -158,8 +133,8 @@ class ReservationViewSet(viewsets.ModelViewSet):
         Notification.objects.create(
             user=notify_user,
             type='status_update',
-            title='Reservation Cancelled',
-            message=f'Reservation for {reservation.post.title} has been cancelled',
+            title='Reservation Canceled!',
+            message=f'Canceled reservation for item {reservation.post.title} by buyer {reservation.buyer.username}!',
             reservation=reservation
         )
         
@@ -182,8 +157,8 @@ class ReservationViewSet(viewsets.ModelViewSet):
         Notification.objects.create(
             user=reservation.post.created_by,
             type='status_update',
-            title='Reservation Reported',
-            message=f'Reservation for {reservation.post.title} has been reported',
+            title='Reservation Reported! Have you delivered the item?',
+            message=f'Reported reservation for {reservation.post.title} by buyer {reservation.buyer.username} as not delivered!',
             reservation=reservation
         )
         
@@ -193,7 +168,121 @@ class ReservationViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['GET'])
     def conversation(self, request, pk=None):
         reservation = self.get_object()
-        buyer = request.user
+        buyer = reservation.buyer
+        seller = reservation.post.created_by
+        conversation = Conversation.objects.filter(buyer=buyer, seller=seller)
+        if conversation.exists():
+            conversation = conversation.first()
+        else:
+            conversation = Conversation.objects.create(
+                buyer=buyer,
+                seller=seller
+            )
+        conversation_serializer = ConversationSerializer(conversation)
+        reservation_serializer = self.get_serializer(reservation)
+        data = {
+            'conversation': conversation_serializer.data,
+            'reservation': reservation_serializer.data
+        }
+        return Response(data)
+ 
+class OrderViewSet(viewsets.ModelViewSet):
+    serializer_class = ReservationSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['status']
+    def get_queryset(self):
+        if self.action == 'list':
+            return Reservation.objects.filter(post__created_by=self.request.user).order_by('-created_at')
+        return Reservation.objects.all()
+
+    @action(detail=True, methods=['POST'])
+    def accept(self, request, pk=None):
+        reservation = self.get_object()
+        if reservation.post.created_by != request.user:
+            return Response(
+                {'error': 'Not authorized'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        reservation.seller_accepted = True
+        reservation.save()
+        
+        # Notify buyer
+        Notification.objects.create(
+            user=reservation.buyer,
+            type='status_update',
+            title='Reservation Accepted',
+            message=f'Your reservation for {reservation.post.title} has been accepted! You should message the sender now in Transactions tab!',
+            reservation=reservation
+        )
+
+        serializer = self.get_serializer(reservation)
+        return Response(serializer.data)
+        
+
+    @action(detail=True, methods=['POST'])
+    def complete(self, request, pk=None):
+        reservation = self.get_object()
+        if reservation.post.created_by != request.user:
+            return Response(
+                {'error': 'Not authorized'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        # Notify buyer
+        Notification.objects.create(
+            user=reservation.buyer,
+            type='accept_request',
+            title='Have you received the item?',
+            message=f'Seller claims you have received item {reservation.post.title}, please confirm if you have received it by going to transactions page, or ignore this otherwise!',
+            reservation=reservation
+        )
+        
+        serializer = self.get_serializer(reservation)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['POST'])
+    def cancel(self, request, pk=None):
+        reservation = self.get_object()
+        if reservation.buyer != request.user and reservation.post.created_by != request.user:
+            return Response(
+                {'error': 'Not authorized'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        with transaction.atomic():
+            # Refund coins if cancelled by seller
+            if request.user == reservation.post.created_by:
+                buyer = reservation.buyer
+                buyer.coins += reservation.coins_spent
+                buyer.save()
+            
+            # Return quantity to post
+            post = Post.objects.select_for_update().get(id=reservation.post.id)
+            post.quantity = F('quantity') + reservation.quantity
+            post.save()
+            
+            reservation.status = 'cancelled'
+            reservation.cancelled_by = request.user
+            reservation.save()
+        
+        # Notify other party
+        notify_user = reservation.buyer if request.user == reservation.post.created_by else reservation.post.created_by
+        Notification.objects.create(
+            user=notify_user,
+            type='status_update',
+            title='Reservation Canceled!',
+            message=f'Canceled reservation for item {reservation.post.title} by seller {reservation.post.created_by.username}!',
+            reservation=reservation
+        )
+        
+        serializer = self.get_serializer(reservation)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['GET'])
+    def conversation(self, request, pk=None):
+        reservation = self.get_object()
+        buyer = reservation.buyer
         seller = reservation.post.created_by
         conversation = Conversation.objects.filter(buyer=buyer, seller=seller)
         if conversation.exists():
