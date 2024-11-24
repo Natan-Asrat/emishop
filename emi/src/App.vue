@@ -11,7 +11,6 @@ import { useFeedPostStore } from './stores/feedPost';
 import { useFavouritesStore } from './stores/favouritePost';
 import { useUserPostsStore } from './stores/userPost';
 import { useTransactionsStore } from './stores/transactions';
-import { Dialog, DialogPanel } from '@headlessui/vue';
 import PopupComponent from './components/App/PopupComponent.vue';
 
 const feedPostStore = useFeedPostStore();

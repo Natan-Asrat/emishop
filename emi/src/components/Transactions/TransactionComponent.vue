@@ -86,7 +86,7 @@ import { ref } from 'vue';
 import axios from 'axios';
 import { CheckCircle, XCircle, AlertTriangle, ShoppingCart, MessageCircle, Archive } from 'lucide-vue-next';
 import ReportComponent from './ReportComponent.vue';
-const emit = defineEmits(['setTransaction', 'removeTransaction'])
+const emit = defineEmits(['setTransaction'])
 const props = defineProps({
   transaction: {
     type: Object,
@@ -237,8 +237,5 @@ const handleAction = async (transaction, action) => {
 };
 const setTransaction = (data) => {
   emit('setTransaction', data, props.index);
-}
-const removeTransaction = (id) => {
-  emit('removeTransaction', id)
 }
 </script>
