@@ -10,7 +10,9 @@ import json
 from rest_framework import status
 from notification.models import Notification
 from rest_framework.filters import SearchFilter
-
+from django.utils.timezone import now, timedelta
+from django.conf import settings
+from transaction.models import Reservation
 # Create your views here.
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
@@ -86,6 +88,14 @@ class PostViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['POST', 'GET'])
     def feed(self, request):
+        blocklist_threshold_date = now() - timedelta(days=settings.REPORTED_BLOCKLIST_DAYS)
+
+        # Subquery for sellers with reported reservations
+        reported_seller_ids = Reservation.objects.filter(
+            status='reported',
+            reported_at__gte=blocklist_threshold_date
+        ).values_list('post__created_by_id', flat=True)
+
         user_embedding = request.data.get('user_embedding')
         
         liked_subquery = Like.objects.filter(
@@ -99,13 +109,16 @@ class PostViewSet(viewsets.ModelViewSet):
             elif isinstance(user_embedding, list):
                 user_embedding = [float(x) for x in user_embedding]      
             posts = Post.objects.annotate(
-                similarity=CosineDistance('embedding', user_embedding),
-                liked=Exists(liked_subquery)
-            ).order_by('similarity')[:1]
+                    similarity=CosineDistance('embedding', user_embedding),
+                    liked=Exists(liked_subquery)
+                ).exclude(created_by__id__in=reported_seller_ids).order_by('similarity')[:1]
 
         else:
-            # If no user embedding, return diverse range of posts
-            posts = Post.objects.order_by('?').annotate(liked=Exists(liked_subquery))[:20]
+            # Exclude posts from reported sellers and return diverse range of posts
+            posts = Post.objects.exclude(
+                created_by__id__in=reported_seller_ids
+            ).order_by('?').annotate(liked=Exists(liked_subquery))[:20]
+
         serializer = self.get_serializer(posts, many=True)
         return Response(serializer.data)
 
