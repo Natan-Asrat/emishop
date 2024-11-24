@@ -97,6 +97,8 @@
     </main>
     <NewPostImageSourceDialog :showImageDialog="showImageDialog" @close="closeImageSourceDialog" @selectImageSource="selectImageSource" />
     <NewPostProcessing :progress="progress" :isProcessing="isProcessing" />
+    <ReportedNotAllowed v-if="reported" @closeModal="closeNotAllowedModal" :reservation="reportedReservation"/>
+    <LoadingComponent v-if="isLoading" :isLoading="isLoading" />
   </div>
 </template>
 
@@ -107,13 +109,24 @@ import NewPostImageUpload from '@/components/NewPost/NewPostImageUpload.vue';
 import { X } from 'lucide-vue-next'
 import axios from 'axios'
 import NewPostProcessing from '@/components/NewPost/NewPostProcessing.vue';
+import ReportedNotAllowed from '@/components/NewPost/ReportedNotAllowed.vue';
+import { useToastStore } from '@/stores/toast';
+import LoadingComponent from '@/components/NewPost/LoadingComponent.vue';
 export default {
   components: {
     NewPostHeader,
     NewPostImageUpload,
     NewPostImageSourceDialog,
     X,
-    NewPostProcessing
+    NewPostProcessing,
+    ReportedNotAllowed,
+    LoadingComponent
+  },
+  setup() {
+    const toastStore = useToastStore();
+    return {
+      toastStore
+    }
   },
   data() {
     return {
@@ -130,7 +143,9 @@ export default {
       isProcessing: false,
       commissionRate: 0.01,
       progress: 'Downloading AI model',
-
+      reportedReservation: null,
+      reported: false,
+      isLoading: true
     }
   },
   computed: {
@@ -146,8 +161,38 @@ export default {
     },
   },
   methods: {
+    checkReportedOnSeller() {
+      this.isLoading = true;
+      axios.get('api/account/users/me/')
+      .then(
+        response => {
+          console.log("user", response.data)
+          this.isLoading = false;
+          const reported_on = response.data.reported;
+          this.reported = reported_on;
+          if(reported_on){
+            this.reportedReservation = response.data.reportedReservation;
+          }
+        }
+      )
+      .catch(
+        error => {
+          this.isLoading = false;
+
+          console.log("erro", error)
+          this.toastStore.showToast(
+            5000,
+            "Something went wrong. Please try again!",
+            "bg-red-300 dark:bg-red-300",
+          );
+        }
+      )
+    },
     removeImage(index) {
       this.images.splice(index, 1);
+    },
+    closeNotAllowedModal() {
+      this.$router.push('/')
     },
     showImageSourceDialog() {
       this.showImageDialog = true;
@@ -248,6 +293,9 @@ export default {
         this.isProcessing = false; // Hide the processing modal
       }
     }
+  },
+  mounted() {
+    this.checkReportedOnSeller();
   }
 }
 

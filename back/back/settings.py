@@ -30,7 +30,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 SITE_URL = "http://localhost:8000"
-
+REPORTED_BLOCKLIST_DAYS = 30
 # Application definition
 
 INSTALLED_APPS = [

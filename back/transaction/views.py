@@ -13,6 +13,8 @@ from notification.models import Notification, Conversation
 from django_filters.rest_framework import DjangoFilterBackend
 from notification.serializers import ConversationSerializer
 import logging
+from django.utils import timezone
+from django.db.models import Count
 logger = logging.getLogger(__name__)
 
 # Create your views here.
@@ -79,6 +81,23 @@ class ReservationViewSet(viewsets.ModelViewSet):
 
         return Response(response_data, status=status.HTTP_201_CREATED)
 
+    @action(detail=False, methods=['GET'])
+    def count(self, request, pk=None):
+        # Initialize result with all statuses set to 0
+        statuses = dict.fromkeys([status[0] for status in Reservation.STATUS_CHOICES], 0)
+
+        # Query counts grouped by status
+        status_counts = (
+            Reservation.objects.filter(buyer=request.user)
+            .values('status')  # Group by status
+            .annotate(count=Count('status'))  # Count occurrences of each status
+        )
+
+        # Update the initial dictionary with actual counts
+        for item in status_counts:
+            statuses[item['status']] = item['count']
+
+        return Response(statuses)
     @action(detail=True, methods=['POST'])
     def complete(self, request, pk=None):
         reservation = self.get_object()
@@ -143,6 +162,7 @@ class ReservationViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['POST'])
     def report(self, request, pk=None):
+        reason = request.data.get('reason')
         reservation = self.get_object()
         if reservation.buyer != request.user:
             return Response(
@@ -151,14 +171,16 @@ class ReservationViewSet(viewsets.ModelViewSet):
             )
         
         reservation.status = 'reported'
+        reservation.report_reason = reason
+        reservation.reported_at = timezone.now()
         reservation.save()
         
         # Notify seller
         Notification.objects.create(
             user=reservation.post.created_by,
-            type='status_update',
-            title='Reservation Reported! Have you delivered the item?',
-            message=f'Reported reservation for {reservation.post.title} by buyer {reservation.buyer.username} as not delivered!',
+            type='popup',
+            title=f"Reservation reported! Have you delivered the item? Reason: '{reason}'",
+            message=f"Reported reservation for item '{reservation.post.title}' by buyer '{reservation.buyer.username}' for reason '{reason}'!",
             reservation=reservation
         )
         
@@ -195,6 +217,23 @@ class OrderViewSet(viewsets.ModelViewSet):
             return Reservation.objects.filter(post__created_by=self.request.user).order_by('-created_at')
         return Reservation.objects.all()
 
+    @action(detail=False, methods=['GET'])
+    def count(self, request, pk=None):
+        # Initialize result with all statuses set to 0
+        statuses = dict.fromkeys([status[0] for status in Reservation.STATUS_CHOICES], 0)
+
+        # Query counts grouped by status
+        status_counts = (
+            Reservation.objects.filter(post__created_by=request.user)
+            .values('status')  # Group by status
+            .annotate(count=Count('status'))  # Count occurrences of each status
+        )
+
+        # Update the initial dictionary with actual counts
+        for item in status_counts:
+            statuses[item['status']] = item['count']
+
+        return Response(statuses)
     @action(detail=True, methods=['POST'])
     def accept(self, request, pk=None):
         reservation = self.get_object()
@@ -232,7 +271,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         # Notify buyer
         Notification.objects.create(
             user=reservation.buyer,
-            type='accept_request',
+            type='popup',
             title='Have you received the item?',
             message=f'Seller claims you have received item {reservation.post.title}, please confirm if you have received it by going to transactions page, or ignore this otherwise!',
             reservation=reservation

@@ -1,13 +1,17 @@
+import axios from "axios";
 import { defineStore } from "pinia";
 
 export const useTransactionsStore = defineStore({
   id: 'transactions',
   state: () => ({
     transactions: [],
-    orders: []
+    orders: [],
+    reservationsCount: null,
+    ordersCount: null,
   }),
   actions: {
     addTransaction(transaction) {
+      this.updateCounts()
       const index = this.transactions.findIndex(tr => tr.id === transaction.id);
       if (index !== -1) {
         // Replace the existing transaction
@@ -22,6 +26,7 @@ export const useTransactionsStore = defineStore({
     },
 
     addOrder(transaction) {
+      this.updateCounts()
       const index = this.orders.findIndex(tr => tr.id === transaction.id);
       if (index !== -1) {
         // Replace the existing transaction
@@ -36,6 +41,7 @@ export const useTransactionsStore = defineStore({
     },
 
     addTransactions(transactions) {
+      this.updateCounts()
       transactions.map(newTransaction => {
         const existingIndex = this.transactions.findIndex(tr => tr.id === newTransaction.id);
         if (existingIndex !== -1) {
@@ -51,6 +57,7 @@ export const useTransactionsStore = defineStore({
     },
 
     addOrders(transactions) {
+      this.updateCounts()
       transactions.map(newTransaction => {
         const existingIndex = this.orders.findIndex(tr => tr.id === newTransaction.id);
         if (existingIndex !== -1) {
@@ -65,30 +72,36 @@ export const useTransactionsStore = defineStore({
       this.orders = [...this.orders];
     },
     replaceTransactions(transaction) {
+      this.updateCounts()
       this.transactions = this.transactions.map(
         tr =>
           tr.id === transaction.id ? transaction : tr
       )
     },
     replaceOrders(transaction) {
+      this.updateCounts()
       this.orders = this.orders.map(
         tr =>
           tr.id === transaction.id ? transaction : tr
       )
     },
     changeTransaction(transaction, index) {
+      this.updateCounts()
       this.transactions[index] = transaction;
     },
     changeOrder(transaction, index) {
+      this.updateCounts()
       this.orders[index] = transaction;
     },
     removeTransaction(id) {
+      this.updateCounts()
       this.transactions = this.transactions.filter(transaction => transaction.id !== id);
 
       // Ensure reactivity by replacing the array reference
       this.transactions = [...this.transactions];
     },
     removeOrder(id) {
+      this.updateCounts()
       this.order = this.order.filter(transaction => transaction.id !== id);
 
       // Ensure reactivity by replacing the array reference
@@ -96,6 +109,27 @@ export const useTransactionsStore = defineStore({
     },
     getTransactions() {
       return this.transactions
+    },
+    updateCounts(){
+      this.updateOrdersCount()
+      this.updateReservationCount()
+    },
+    updateOrdersCount() {
+      axios.get('api/transaction/orders/count/')
+      .then(
+        response => {
+          console.log('counts', response.data)
+          this.ordersCount = response.data
+        }
+      )
+    },
+    updateReservationCount() {
+      axios.get('api/transaction/reservations/count/')
+      .then(
+        response => {
+          this.reservationsCount = response.data
+        }
+      )
     }
 
   }

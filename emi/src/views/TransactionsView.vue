@@ -1,7 +1,8 @@
 <template>
   <div class="min-h-screen bg-gray-100 dark:bg-gray-900 p-4">
     <div class="flex">
-      <h1 class="text-2xl flex-grow font-bold text-gray-900 dark:text-gray-100 mb-6">Transactions</h1>
+      <h1 v-if="trueForReservationFalseForOrder" class="text-2xl flex-grow font-bold text-gray-900 dark:text-gray-100 mb-6">Reservations</h1>
+      <h1 v-else class="text-2xl flex-grow font-bold text-gray-900 dark:text-gray-100 mb-6">Orders</h1>
       <div
       @click="trueForReservationFalseForOrder=!trueForReservationFalseForOrder"
       class="flex rounded-lg h-8 py-auto px-5 text-sm font-medium leading-5 ring-white ring-opacity-60 ring-offset-2 focus:outline-none ring-2 bg-white dark:bg-gray-700 shadow text-blue-700 dark:text-blue-200"
@@ -9,28 +10,39 @@
         ' ring-offset-blue-400': trueForReservationFalseForOrder,
         ' ring-offset-green-400': !trueForReservationFalseForOrder
       }">
-        <span class="dark:text-gray-100 text-gray-900 inline-flex items-center mr-3"><span v-if="trueForReservationFalseForOrder">Reservations</span><span v-else>Orders</span></span>
+        <span class="dark:text-gray-100 text-gray-900 inline-flex items-center mr-3">
+          <span v-if="!trueForReservationFalseForOrder">
+            <span v-if="transactionStore.reservationsCount != null" class="inline-block rounded-full bg-gray-500 w-5 h-5 text-center mr-2" :class="{'bg-red-500': transactionStore.reservationsCount.pending > 0}">
+              {{ transactionStore.reservationsCount.pending }}
+            </span> Reservations</span>
+            <span v-else>
+              <span v-if="transactionStore.ordersCount != null" class="inline-block rounded-full bg-gray-500 w-5 h-5 text-center mr-2" :class="{'bg-green-500': transactionStore.ordersCount.pending > 0}">
+                {{ transactionStore.ordersCount.pending }}
+              </span>
+              Orders
+            </span>
+            </span>
         <div class="flex flex-col">
 
           <ArrowLeft
           class="w-4 h-4"
           style="margin-top: 3px"
           :class="{
-            'dark:text-white text-gray-900': trueForReservationFalseForOrder,
-            'darK:text-green-600 text-green-600': !trueForReservationFalseForOrder
+            'dark:text-white text-gray-900': !trueForReservationFalseForOrder,
+            'darK:text-green-600 text-green-600': trueForReservationFalseForOrder
           }"/>
           <ArrowRight
           class="w-4 h-4"
           style="margin-top: -3px"
           :class="{
-            'dark:text-white text-gray-900': !trueForReservationFalseForOrder,
-            'darK:text-red-600 text-red-600': trueForReservationFalseForOrder
+            'dark:text-white text-gray-900': trueForReservationFalseForOrder,
+            'darK:text-red-600 text-red-600': !trueForReservationFalseForOrder
           }"/>
         </div>
       </div>
     </div>
     <div v-if="isLoading" class='mb-5 text-center dark:text-gray-100'>Loading...</div>
-  <TabsComponent @setCurrentTab="setCurrentTab" :currentTab="currentTab"/>
+  <TabsComponent :trueForReservationFalseForOrder="trueForReservationFalseForOrder" @setCurrentTab="setCurrentTab" :currentTab="currentTab"/>
     <div class="space-y-4 mb-16">
       <TransactionComponent :trueForReservationFalseForOrder="trueForReservationFalseForOrder" @removeTransaction="removeTransaction" @setTransaction="handleSetTransaction" v-for="(transaction, index) in filteredTransactions" :key="transaction.id" :index="index" :transaction="transaction" />
     </div>

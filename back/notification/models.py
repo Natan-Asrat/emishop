@@ -14,6 +14,7 @@ class Notification(models.Model):
         ('message', 'New Message'),
         ('like', 'New Like'),
         ('status_update', 'Status Update'),
+        ('popup', 'Show Popup')
     ]
 
     user = models.ForeignKey('account.User', related_name='notifications', on_delete=models.CASCADE)

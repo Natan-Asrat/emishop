@@ -8,7 +8,10 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.http import JsonResponse
 from rest_framework.permissions import AllowAny
-
+from transaction.models import Reservation
+from django.conf import settings
+from django.utils.timezone import now, timedelta
+from transaction.serializers import ReservationSerializer
 class UserViewSet(
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
@@ -92,14 +95,23 @@ class UserViewSet(
     @action(detail=False, methods=['get'])
     def me(self, request, pk=None):
         user = request.user
+        blocklist_threshold_date = now() - timedelta(days=settings.REPORTED_BLOCKLIST_DAYS)
+
         avatar_url = request.build_absolute_uri(user.avatar.url) if user.avatar else None
+        reported_reservation = Reservation.objects.filter(post__created_by=request.user, status='reported', reported_at__gte=blocklist_threshold_date).order_by('-reported_at').first()
+        is_reported_on = False
+        if reported_reservation is not None:
+            is_reported_on = True
+            reported_reservation = ReservationSerializer(reported_reservation).data
 
         response_data = {
             "id": user.id,
             "name": user.name,
             "username": user.username,
             "avatar": avatar_url,
-            "coins": user.coins
+            "coins": user.coins,
+            "reported": is_reported_on,
+            "reportedReservation": reported_reservation
         }
 
         return JsonResponse(response_data)

@@ -11,6 +11,9 @@ import { useFeedPostStore } from './stores/feedPost';
 import { useFavouritesStore } from './stores/favouritePost';
 import { useUserPostsStore } from './stores/userPost';
 import { useTransactionsStore } from './stores/transactions';
+import { Dialog, DialogPanel } from '@headlessui/vue';
+import PopupComponent from './components/App/PopupComponent.vue';
+
 const feedPostStore = useFeedPostStore();
 const favouritePostStore = useFavouritesStore();
 const userPostStore = useUserPostsStore();
@@ -20,6 +23,16 @@ const userStore = useUserStore();
 const isAuthenticated = ref(false);
 const token = userStore.user.access;
 const ws = ref(null)
+const isModalVisible = ref(false);
+const selectedProduct = ref(null);
+const modalContent = ref(null);
+
+const closeModal = () => {
+  isModalVisible.value = false;
+  modalContent.value = null;
+};
+
+
 onMounted(() => {
   if (token) {
     axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
@@ -37,6 +50,16 @@ onMounted(() => {
           "bg-green-500 dark:bg-green-500"
         )
         let icon
+        if (notification.type === 'popup') {
+          console.log("popup")
+          isModalVisible.value = true;
+          modalContent.value = {
+            title: notification.title,
+            message: notification.message,
+            reservation: notification.reservation,
+            post: notification.post,
+          };
+        }
         if(notification.type === 'reservation'){
           transactionStore.addOrder(notification.reservation);
           transactionStore.addTransaction(notification.reservation);
@@ -93,7 +116,7 @@ onMounted(() => {
       console.log("WebSocket error:", error);
       toastStore.showToast(
         5000,
-        "Something went wrong. Please try again!",
+        "Something went wrong. Please refresh!",
         "bg-red-300 dark:bg-red-300",
       );
     };
@@ -146,4 +169,15 @@ defineExpose({ logout });
   <RouterView v-if="isAuthenticated" />
   <AuthView v-else @auth-success="onAuthSuccess" />
   <ToastComponent />
+  <PopupComponent v-if="isModalVisible" :notification="modalContent" @closeModal="closeModal" />
+
+  <!-- Post Modal -->
+  <SelectedProduct
+    v-if="selectedProduct"
+    :isReserving="isReserving"
+    :selectedProduct="selectedProduct"
+    @reserveProduct="reserveProduct"
+    @closeProductDetails="() => (selectedProduct = null)"
+  />
+
 </template>

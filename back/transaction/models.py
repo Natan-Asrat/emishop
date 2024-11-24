@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.timesince import timesince
 class Reservation(models.Model):
     STATUS_CHOICES = [
         ('pending', 'Pending'),
@@ -16,8 +17,12 @@ class Reservation(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     seller_accepted = models.BooleanField(default=False)
+    report_reason = models.TextField(blank=True, null=True)
+    reported_at = models.DateTimeField(null=True, blank=True)
     cancelled_by = models.ForeignKey('account.User', related_name='cancelled_reservations', 
                                    on_delete=models.SET_NULL, null=True, blank=True)
 
+    def reported_at_formatted(self):
+        return timesince(self.reported_at) if self.reported_at else None
     class Meta:
         ordering = ['-created_at']

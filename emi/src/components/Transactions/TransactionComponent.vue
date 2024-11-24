@@ -76,13 +76,16 @@
     <span>Report</span>
   </button>
 </div>
+<ReportComponent v-if="showReportDialog" @setTransaction="setTransaction" @closeModal="closeModal" :reservation="transaction"/>
 
   </div>
 </template>
 <script setup>
 import { useRouter } from 'vue-router';
+import { ref } from 'vue';
 import axios from 'axios';
 import { CheckCircle, XCircle, AlertTriangle, ShoppingCart, MessageCircle, Archive } from 'lucide-vue-next';
+import ReportComponent from './ReportComponent.vue';
 const emit = defineEmits(['setTransaction', 'removeTransaction'])
 const props = defineProps({
   transaction: {
@@ -99,6 +102,11 @@ const props = defineProps({
   }
 })
 const router = useRouter();
+const showReportDialog = ref(false);
+
+const closeModal = () => {
+  showReportDialog.value = false;
+}
 
 const showActions = (transaction) => {
   return (transaction.status === 'pending' && transaction.seller_accepted) || !props.trueForReservationFalseForOrder;
@@ -220,12 +228,7 @@ const handleAction = async (transaction, action) => {
         );
         break;
       case 'report':
-        axios.post(`api/transaction/reservations/${transaction.id}/report/`)
-        .then(
-          response => {
-            setTransaction(response.data);
-          }
-        );
+        showReportDialog.value = true;
         break;
     }
   } catch (error) {
