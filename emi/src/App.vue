@@ -71,9 +71,9 @@ onMounted(() => {
         }
         if(notification.type === 'message'){
           icon = notification.sender.avatar
-        }else if(notification.type === 'reservation' || notification.type === 'status_update') {
+        }else if(notification.type === 'reservation' || notification.type === 'status_update' || (notification.type === 'popup' && notification.reservation != null)) {
           icon = notification.reservation.post.images[0]
-        }else if(notification.type === 'like') {
+        }else if(notification.type === 'like' || (notification.type === 'popup' && notification.post != null)) {
           icon = notification.post.images[0]
         }else {
           icon = '/logo.png'

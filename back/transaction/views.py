@@ -273,7 +273,7 @@ class OrderViewSet(viewsets.ModelViewSet):
             user=reservation.buyer,
             type='popup',
             title='Have you received the item?',
-            message=f'Seller claims you have received item {reservation.post.title}, please confirm if you have received it by going to transactions page, or ignore this otherwise!',
+            message=f"Seller claims you have received item '{reservation.post.title}', please confirm if you have received it by going to transactions page, or ignore this otherwise!",
             reservation=reservation
         )
         
