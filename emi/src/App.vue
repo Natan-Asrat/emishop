@@ -11,8 +11,10 @@ import { useFeedPostStore } from './stores/feedPost';
 import { useFavouritesStore } from './stores/favouritePost';
 import { useUserPostsStore } from './stores/userPost';
 import { useTransactionsStore } from './stores/transactions';
+import { useNotificationStore } from './stores/notification';
 import PopupComponent from './components/App/PopupComponent.vue';
 
+const notificationStore = useNotificationStore();
 const feedPostStore = useFeedPostStore();
 const favouritePostStore = useFavouritesStore();
 const userPostStore = useUserPostsStore();
@@ -43,6 +45,7 @@ onMounted(() => {
       console.log('received', message)
       if( message.type === 'notification' ){
         const notification = message.object;
+        notificationStore.addNotification(notification);
         toastStore.showToast(
           5000,
           notification.message,

@@ -55,7 +55,7 @@ class PostViewSet(viewsets.ModelViewSet):
             post.save()
         post.liked = True
         serializer = self.get_serializer(post)
-        notification_message = f"{user.username} liked your post {post.title}!"
+        notification_message = f"'{user.username}' liked your post '{post.title}'!"
         Notification.objects.create(
             user=post.created_by,
             type='like',

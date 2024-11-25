@@ -58,9 +58,8 @@ class ReservationViewSet(viewsets.ModelViewSet):
         buyer.save()
         post.quantity = post.quantity - quantity
         post.save()
-        print("createing notification")
         # Create notification for seller
-        message = f'{request.user.username} has reserved {quantity} quantity of item {post.title}'
+        message = f"'{request.user.username}' has reserved '{quantity}' quantity of item '{post.title}'"
         Notification.objects.create(
             user=post.created_by,
             type='reservation',
@@ -115,7 +114,7 @@ class ReservationViewSet(viewsets.ModelViewSet):
             user=reservation.post.created_by,
             type='status_update',
             title='Reservation Completed!',
-            message=f'Received item {reservation.post.title} by buyer {reservation.buyer.username}!',
+            message=f"Received item '{reservation.post.title}' by buyer '{reservation.buyer.username}!'",
             reservation=reservation
         )
         
@@ -153,7 +152,7 @@ class ReservationViewSet(viewsets.ModelViewSet):
             user=notify_user,
             type='status_update',
             title='Reservation Canceled!',
-            message=f'Canceled reservation for item {reservation.post.title} by buyer {reservation.buyer.username}!',
+            message=f"Canceled reservation for item '{reservation.post.title}' by buyer '{reservation.buyer.username}!'",
             reservation=reservation
         )
         
@@ -251,7 +250,7 @@ class OrderViewSet(viewsets.ModelViewSet):
             user=reservation.buyer,
             type='status_update',
             title='Reservation Accepted',
-            message=f'Your reservation for {reservation.post.title} has been accepted! You should message the sender now in Transactions tab!',
+            message=f"Your reservation for '{reservation.post.title}' has been accepted! You should message the sender now in Transactions tab!",
             reservation=reservation
         )
 
@@ -311,7 +310,7 @@ class OrderViewSet(viewsets.ModelViewSet):
             user=notify_user,
             type='status_update',
             title='Reservation Canceled!',
-            message=f'Canceled reservation for item {reservation.post.title} by seller {reservation.post.created_by.username}!',
+            message=f"Canceled reservation for item '{reservation.post.title}' by seller '{reservation.post.created_by.username}!'",
             reservation=reservation
         )
         

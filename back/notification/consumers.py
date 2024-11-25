@@ -47,7 +47,7 @@ class ChatConsumer(WebsocketConsumer):
                 user = receiver,
                 sender = sender,
                 type='message',
-                title=f'You have a new message from {sender.username}!',
+                title=f"You have a new message from '{sender.username}!'",
                 message=data.get('message'),
                 reservation_id = reservation_id
             )
@@ -62,7 +62,7 @@ class ChatConsumer(WebsocketConsumer):
                 user = receiver,
                 sender = sender,
                 type='message',
-                title=f'You have a new message from {sender.username}!',
+                title=f"You have a new message from '{sender.username}!'",
                 message=data.get('message'),
             )
         async_to_sync(self.channel_layer.group_send)(

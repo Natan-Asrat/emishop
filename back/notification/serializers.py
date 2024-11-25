@@ -13,7 +13,7 @@ class NotificationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Notification
-        fields = ["id", "message", "title", "sender", "reservation", "type", "user", "post", "read", "created_at_formatted"]
+        fields = ["id", "message", "title", "sender", "reservation", "type", "user", "post", "read", "created_at", "created_at_formatted"]
 
 
 class ConversationSerializer(serializers.ModelSerializer):

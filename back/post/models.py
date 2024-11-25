@@ -47,7 +47,7 @@ class PostImage(models.Model):
     image = models.ImageField(upload_to='post_images/')
 
     def __str__(self):
-        return f'Image for {self.post.title}'
+        return f"Image for '{self.post.title}'"
 
 
 class Like(models.Model):
