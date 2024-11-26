@@ -16,7 +16,8 @@ export const useRecommendationStore = defineStore({
     MAX_TRACKED_POSTS: 500,
     TEMP_TRACKED_POSTS: 20,
     lastSavedDate: null,
-    visibilityTimes: {}
+    visibilityTimes: {},
+    topPosts: []
   }),
 
   actions: {
@@ -87,6 +88,41 @@ export const useRecommendationStore = defineStore({
       localStorage.setItem('tempEmbeddings', JSON.stringify(this.tempEmbeddings))
       localStorage.setItem('lastSavedDate', this.lastSavedDate)
     },
+    saveRecentlyViewed(postId) {
+      console.log("saving", postId)
+      const maxInteractions = 5; // Define the maximum size of the recently viewed array
+      const existingInteractions = JSON.parse(localStorage.getItem('recentlyViewed')) || [];
+
+      // Check if the post is already in the interactions
+      const existingIndex = existingInteractions.findIndex(id => id === postId);
+
+      if (existingIndex !== -1) {
+        // Remove existing interaction to re-add it to the top
+        existingInteractions.splice(existingIndex, 1);
+      }
+
+      // Add the new interaction at the beginning
+      existingInteractions.unshift(postId);
+
+      // Trim the array to the max size
+      if (existingInteractions.length > maxInteractions) {
+        existingInteractions.pop();
+      }
+      console.log
+
+      // Save updated interactions back to localStorage
+      localStorage.setItem('recentlyViewed', JSON.stringify(existingInteractions));
+    },
+    saveTopPostsToRecentlyViewed(topPosts) {
+      // Process each post in topPosts
+      if(topPosts != null && topPosts.length > 0){
+        topPosts.forEach((postId) => {
+          this.saveRecentlyViewed(postId);
+        });
+
+      }
+    },
+
     updateVisibility(productId, isVisible) {
       if (isVisible) {
           // If the product becomes visible, set startTime if not already set
@@ -147,7 +183,7 @@ export const useRecommendationStore = defineStore({
         .map(([postId]) => postId)
     },
     setTopPosts(posts) {
-      this.topPosts = posts
+      this.topPosts = posts;
     }
   },
 

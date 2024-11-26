@@ -13,6 +13,7 @@ from rest_framework.filters import SearchFilter
 from django.utils.timezone import now, timedelta
 from django.conf import settings
 from transaction.models import Reservation
+import uuid
 # Create your views here.
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
@@ -166,4 +167,48 @@ class PostViewSet(viewsets.ModelViewSet):
         # Return the created post data
         response_serializer = PostSerializer(post, context={"request": request})
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+    @action(detail=False, methods=["GET"], url_path="bulk")
+    def bulk_retrieve(self, request):
+        """
+        Custom action to retrieve posts in bulk by IDs (int or UUID) provided in the query parameter.
+        """
+        # Extract the `getposts` query parameter
+        post_ids = request.query_params.get("getposts", "")
+        
+        if not post_ids:
+            return Response(
+                {"error": "No post IDs provided in the 'getposts' query parameter."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
+        # Parse the IDs into a list of strings (to handle both integers and UUIDs)
+        post_ids = post_ids.split(",")
+
+        valid_ids = []
+        invalid_ids = []
+
+        # Validate and separate IDs
+        for post_id in post_ids:
+            try:
+                # Check if the ID is an integer or UUID
+                if post_id.isdigit():
+                    valid_ids.append(int(post_id))
+                else:
+                    uuid.UUID(post_id)  # Validate as UUID
+                    valid_ids.append(post_id)
+            except (ValueError, TypeError):
+                invalid_ids.append(post_id)
+
+        if invalid_ids:
+            return Response(
+                {"error": f"Invalid ID format for: {', '.join(invalid_ids)}"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Retrieve posts with the valid IDs
+        posts = self.queryset.filter(id__in=valid_ids)
+
+        # Serialize the posts
+        serializer = self.get_serializer(posts, many=True)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)

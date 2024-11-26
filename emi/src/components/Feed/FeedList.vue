@@ -1,6 +1,6 @@
 <template>
   <main ref="mainContent" class="pb-20 bg-gray-200 dark:bg-gray-600">
-    <div class="px-4 overflow-y-auto" style="padding-top: 300px">
+    <div class="px-4 overflow-y-auto">
       <div class="space-y-6 " :class="{'mt-9': feedPostStore.isSearchExpanded}" >
         <FeedItem
           v-for="(product, index) in feedPostStore.isSearchExpanded && feedPostStore.searchResults.length > 0 ? feedPostStore.searchResults : feedPostStore.posts"
@@ -38,7 +38,7 @@ const props = defineProps({
     required: true,
   }
 })
-const emits = defineEmits(['resetLastElement'])
+const emits = defineEmits(['resetLastElement', 'openProductDetails'])
 const showInsufficientCoinsModal = ref(false)
 
 const selectedProduct = ref(null)
@@ -197,6 +197,7 @@ watch(
       if(newVal === true){
         const topPosts =recommendationStore.calculateTopInteractedPosts()
         recommendationStore.setTopPosts(topPosts)
+        recommendationStore.saveTopPostsToRecentlyViewed(topPosts)
         recommendationStore.saveToTemporaryStore(feedPostStore.posts)
         recommendationStore.updateMainListAndGenerateEmbedding()
         await fetchPosts()
@@ -207,4 +208,7 @@ watch(
 );
 watch([recommendationStore.postInteractions, recommendationStore.interactionTimes, recommendationStore.userEmbedding, recommendationStore.tempEmbeddings], recommendationStore.saveUserData, { deep: true })
 
+defineExpose({
+  openProductDetails,
+});
 </script>
