@@ -134,7 +134,8 @@ export default {
         type: 'chat_message',
         message: this.newMessage,
         sender_id: this.userStore.user,
-        recipient_id: this.$route.query.username
+        recipient_id: this.$route.query.username,
+        reservation_id: this.$route.query.itemId
       }; // Send via WebSocket
       this.ws.send(JSON.stringify(messageData));
       this.newMessage = '';

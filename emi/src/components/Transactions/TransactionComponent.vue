@@ -165,7 +165,7 @@ const getStatusText = (transaction) => {
 };
 const navigateToChat = (transaction) => {
   router.push({
-    path: '/chat',
+    name: 'chat',
     query: {
       username: transaction.post.created_by.username,
       itemId: transaction.id

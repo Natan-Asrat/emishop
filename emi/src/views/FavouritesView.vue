@@ -91,7 +91,7 @@ export default {
         this.recommendationStore.updatePostInteraction(product.id, 'reserve', product.quantity);
 
         this.closeProductDetails();
-        this.$router.push('/transactions');
+        this.$router.push({name: 'transactions'});
 
       } catch (error) {
         console.error('Error creating reservation:', error);

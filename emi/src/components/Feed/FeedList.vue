@@ -93,7 +93,7 @@ const reserveProduct = async (product) => {
     recommendationStore.updatePostInteraction(product.id, 'reserve', product.quantity);
 
     closeProductDetails();
-    router.push('/transactions');
+    router.push({name: 'transactions'});
 
   } catch (error) {
     console.error('Error creating reservation:', error);

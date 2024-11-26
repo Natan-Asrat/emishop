@@ -192,7 +192,7 @@ export default {
       this.images.splice(index, 1);
     },
     closeNotAllowedModal() {
-      this.$router.push('/')
+      this.$router.push({name: 'home'})
     },
     showImageSourceDialog() {
       this.showImageDialog = true;
@@ -282,7 +282,7 @@ export default {
         });
 
         await axios.post(`api/post/posts/create-new/`, formData);
-        this.$router.push('/myprofile');
+        this.$router.push({name: 'myprofile'});
         processingComplete = true;
 
       }catch(error) {
