@@ -3,6 +3,13 @@
     <div class="flex">
       <h1 v-if="trueForReservationFalseForOrder" class="text-2xl flex-grow font-bold text-gray-900 dark:text-gray-100 mb-6">Reservations</h1>
       <h1 v-else class="text-2xl flex-grow font-bold text-gray-900 dark:text-gray-100 mb-6">Orders</h1>
+      <router-link
+        :to="{'name': 'notifications'}"
+        class="p-2 mr-2 rounded-md text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        aria-label="Notifications"
+      >
+        <BellIcon class="h-6 w-6" />
+      </router-link>
       <div
       @click="trueForReservationFalseForOrder=!trueForReservationFalseForOrder"
       class="flex rounded-lg h-8 py-auto px-5 text-sm font-medium leading-5 ring-white ring-opacity-60 ring-offset-2 focus:outline-none ring-2 bg-white dark:bg-gray-700 shadow text-blue-700 dark:text-blue-200"
@@ -58,14 +65,15 @@ import TransactionComponent from '@/components/Transactions/TransactionComponent
 import { useTransactionsStore } from '@/stores/transactions';
 import FooterComponent from '@/components/FooterComponent.vue';
 import axios from 'axios';
-import { ArrowLeft, ArrowRight } from 'lucide-vue-next';
+import { ArrowLeft, ArrowRight, BellIcon } from 'lucide-vue-next';
 export default {
   components: {
     TabsComponent,
     TransactionComponent,
     FooterComponent,
     ArrowLeft,
-    ArrowRight
+    ArrowRight,
+    BellIcon
   },
   setup() {
     const transactionStore = useTransactionsStore();

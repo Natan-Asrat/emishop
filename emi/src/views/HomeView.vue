@@ -14,7 +14,7 @@ import RecentlyViewed from '@/components/RecentlyViewed.vue';
 import NavbarWrapper from '@/components/NavbarWrapper.vue';
 import FooterComponent from '@/components/FooterComponent.vue';
 export default {
-  name: 'Home',
+  name: 'HomeView',
   components: {
     Navbar,
     NavbarWrapper,
