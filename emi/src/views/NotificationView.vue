@@ -49,6 +49,7 @@ export default {
       showInsufficientCoinsModal: false,
       isPopupVisible: false,
       popupContent: null,
+      isLoading: false,
     }
   },
   setup() {
@@ -65,16 +66,21 @@ export default {
     fetchNotifications() {
       console.log("fetching", this.currentTab)
       if(this.currentTab === 'All'){
+        this.isLoading = true;
         axios.get('api/notification/notifications/')
         .then(
           response => {
             console.log("resp all", response.data)
+            this.isLoading = false;
+
             this.notificationStore.setNotifications(response.data)
           }
         )
         .catch(
           error => {
             console.log("error", error)
+            this.isLoading = false;
+
             this.toastStore.showToast(
               5000,
               "Something went wrong. Please refresh!",
@@ -83,11 +89,13 @@ export default {
           }
         )
       }else {
+        this.isLoading = true;
 
         axios.get(`/api/notification/notifications/?type=${this.currentTab.toLowerCase()}`)
         .then(
           response => {
             console.log("resp", response.data)
+            this.isLoading = false;
 
             this.notificationStore.setNotifications(response.data)
           }
@@ -95,6 +103,7 @@ export default {
         .catch(
           error => {
             console.log("error", error)
+            this.isLoading = false;
 
             this.toastStore.showToast(
               5000,
