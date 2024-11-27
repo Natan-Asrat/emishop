@@ -3,7 +3,10 @@
     <div v-if="user" class="grid grid-cols-6 p-4">
       <div class="col-span-2 space-y-3">
         <img :src="user.avatar" alt="" class="ml-auto mr-auto w-24 h-24 rounded-full object-cover">
-        <h1 class="text-xl text-center font-semibold whitespace-nowrap text-gray-900 dark:text-gray-100">{{ user.name }}</h1>
+        <div>
+          <h1 class="text-xl text-center font-semibold whitespace-nowrap text-gray-900 dark:text-gray-100">{{ user.name }}</h1>
+          <h2 class="text-sm text-center whitespace-nowrap text-gray-700 dark:text-gray-300">@{{ user.username }}</h2>
+        </div>
         <p class="whitespace-nowrap text-gray-600 dark:text-gray-400"><span class="text-sm">Coins spent </span><span class="block text-md ml-6"><span class="text-sm">{{ user.stats.coins_spent}} </span> / {{ user.stats.coins_bought }}</span> </p>
       </div>
 
@@ -40,7 +43,7 @@
 
         </div>
         <div class="flex gap-4">
-          <button class="text-gray-800  flex-grow rounded-lg h-10 bg-yellow-300">Edit</button>
+          <button @click="$router.push({name: 'edit_profile'})" class="text-gray-800  flex-grow rounded-lg h-10 bg-yellow-300">Edit</button>
           <button @click="showLogoutModal = true" class="bg-red-800 text-gray-100 rounded-lg h-10 flex-grow">Logout</button>
 
         </div>

@@ -1,0 +1,159 @@
+<template>
+  <div class="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
+    <div class="w-full max-w-md space-y-8">
+      <button @click="$router.push({name: 'myprofile'})" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700">
+          <XIcon class="h-6 w-6 text-white" />
+        </button>
+      <div class="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg">
+        <h2 class="text-3xl font-bold text-center text-gray-900 dark:text-gray-100 mb-6">
+          Edit Profile
+        </h2>
+        <h2 class="text-sm text-center text-gray-700 dark:text-gray-300 mb-6">
+          You can change nickname but not username, you'll still use the old username on signin!
+        </h2>
+        <p class="text-center text-gray-600 dark:text-gray-400 mb-8">
+          Update your profile details below
+        </p>
+
+        <!-- Error Messages -->
+        <div v-if="errors.length" class="mb-4">
+          <ul class="text-sm text-red-600 dark:text-red-400 list-disc pl-5 space-y-1">
+            <li v-for="(error, index) in errors" :key="index">{{ error }}</li>
+          </ul>
+        </div>
+
+        <form @submit.prevent="submitForm" class="space-y-6">
+          <div class="space-y-4">
+            <div class="space-y-2">
+              <label for="avatar" class="text-sm font-medium text-gray-700 dark:text-gray-300">Avatar</label>
+              <input
+                type="file"
+                @change="handleFileChange"
+                class="w-full py-2 px-4 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                id="avatar"
+              />
+            </div>
+
+            <div class="space-y-2">
+              <label for="name" class="text-sm font-medium text-gray-700 dark:text-gray-300">Nickname</label>
+              <input
+                v-model="form.name"
+                type="text"
+                required
+                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                placeholder="Your nickname"
+                id="name"
+              />
+            </div>
+
+            <div v-if="changePassword" class="space-y-4">
+              <div class="space-y-2">
+                <label for="password1" class="text-sm font-medium text-gray-700 dark:text-gray-300">New Password</label>
+                <input
+                  v-model="form.password1"
+                  type="password"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  placeholder="New password"
+                  id="password1"
+                />
+              </div>
+              <div class="space-y-2">
+                <label for="password2" class="text-sm font-medium text-gray-700 dark:text-gray-300">Confirm Password</label>
+                <input
+                  v-model="form.password2"
+                  type="password"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  placeholder="Confirm new password"
+                  id="password2"
+                />
+              </div>
+            </div>
+
+            <div class="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                v-model="changePassword"
+                id="change_password"
+                class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:bg-gray-700 dark:border-gray-600"
+              />
+              <label for="change_password" class="text-sm text-gray-700 dark:text-gray-300">
+                Change Password
+              </label>
+            </div>
+          </div>
+
+          <div>
+            <button
+              type="submit"
+              class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out"
+            >
+              Save Changes
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { reactive, ref } from "vue";
+import { useRouter } from "vue-router";
+import axios from "axios";
+import { useToastStore } from "@/stores/toast";
+import { useUserStore } from "@/stores/user";
+import { XIcon } from "lucide-vue-next";
+const router = useRouter();
+const userStore = useUserStore();
+const toastStore = useToastStore();
+
+const form = reactive({
+  name: userStore.user.name || "",
+  password1: "",
+  password2: "",
+  avatar: null,
+});
+
+const changePassword = ref(false);
+const errors = reactive([]);
+
+const handleFileChange = (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    form.avatar = file;
+  }
+};
+
+const submitForm = async () => {
+  errors.splice(0); // Clear errors
+  if (changePassword.value && form.password1 !== form.password2) {
+    errors.push("Passwords do not match");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("name", form.name);
+  if (changePassword.value) {
+    formData.append("password1", form.password1);
+    formData.append("password2", form.password2);
+  }
+  if (form.avatar) {
+    formData.append("avatar", form.avatar);
+  }
+
+  try {
+    const response = await axios.patch("/api/account/users/update_profile/", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+
+    if (response.status === 200) {
+      toastStore.showToast(5000, "Profile updated successfully!", "bg-green-500");
+      userStore.setUserInfo(response.data);
+      router.push({name: 'myprofile'})
+
+    }
+  } catch (error) {
+    errors.push(error.response?.data?.message || "An error occurred.");
+  }
+};
+</script>
