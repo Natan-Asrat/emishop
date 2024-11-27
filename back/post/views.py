@@ -16,7 +16,7 @@ from transaction.models import Reservation
 import uuid
 # Create your views here.
 class PostViewSet(viewsets.ModelViewSet):
-    queryset = Post.objects.all()
+    queryset = Post.objects.filter(is_active=True)
 
     filter_backends = (SearchFilter,)
     search_fields = [
@@ -83,7 +83,7 @@ class PostViewSet(viewsets.ModelViewSet):
             return Response(status=status.HTTP_404_NOT_FOUND)
     @action(detail=False, methods=['GET'])
     def favourites(self, request):
-        liked_posts = Post.objects.filter(likes__liked_by=request.user)
+        liked_posts = Post.objects.filter(likes__liked_by=request.user, is_active=True)
         serializer = self.get_serializer(liked_posts, many=True)
         return Response(serializer.data)
 
@@ -109,14 +109,14 @@ class PostViewSet(viewsets.ModelViewSet):
                 user_embedding = [float(x) for x in user_embedding.split(',')]
             elif isinstance(user_embedding, list):
                 user_embedding = [float(x) for x in user_embedding]      
-            posts = Post.objects.annotate(
+            posts = Post.objects.filter(is_active=True).annotate(
                     similarity=CosineDistance('embedding', user_embedding),
                     liked=Exists(liked_subquery)
                 ).exclude(created_by__id__in=reported_seller_ids).order_by('similarity')[:1]
 
         else:
             # Exclude posts from reported sellers and return diverse range of posts
-            posts = Post.objects.exclude(
+            posts = Post.objects.filter(is_active=True).exclude(
                 created_by__id__in=reported_seller_ids
             ).order_by('?').annotate(liked=Exists(liked_subquery))[:20]
 
@@ -167,6 +167,14 @@ class PostViewSet(viewsets.ModelViewSet):
         # Return the created post data
         response_serializer = PostSerializer(post, context={"request": request})
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+    @action(detail=True, methods=["DELETE"])
+    def deactivate(self, request, pk=None):
+        post = self.get_object()
+        if post.created_by != request.user:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        post.is_active = False
+        post.save()
+        return Response(status=status.HTTP_200_OK)
     @action(detail=False, methods=["GET"], url_path="bulk")
     def bulk_retrieve(self, request):
         """

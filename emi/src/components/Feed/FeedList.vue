@@ -139,6 +139,7 @@ const fetchPosts = async () => {
       totalStock: post.initial_quantity,
       liked: post.liked,
       quantity: 1,
+      isActive: post.is_active,
       description: post.title, // You might want to add description field in your model
       sellerName: post.created_by.username,
       sellerAvatar: "https://placehold.co/40", // You might want to add avatar in your UserProfile

@@ -34,7 +34,7 @@ class UserViewSet(
             post=OuterRef("pk"),  # Refers to the current post in the main queryset
             liked_by=user,
         )
-        posts = user.posts.all().annotate(liked=Exists(liked_subquery))
+        posts = user.posts.filter(is_active=True).annotate(liked=Exists(liked_subquery))
         serializer = PostSerializer(posts, many=True)
         return Response(serializer.data)
     @action(detail=True, methods=['get'])
@@ -170,7 +170,7 @@ class UserViewSet(
             "reported": is_reported_on,
             "reportedReservation": reported_reservation,
             "stats": {
-                "ads": request.user.posts.count(),
+                "ads": request.user.posts.filter(is_active=True).count(),
                 "ordered": stats['ordered_count'],
                 "delivered": stats['delivered_count'],
                 "reserved": stats['reserved_count'],

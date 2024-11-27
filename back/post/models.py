@@ -28,6 +28,7 @@ class Post(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     likes_count = models.IntegerField(default=0)
+    is_active = models.BooleanField(default=True)
 
     def get_required_coins(self):
         return math.ceil(float(self.price) * 0.01)

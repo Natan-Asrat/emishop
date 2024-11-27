@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden product pt-6" :data-product-id="product.id" >
+  <div v-if="product.isActive" class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden product pt-6" :data-product-id="product.id" >
     <img :src="product.image" :alt="product.name" class="w-full h-48 object-cover" @click="openProductDetails(product)" />
     <div class="p-4 relative">
       <Trash @click="deletePost" class="h-5 w-5 text-red-500 ml-auto right-12 top-5 absolute" />
@@ -19,7 +19,9 @@
 <script setup>
 import { defineProps, defineEmits } from 'vue';
 import { HeartIcon, HeartHandshakeIcon, Trash } from 'lucide-vue-next';
+import { useToastStore } from '@/stores/toast';
 import axios from 'axios';
+const toastStore = useToastStore();
 const emit = defineEmits(['setProduct', 'viewDetails']);
 
 const props = defineProps({
@@ -34,6 +36,23 @@ const props = defineProps({
 });
 
 const deletePost = () => {
+  axios.delete(`api/post/posts/${props.product.id}/deactivate/`)
+  .then(
+    response => {
+      console.log(response)
+      window.location.reload()
+    }
+  )
+  .catch(
+    error => {
+      console.log(error)
+      toastStore.showToast(
+              5000,
+              "Something went wrong. Please refresh!",
+              "bg-red-300 dark:bg-red-300"
+            )
+    }
+  )
 
 }
 
