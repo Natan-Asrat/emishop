@@ -21,6 +21,7 @@
     <div v-if="favouriteStore.posts.length === 0" class="text-center my-auto dark:text-gray-100">
       You don't have any posts here!
     </div>
+    <InsufficientCoinsComponent v-if="showInsufficientCoinsModal" :requiredCoins="requiredCoins" :userCoins="userStore.user.coins" @closeInsufficientCoinsModal="showInsufficientCoinsModal = false"  />
 
     <FooterComponent />
 </div>
@@ -34,6 +35,7 @@ import { useRecommendationStore } from '@/stores/recommendation';
 import axios from 'axios';
 import FooterComponent from '@/components/FooterComponent.vue';
 import NavbarWrapper from '@/components/NavbarWrapper.vue';
+import InsufficientCoinsComponent from '@/components/InsufficientCoinsComponent.vue';
 export default {
   data() {
     return{
@@ -60,7 +62,8 @@ export default {
   components: {
     FavouriteItem,
     FooterComponent,
-    NavbarWrapper
+    NavbarWrapper,
+    InsufficientCoinsComponent
   },
   methods: {
     setCurrentTab(tab) {

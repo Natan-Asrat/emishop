@@ -15,12 +15,14 @@
           @decrementQuantity="feedPostStore.decrementQuantity"
         />
       </div>
+      <InsufficientCoinsComponent v-if="showInsufficientCoinsModal" :requiredCoins="requiredCoins" :userCoins="userStore.user.coins" @closeInsufficientCoinsModal="showInsufficientCoinsModal = false"  />
       <SelectedProduct :isReserving="isReserving" :selectedProduct="selectedProduct" @reserveProduct="reserveProduct" @closeProductDetails="closeProductDetails" />
     </div>
   </main>
 </template>
 <script setup>
 import FeedItem from '@/components/Feed/FeedItem.vue';
+import InsufficientCoinsComponent from '@/components/InsufficientCoinsComponent.vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 import { onMounted, onUnmounted, nextTick, watch, ref, defineEmits  } from 'vue';

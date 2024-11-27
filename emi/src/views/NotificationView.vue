@@ -17,6 +17,8 @@
     <FooterComponent />
     <PopupComponent v-if="isPopupVisible" :notification="popupContent" @closeModal="closeModal" />
     <SelectedProduct :isReserving="isReserving" :selectedProduct="selectedProduct" @reserveProduct="reserveProduct" @closeProductDetails="closeProductDetails" />
+    <InsufficientCoinsComponent v-if="showInsufficientCoinsModal" :requiredCoins="requiredCoins" :userCoins="userStore.user.coins" @closeInsufficientCoinsModal="showInsufficientCoinsModal = false" />
+
   </div>
 </template>
 <script>
@@ -30,6 +32,7 @@ import NotificationGroupComponent from "@/components/Notifications/NotificationG
 import { useUserStore } from "@/stores/user";
 import SelectedProduct from "@/components/Feed/SelectedProduct.vue";
 import PopupComponent from "@/components/App/PopupComponent.vue";
+import InsufficientCoinsComponent from "@/components/InsufficientCoinsComponent.vue"
 export default {
   name: "NotificationView",
   components: {
@@ -38,7 +41,8 @@ export default {
     NavbarWrapper,
     NotificationGroupComponent,
     SelectedProduct,
-    PopupComponent
+    PopupComponent,
+    InsufficientCoinsComponent
   },
   data() {
     return {
@@ -134,6 +138,7 @@ export default {
       if (this.userStore.user.coins < req) {
         this.requiredCoins = req;
         this.showInsufficientCoinsModal = true;
+        console.log("not enough coins")
         return;
       }
 
