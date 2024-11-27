@@ -19,10 +19,8 @@
 <script setup>
 import { defineProps, defineEmits } from 'vue';
 import { HeartIcon, HeartHandshakeIcon, Trash } from 'lucide-vue-next';
-import { useToastStore } from '@/stores/toast';
 import axios from 'axios';
-const toastStore = useToastStore();
-const emit = defineEmits(['setProduct', 'viewDetails']);
+const emit = defineEmits(['setProduct', 'viewDetails', 'deletePost']);
 
 const props = defineProps({
   product: {
@@ -36,24 +34,7 @@ const props = defineProps({
 });
 
 const deletePost = () => {
-  axios.delete(`api/post/posts/${props.product.id}/deactivate/`)
-  .then(
-    response => {
-      console.log(response)
-      window.location.reload()
-    }
-  )
-  .catch(
-    error => {
-      console.log(error)
-      toastStore.showToast(
-              5000,
-              "Something went wrong. Please refresh!",
-              "bg-red-300 dark:bg-red-300"
-            )
-    }
-  )
-
+  emit('deletePost', props.product)
 }
 
 const like = () => {

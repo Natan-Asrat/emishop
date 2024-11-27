@@ -9,9 +9,10 @@
           :index="index"
           @setProduct="handleSetProduct"
           @viewDetails="openProductDetails"
+          @deletePost="deletePost"
         />
       </div>
-      <SelectedProduct :isReserving="isReserving" :selectedProduct="selectedProduct" @reserveProduct="reserveProduct" @closeProductDetails="closeProductDetails" />
+      <SelectedProduct :isDeleting="isDeleting" :selectedProduct="selectedProduct" @deletePost="deletePost" @closeProductDetails="closeProductDetails" />
     </div>
   </main>
 </template>
@@ -21,8 +22,30 @@ import axios from 'axios';
 // import { useRouter } from 'vue-router';
 import { onMounted, ref  } from 'vue';
 import { useUserPostsStore } from '@/stores/userPost';
+import { useToastStore } from '@/stores/toast';
 // import { useUserStore } from '@/stores/user';
-import SelectedProduct from '@/components/Feed/SelectedProduct.vue';
+import SelectedProduct from '@/components/MyProfile/SelectedProduct.vue';
+const toastStore = useToastStore();
+const deletePost = (post) => {
+  axios.delete(`api/post/posts/${post.id}/deactivate/`)
+  .then(
+    response => {
+      console.log(response)
+      window.location.reload()
+    }
+  )
+  .catch(
+    error => {
+      console.log(error)
+      toastStore.showToast(
+              5000,
+              "Something went wrong. Please refresh!",
+              "bg-red-300 dark:bg-red-300"
+            )
+    }
+  )
+
+}
 
 const feedPostStore = useUserPostsStore();
 // const userStore = useUserStore();
@@ -36,7 +59,7 @@ const feedPostStore = useUserPostsStore();
 // const showInsufficientCoinsModal = ref(false)
 
 const selectedProduct = ref(null)
-const isReserving = ref(false);
+const isDeleting = ref(false);
 // const router = useRouter();
 const isLoading = ref(false);
 const hasMore = ref(true)
