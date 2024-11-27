@@ -12,6 +12,10 @@ from transaction.models import Reservation
 from django.conf import settings
 from django.utils.timezone import now, timedelta
 from transaction.serializers import ReservationSerializer
+from django.db.models import Count, Q
+from post.serializers import PostSerializer
+from post.models import Like
+from django.db.models import Exists, OuterRef
 class UserViewSet(
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
@@ -23,6 +27,16 @@ class UserViewSet(
         if self.action == 'create':
             return [AllowAny()]
         return super().get_permissions()
+    @action(detail=False, methods=['get'])
+    def myposts(self, request, pk=None):
+        user = request.user
+        liked_subquery = Like.objects.filter(
+            post=OuterRef("pk"),  # Refers to the current post in the main queryset
+            liked_by=user,
+        )
+        posts = user.posts.all().annotate(liked=Exists(liked_subquery))
+        serializer = PostSerializer(posts, many=True)
+        return Response(serializer.data)
     @action(detail=True, methods=['get'])
     def followers(self, request, pk=None):
         user = self.get_object()
@@ -112,6 +126,59 @@ class UserViewSet(
             "coins": user.coins,
             "reported": is_reported_on,
             "reportedReservation": reported_reservation
+        }
+
+        return JsonResponse(response_data)
+    @action(detail=False, methods=['get'])
+    def stats(self, request, pk=None):
+        user = request.user
+        blocklist_threshold_date = now() - timedelta(days=settings.REPORTED_BLOCKLIST_DAYS)
+
+        # Avatar URL
+        avatar_url = request.build_absolute_uri(user.avatar.url) if user.avatar else None
+
+        # Pre-aggregate data
+        stats = Reservation.objects.filter(
+            Q(post__created_by=user) | Q(buyer=user)
+        ).aggregate(
+            ordered_count=Count('id', filter=Q(post__created_by=user)),
+            delivered_count=Count('id', filter=Q(post__created_by=user, status='completed')),
+            reserved_count=Count('id', filter=Q(buyer=user)),
+            received_count=Count('id', filter=Q(buyer=user, status='completed')),
+            canceled_count=Count('id', filter=Q(buyer=user, status='cancelled')),
+        )
+
+        # Reported Reservation
+        reported_reservation = Reservation.objects.filter(
+            post__created_by=request.user,
+            status='reported',
+            reported_at__gte=blocklist_threshold_date
+        ).order_by('-reported_at').first()
+
+        is_reported_on = False
+        if reported_reservation is not None:
+            is_reported_on = True
+            reported_reservation = ReservationSerializer(reported_reservation).data
+
+        # Response Data
+        response_data = {
+            "id": user.id,
+            "name": user.name,
+            "username": user.username,
+            "avatar": avatar_url,
+            "coins": user.coins,
+            "reported": is_reported_on,
+            "reportedReservation": reported_reservation,
+            "stats": {
+                "ads": request.user.posts.count(),
+                "ordered": stats['ordered_count'],
+                "delivered": stats['delivered_count'],
+                "reserved": stats['reserved_count'],
+                "received": stats['received_count'],
+                "canceled": stats['canceled_count'],
+                "coins_spent": user.coins_spent,
+                "coins_bought": user.coins_bought,
+            },
         }
 
         return JsonResponse(response_data)

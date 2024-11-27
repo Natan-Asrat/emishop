@@ -41,7 +41,7 @@ const router = createRouter({
     {
       path: '/myprofile',
       name:'myprofile',
-      component: () => import('@/views/NotificationView.vue')
+      component: () => import('@/views/MyProfileView.vue')
     }
 
   ],

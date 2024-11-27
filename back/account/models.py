@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 import uuid
 from django.utils import timezone
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
 # Create your models here.
 
 class CustomUserManager(BaseUserManager):
@@ -47,6 +49,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(default=timezone.now)
     coins = models.IntegerField(default=0)
+    coins_spent = models.IntegerField(default=0)
+    coins_bought = models.IntegerField(default=0)
 
     objects = CustomUserManager()
 
@@ -55,3 +59,19 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.username
+    
+@receiver(pre_save, sender=User)
+def update_coin_stats(sender, instance, **kwargs):
+    # Check if this is an update and not a new user creation
+    if not instance._state.adding:
+        # Get the old user instance from the database
+        old_instance = User.objects.get(pk=instance.pk)
+        
+        # Calculate the difference in coins
+        coin_difference = instance.coins - old_instance.coins
+        
+        # Adjust coins_bought or coins_spent based on the difference
+        if coin_difference > 0:
+            instance.coins_bought += coin_difference
+        elif coin_difference < 0:
+            instance.coins_spent += abs(coin_difference)

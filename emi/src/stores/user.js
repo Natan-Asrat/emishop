@@ -27,6 +27,7 @@ export const useUserStore = defineStore({
         this.user.name = localStorage.getItem("user.name");
         this.user.username = localStorage.getItem("user.username");
         this.user.avatar = localStorage.getItem("user.avatar");
+      localStorage.setItem("user.avatar", this.user.avatar);
         this.user.isAuthenticated = true;
 
         await this.refreshToken();
@@ -59,12 +60,14 @@ export const useUserStore = defineStore({
       this.user.id = false;
       this.user.name = false;
       this.user.username = false;
+      this.user.avatar = null;
 
       localStorage.setItem("user.access", "");
       localStorage.setItem("user.refresh", "");
       localStorage.setItem("user.id", "");
       localStorage.setItem("user.name", "");
       localStorage.setItem("user.username", "");
+      localStorage.setItem("user.avatar", "");
     },
 
     setUserInfo(user) {

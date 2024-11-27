@@ -25,7 +25,6 @@ const isAuthenticated = ref(false);
 const token = userStore.user.access;
 const ws = ref(null)
 const isModalVisible = ref(false);
-const selectedProduct = ref(null);
 const modalContent = ref(null);
 
 const closeModal = () => {
@@ -173,13 +172,5 @@ defineExpose({ logout });
   <ToastComponent />
   <PopupComponent v-if="isModalVisible" :notification="modalContent" @closeModal="closeModal" />
 
-  <!-- Post Modal -->
-  <SelectedProduct
-    v-if="selectedProduct"
-    :isReserving="isReserving"
-    :selectedProduct="selectedProduct"
-    @reserveProduct="reserveProduct"
-    @closeProductDetails="() => (selectedProduct = null)"
-  />
 
 </template>

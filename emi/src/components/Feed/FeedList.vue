@@ -1,5 +1,5 @@
 <template>
-  <main ref="mainContent" class="pb-20 bg-gray-200 dark:bg-gray-600">
+  <main ref="mainContent" class="pb-20 min-h-screen bg-gray-200 dark:bg-gray-600">
     <div class="px-4 overflow-y-auto">
       <div class="space-y-6 " :class="{'mt-9': feedPostStore.isSearchExpanded}" >
         <FeedItem
