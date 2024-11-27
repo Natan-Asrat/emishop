@@ -3,10 +3,9 @@
     <NavbarWrapper class="bg-gray-100 dark:bg-gray-900 p-4">
       <h1 class="text-2xl text-gray-900 dark:text-gray-100 font-bold mb-6">Favourites</h1>
     <div v-if="isLoading" class='mb-5 text-center dark:text-gray-100'>Loading...</div>
-    <TabsComponent :current-tab="currentTab" @setCurrentTab="setCurrentTab"/>
 
     </NavbarWrapper>
-    <div class="space-y-4 mt-6 dark:bg-gray-100 p-4 mb-12" style="margin-top: 160px">
+    <div class="space-y-4 bg-gray-200 dark:bg-gray-600 p-4 mb-12" style="padding-top: 108px">
       <FavouriteItem
         v-for="(product, index) in favouriteStore.posts"
         :key="product.id"
@@ -29,7 +28,6 @@
 </template>
 <script>
 import FavouriteItem from '@/components/Favourites/FavouriteItem.vue';
-import TabsComponent from '@/components/Favourites/TabsComponent.vue';
 import { useFavouritesStore } from '@/stores/favouritePost';
 import { useUserStore } from '@/stores/user';
 import { useRecommendationStore } from '@/stores/recommendation';
@@ -60,7 +58,6 @@ export default {
 
   },
   components: {
-    TabsComponent,
     FavouriteItem,
     FooterComponent,
     NavbarWrapper
