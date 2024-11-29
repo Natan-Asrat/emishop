@@ -60,6 +60,12 @@ import { useToastStore } from '@/stores/toast';
 import { useUserStore } from '@/stores/user';
 import axios from 'axios';
 import {useRouter} from 'vue-router';
+import onecoin from '@/assets/onecoin.png';
+import threecoins from '@/assets/threecoins.png';
+import tencoins from '@/assets/tencoins.png';
+import twentyfivecoins from '@/assets/twentyfivecoins.png';
+import hundredcoins from '@/assets/hundredcoins.png';
+import twothousandcoins from '@/assets/twothousandcoins.png';
 
 const toastStore = useToastStore();
 const userStore = useUserStore();
@@ -68,12 +74,12 @@ const router = useRouter();
 const loadingIndex = ref(null);
 
 const coinOptions = [
-  { coins: 1, price: 1, image: '/onecoin.png' },
-  { coins: 3, price: 3, image: '/threecoins.png' },
-  { coins: 10, price: 10, image: '/tencoins.png' },
-  { coins: 25, price: 25, image: '/twentyfivecoins.png' },
-  { coins: 100, price: 100, image: '/hundredcoins.png' },
-  { coins: 2000, price: 2000, image: '/twothousandcoins.png' }
+  { coins: 1, price: 1, image: onecoin},
+  { coins: 3, price: 3, image: threecoins},
+  { coins: 10, price: 10, image: tencoins },
+  { coins: 25, price: 25, image: twentyfivecoins },
+  { coins: 100, price: 100, image: hundredcoins },
+  { coins: 2000, price: 2000, image: twothousandcoins }
 ];
 
 let paypal;

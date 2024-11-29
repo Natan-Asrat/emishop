@@ -36,11 +36,11 @@
                 
                 <div class="grid grid-cols-2 gap-4 mb-4">
                   <a href="#" class="flex flex-col items-center p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
-                    <img src="/appstore.png" alt="App Store" class="w-16 h-16 mb-2">
+                    <img :src="appstore" alt="App Store" class="w-16 h-16 mb-2">
                     <span class="text-sm font-medium text-gray-700 dark:text-gray-300">App Store</span>
                   </a>
                   <a href="#" class="flex flex-col items-center p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
-                    <img src="/playstore.png" alt="Play Store" class="w-16 h-16 mb-2">
+                    <img :src="playstore" alt="Play Store" class="w-16 h-16 mb-2">
                     <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Play Store</span>
                   </a>
                 </div>
@@ -66,7 +66,8 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { Dialog, DialogPanel, DialogTitle, TransitionRoot, TransitionChild } from '@headlessui/vue'
-
+import playstore from "@/assets/playstore.png"
+import appstore from "@/assets/appstore.png"
 const showPrompt = ref(false)
 const isModalOpen = ref(false)
 let deferredPrompt = null

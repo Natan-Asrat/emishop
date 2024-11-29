@@ -5,7 +5,7 @@
     <div v-if="isLoading" class='mb-5 text-center dark:text-gray-100'>Loading...</div>
 
     </NavbarWrapper>
-    <div class="space-y-4 bg-gray-200 dark:bg-gray-600 p-4 mb-12" style="padding-top: 108px">
+    <div class="space-y-4 min-h-screen bg-gray-200 dark:bg-gray-600 p-4 mb-12" style="padding-top: 108px">
       <FavouriteItem
         v-for="(product, index) in favouriteStore.posts"
         :key="product.id"
