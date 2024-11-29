@@ -23,6 +23,8 @@
       </div>
 </template>
 <script setup>
+import { useRouter } from 'vue-router';
+
 defineProps({
   requiredCoins: {
     type: Number,
@@ -34,13 +36,15 @@ defineProps({
   }
 })
 const emit = defineEmits(['closeInsufficientCoinsModal'])
+const router = useRouter();
 
 const closeInsufficientCoinsModal = () => {
   emit('closeInsufficientCoinsModal')
 }
 
 const redirectToBuyCoins = () => {
-
+  closeInsufficientCoinsModal();
+  router.push({ name: 'buy-coins' });
 }
 
 </script>

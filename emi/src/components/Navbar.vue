@@ -38,8 +38,8 @@
       </router-link>
       <span class="text-gray-700 dark:text-gray-200 text-sm">Coins: {{ userStore.user.coins }}</span>
       <button
-        @click="openBuyCoinsModal"
-        class="bg-yellow-500 text-white px-3 py-1 rounded-full text-sm font-medium hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
+        @click="redirectToBuyCoins"
+        class="bg-yellow-500 text-gray-900 px-3 py-1 rounded-full text-sm font-medium hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
       >
         Buy Coins
       </button>
@@ -53,6 +53,7 @@ import logo from '@/assets/logo.png';
 import { SearchIcon, BellIcon } from 'lucide-vue-next'
 import { useUserStore } from '@/stores/user';
 import { useFeedPostStore } from '@/stores/feedPost';
+import {useRouter} from 'vue-router'
 import axios from 'axios';
 const feedPostStore = useFeedPostStore();
 const navbarTransform = ref('0');
@@ -60,6 +61,7 @@ const navbarRef = ref<HTMLElement>();
 const searchInput = ref(null)
 const searchQuery = ref('')
 const userStore = useUserStore()
+const router = useRouter()
 let lastScroll = 0;
 let isScrollingDown = false;
 
@@ -81,8 +83,8 @@ const handleScroll = () => {
     lastScroll = currentScroll <= 0 ? 0 : currentScroll; // Prevent negative scroll values
 };
 
-const openBuyCoinsModal = () => {
-
+const redirectToBuyCoins = () => {
+  router.push({name: 'buy-coins'})
 }
 const search = () => {
   if (searchQuery.value.trim()) {

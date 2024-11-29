@@ -118,6 +118,10 @@ DATABASES = {
     }
 }
 
+# PayPal Settings
+PAYPAL_MODE = os.environ.get('PAYPAL_MODE')  # Change to "live" for production
+PAYPAL_CLIENT_ID = os.environ.get('PAYPAL_CLIENT_ID')
+PAYPAL_CLIENT_SECRET = os.environ.get('PAYPAL_CLIENT_SECRET')
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators

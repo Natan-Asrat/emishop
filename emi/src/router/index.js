@@ -47,8 +47,12 @@ const router = createRouter({
       path: '/edit_profile',
       name:'edit_profile',
       component: () => import('@/views/EditProfileView.vue')
+    },
+    {
+      path: '/buy-coins',
+      name: 'buy-coins',
+      component: () => import('@/views/BuyCoinsView.vue')
     }
-
   ],
 })
 
