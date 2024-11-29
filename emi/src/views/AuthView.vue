@@ -22,15 +22,78 @@
 
               <template v-if="isSignUp">
 
-                <div class="space-y-2">
-                <label for="avatar" class="text-sm font-medium text-gray-700 dark:text-gray-300">Avatar</label>
-                <input
-                  type="file"
-                  @change="handleFileChange"
-                  class="w-full py-4 px-6 border border-gray-200 rounded-lg"
-                  id="avatar"
-                />
-              </div>
+                <div class="flex flex-col items-center space-y-2">
+                  <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Avatar</label>
+                  <div class="flex items-center justify-center">
+                    <input
+                      type="file"
+                      @change="handleFileChange"
+                      accept="image/*"
+                      class="hidden"
+                      id="avatar"
+                      ref="fileInput"
+                      :disabled="isLoading"
+                    />
+                    <button 
+                      type="button"
+                      @click="$refs.fileInput.click()"
+                      :disabled="isLoading"
+                      class="relative group cursor-pointer disabled:cursor-not-allowed"
+                    >
+                      <img 
+                        v-if="avatarPreview" 
+                        :src="avatarPreview" 
+                        class="h-20 w-20 rounded-full object-cover border-2 border-gray-200 group-hover:opacity-75 transition-opacity"
+                        alt="Avatar preview"
+                      />
+                      <div 
+                        v-else 
+                        class="h-20 w-20 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center group-hover:bg-gray-300 dark:group-hover:bg-gray-600 transition-colors"
+                      >
+                        <svg 
+                          class="h-10 w-10 text-gray-400" 
+                          fill="none" 
+                          stroke="currentColor" 
+                          viewBox="0 0 24 24"
+                        >
+                          <path 
+                            stroke-linecap="round" 
+                            stroke-linejoin="round" 
+                            stroke-width="2" 
+                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                          />
+                        </svg>
+                      </div>
+                      <!-- Overlay with camera icon -->
+                      <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div class="rounded-full bg-black bg-opacity-50 p-2">
+                          <svg 
+                            class="h-6 w-6 text-white" 
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                          >
+                            <path 
+                              stroke-linecap="round" 
+                              stroke-linejoin="round" 
+                              stroke-width="2" 
+                              d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+                            />
+                            <path 
+                              stroke-linecap="round" 
+                              stroke-linejoin="round" 
+                              stroke-width="2" 
+                              d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
+                            />
+                          </svg>
+                        </div>
+                      </div>
+                    </button>
+                  </div>
+                  <p class="text-center text-xs text-gray-500 dark:text-gray-400 mt-2">
+                    Click to choose an avatar
+                  </p>
+                </div>
               </template>
               <div class="space-y-2">
                 <label for="username" class="text-sm font-medium text-gray-700 dark:text-gray-300">Username</label>
@@ -203,6 +266,7 @@ const isLoading = ref(false);
 const isErrorModalOpen = ref(false);
 const errorTitle = ref('');
 const errorMessage = ref('');
+const avatarPreview = ref('');
 
 const user = reactive({
   username: '',
@@ -239,38 +303,75 @@ const toggleAuthMode = () => {
   // Clear form
   Object.keys(user).forEach(key => user[key] = '');
   Object.keys(errors).forEach(key => errors[key] = null);
+  avatarPreview.value = ''; // Clear avatar preview
 };
 
 const handleFileChange = (event) => {
   const file = event.target.files[0];
   if (file) {
+    if (!file.type.match('image.*')) {
+      showError('Invalid File', 'Please select an image file');
+      event.target.value = ''; // Clear the file input
+      return;
+    }
+    
     user.avatar = file;
+    // Create preview URL
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      avatarPreview.value = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  } else {
+    avatarPreview.value = '';
   }
+};
+
+const validateForm = () => {
+  const errors = {
+    username: null,
+    nickname: null,
+    password1: null,
+    password2: null,
+    avatar: null,
+  };
+
+  if (isSignUp.value) {
+    if (!user.nickname) errors.nickname = "Your name is missing";
+    if (!user.username) errors.username = "Your username is missing";
+    if (!user.password1) errors.password1 = "Your password is missing";
+    if (!user.password2) errors.password2 = "Confirm your password";
+    if (user.password1.length < 8) errors.password1 = "Password must be at least 8 characters long";
+    if (user.password1 !== user.password2) errors.password2 = "Passwords do not match";
+    if (!user.avatar) errors.avatar = "Please select an avatar";
+
+    if (Object.values(errors).some((error) => error)) {
+      showError('Validation Error', Object.values(errors).find(error => error));
+      return false;
+    }
+  } else {
+    if (!user.username) errors.username = "Your username is missing";
+    if (!user.password1) errors.password1 = "Your password is missing";
+
+    if (Object.values(errors).some((error) => error)) {
+      showError('Validation Error', Object.values(errors).find(error => error));
+      return false;
+    }
+  }
+
+  return true;
 };
 
 const handleAuth = async () => {
   if (isLoading.value) return;
+
+  if (!validateForm()) return;
   isLoading.value = true;
   
   const action = isSignUp.value ? 'signup' : 'signin';
 
-  // Clear previous errors
-  Object.keys(errors).forEach((key) => (errors[key] = null));
-
   try {
     if (action === 'signup') {
-      if (!user.nickname) errors.nickname = "Your name is missing";
-      if (!user.username) errors.username = "Your username is missing";
-      if (!user.password1) errors.password1 = "Your password is missing";
-      if (!user.password2) errors.password2 = "Confirm your password";
-      if (user.password1.length < 8) errors.password1 = "Password must be at least 8 characters long";
-      if (user.password1 !== user.password2) errors.password2 = "Passwords do not match";
-
-      if (Object.values(errors).some((error) => error)) {
-        showError('Validation Error', Object.values(errors).find(error => error));
-        return;
-      }
-
       const formData = new FormData();
       formData.append("username", user.username);
       formData.append("name", user.nickname);
@@ -290,14 +391,6 @@ const handleAuth = async () => {
         showError('Registration Error', "Something went wrong. Please try again!");
       }
     } else if (action === 'signin') {
-      if (!user.username) errors.username = "Please enter your username";
-      if (!user.password1) errors.password1 = "Please enter your password";
-
-      if (Object.values(errors).some((error) => error)) {
-        showError('Validation Error', Object.values(errors).find(error => error));
-        return;
-      }
-
       const response = await axios.post("/api/account/login/", {
         username: user.username,
         password: user.password1,
