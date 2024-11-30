@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "corsheaders",
     "account",
     "post",
     "transaction",
@@ -48,7 +49,6 @@ INSTALLED_APPS = [
     "rest_framework",
     "django_filters",
     "rest_framework_simplejwt",
-    "corsheaders",
     "whitenoise.runserver_nostatic",
 ]
 
@@ -94,12 +94,11 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
 }
-# CORS_ALLOWED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS').split(',')
+CORS_ALLOWED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS').split(',')
 
-# CORS_TRUSTED_ORIGINS = os.environ.get('CORS_TRUSTED_ORIGINS').split(',')
-CORS_ALLOW_ALL_ORIGINS = True
-
+CORS_TRUSTED_ORIGINS = os.environ.get('CORS_TRUSTED_ORIGINS').split(',')
 CORS_ALLOW_CREDENTIALS = True
+
 CORS_ALLOW_METHODS = [
     'DELETE',
     'GET',
