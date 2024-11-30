@@ -50,27 +50,17 @@ export default defineConfig({
         ],
         runtimeCaching: [
           {
-            urlPattern: /^https:\/\/api\.*/i,
+            urlPattern: /^https:\/\/emishoplive\.onrender\.com\/.*$/,
             handler: 'NetworkFirst',
             options: {
               cacheName: 'api-cache',
+              networkTimeoutSeconds: 5,
               expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 7 // 1 week
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 * 24 // 24 hours
               },
               cacheableResponse: {
                 statuses: [0, 200]
-              }
-            }
-          },
-          {
-            urlPattern: /^https:\/\/fonts\.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'font-cache',
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
               }
             }
           }
@@ -78,20 +68,10 @@ export default defineConfig({
       }
     })
   ],
-  build: {
-    chunkSizeWarningLimit: 1000,
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          'vendor': ['vue', 'vue-router', 'pinia'],
-          'tensorflow': ['@tensorflow/tfjs', '@tensorflow-models/universal-sentence-encoder']
-        }
-      }
-    }
-  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
-  }
+  },
+  base: process.env.NODE_ENV === 'production' ? 'https://emishoplive.onrender.com/' : '/'
 })
