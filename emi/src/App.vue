@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, onBeforeMount } from 'vue';
 import AuthView from '@/views/AuthView.vue'
 import axios from 'axios';
 import { RouterView } from 'vue-router';
@@ -15,7 +15,8 @@ import { useTransactionsStore } from './stores/transactions';
 import { useNotificationStore } from './stores/notification';
 import PopupComponent from './components/App/PopupComponent.vue';
 import { useThemeStore } from './stores/theme'
-import { Sun, Moon, Monitor } from 'lucide-vue-next'
+import { Sun, Moon, Monitor } from 'lucide-vue-next';
+import { Dialog, DialogPanel, DialogTitle } from '@headlessui/vue';
 
 const notificationStore = useNotificationStore();
 const feedPostStore = useFeedPostStore();
@@ -30,6 +31,7 @@ const token = userStore.user.access;
 const ws = ref(null)
 const isModalVisible = ref(false);
 const modalContent = ref(null);
+const showMobileWarning = ref(false);
 
 const currentThemeIcon = computed(() => {
   switch (themeStore.theme) {
@@ -59,6 +61,12 @@ function toggleTheme() {
 const closeModal = () => {
   isModalVisible.value = false;
   modalContent.value = null;
+};
+
+const checkScreenSize = () => {
+  if (window.innerWidth > 768) {
+    showMobileWarning.value = true;
+  }
 };
 
 onMounted(() => {
@@ -198,6 +206,12 @@ onMounted(() => {
     axios.defaults.headers.common["Authorization"] = "";
   }
   isAuthenticated.value = !!token;;
+  checkScreenSize();
+  window.addEventListener('resize', checkScreenSize);
+});
+
+onBeforeMount(() => {
+  window.removeEventListener('resize', checkScreenSize);
 });
 
 const markNotificationAsDelivered = async (notificationId) => {
@@ -235,19 +249,53 @@ defineExpose({ logout });
 </script>
 
 <template>
-  <RouterView v-if="isAuthenticated" />
-  <AuthView v-else @auth-success="onAuthSuccess" />
-  <ToastComponent />
-  <PopupComponent v-if="isModalVisible" :notification="modalContent" @closeModal="closeModal" />
-  <PWAUpdateHandler />
-  <button 
-    @click="toggleTheme" 
-    class="fixed bottom-20 right-4 p-3 rounded-full bg-gray-100 dark:bg-gray-800 shadow-lg hover:shadow-xl transition-all duration-300 z-50"
-    :title="currentThemeIcon.title"
-  >
-    <component 
-      :is="currentThemeIcon.icon" 
-      class="w-6 h-6 text-gray-800 dark:text-gray-200"
-    />
-  </button>
+  <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
+    <Dialog 
+      :open="showMobileWarning"
+      class="relative z-50"
+      static
+    >
+      <div class="fixed inset-0 bg-black/30 backdrop-blur-sm" aria-hidden="true" />
+      
+      <div class="fixed inset-0 flex w-screen items-center justify-center p-4">
+        <DialogPanel class="mx-auto max-w-sm rounded-2xl bg-white dark:bg-gray-800 p-8 text-center shadow-xl">
+          <DialogTitle as="h3" class="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+            Mobile Only Experience
+          </DialogTitle>
+          
+          <div class="mt-4">
+            <p class="text-lg text-gray-600 dark:text-gray-300 mb-6">
+              Emi Shop is designed exclusively for mobile devices. 
+              Please access the app from your phone for the best experience.
+            </p>
+            
+            <div class="mt-6 bg-blue-50 dark:bg-blue-900/30 rounded-xl p-5">
+              <p class="text-blue-700 dark:text-blue-300 font-medium">
+                💫 For optimal experience, visit this site on your mobile device and add it to your home screen!
+              </p>
+            </div>
+          </div>
+        </DialogPanel>
+      </div>
+    </Dialog>
+
+    <!-- Rest of your app content -->
+    <div :class="{ 'pointer-events-none blur-sm': showMobileWarning }">
+      <RouterView v-if="isAuthenticated" />
+      <AuthView v-else @auth-success="onAuthSuccess" />
+      <ToastComponent />
+      <PopupComponent v-if="isModalVisible" :notification="modalContent" @closeModal="closeModal" />
+      <PWAUpdateHandler />
+      <button 
+        @click="toggleTheme" 
+        class="fixed bottom-20 right-4 p-3 rounded-full bg-gray-100 dark:bg-gray-800 shadow-lg hover:shadow-xl transition-all duration-300 z-50"
+        :title="currentThemeIcon.title"
+      >
+        <component 
+          :is="currentThemeIcon.icon" 
+          class="w-6 h-6 text-gray-800 dark:text-gray-200"
+        />
+      </button>
+    </div>
+  </div>
 </template>

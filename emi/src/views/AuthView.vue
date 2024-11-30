@@ -33,7 +33,6 @@
                       id="avatar"
                       ref="fileInput"
                       :disabled="isLoading"
-                      capture="none"
                     />
                     <div class="flex flex-col items-center">
                       <button 
