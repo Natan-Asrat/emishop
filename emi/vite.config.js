@@ -77,21 +77,39 @@ export default defineConfig({
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/emishoplive\.onrender\.com\/api\/.*/i,
-            handler: 'NetworkOnly',
+            handler: 'NetworkFirst',
             options: {
               cacheName: 'api-cache',
-              networkTimeoutSeconds: 10
+              networkTimeoutSeconds: 10,
+              expiration: {
+                maxEntries: 32,
+                maxAgeSeconds: 24 * 60 * 60 // 24 hours
+              }
             }
           },
           {
-            // Force NetworkOnly for all image requests
+            // Cache images but prefer network
             urlPattern: /\.(png|jpg|jpeg|svg|gif|webp)$/i,
-            handler: 'NetworkOnly'
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'image-cache',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 24 * 60 * 60 // 24 hours
+              }
+            }
           },
           {
-            // Force NetworkOnly for all static assets
+            // Cache static assets but prefer network
             urlPattern: /\.(js|css|ico)$/,
-            handler: 'NetworkOnly'
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'static-cache',
+              expiration: {
+                maxEntries: 32,
+                maxAgeSeconds: 24 * 60 * 60 // 24 hours
+              }
+            }
           }
         ]
       }
