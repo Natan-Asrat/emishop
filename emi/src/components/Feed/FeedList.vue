@@ -15,6 +15,9 @@
           @decrementQuantity="feedPostStore.decrementQuantity"
         />
       </div>
+      <div class="text-center dark:text-gray-100 mt-4" v-if="!isLoading && feedPostStore.posts.length === 0">
+        <p class="text-lg">There are no posts yet. Be the first to post!</p>
+      </div>
       <InsufficientCoinsComponent v-if="showInsufficientCoinsModal" :requiredCoins="requiredCoins" :userCoins="userStore.user.coins" @closeInsufficientCoinsModal="showInsufficientCoinsModal = false"  />
       <SelectedProduct :isReserving="isReserving" :selectedProduct="selectedProduct" @reserveProduct="reserveProduct" @closeProductDetails="closeProductDetails" />
     </div>
