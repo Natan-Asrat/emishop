@@ -34,6 +34,7 @@
                   class="hidden"
                   id="avatar"
                   ref="fileInput"
+                  capture="none"
                 />
                 <div class="flex flex-col items-center">
                   <button 

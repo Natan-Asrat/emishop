@@ -304,6 +304,7 @@ export default {
       input.type = 'file';
       input.accept = 'image/*';
       input.multiple = true;
+      input.capture = 'none';
 
       input.onchange = async (e) => {
         const files = e.target.files;
