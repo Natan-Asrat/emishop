@@ -21,11 +21,20 @@
             placeholder="Search..."
             class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-700 rounded-full text-sm leading-5 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out"
             @blur="closeSearch"
+            @keyup.enter="search"
           />
           </form>
 
           <div class="absolute inset-y-0 left-5 flex items-center pointer-events-none">
             <SearchIcon class="h-5 w-5 text-gray-400" />
+          </div>
+          <div v-if="isSearching" class="absolute inset-0 flex items-center justify-center">
+            <Loader2 class="w-12 h-12 text-white animate-spin" />
+          </div>
+          <div v-if="noResults && !isSearching" class="absolute inset-0 flex items-center justify-center">
+            <div class="text-gray-700 dark:text-gray-200 text-sm font-semibold bg-gray-800 bg-opacity-75 px-6 py-4 rounded-lg">
+              No results found for "{{ searchQuery }}"
+            </div>
           </div>
         </div>
       </div>
@@ -48,9 +57,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, nextTick } from 'vue';
+import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue';
 import logo from '@/assets/logo.png';
-import { SearchIcon, BellIcon } from 'lucide-vue-next'
+import { SearchIcon, BellIcon, Loader2 } from 'lucide-vue-next'
 import { useUserStore } from '@/stores/user';
 import { useFeedPostStore } from '@/stores/feedPost';
 import {useRouter} from 'vue-router'
@@ -65,6 +74,8 @@ const userStore = useUserStore()
 const router = useRouter()
 let lastScroll = 0;
 let isScrollingDown = false;
+const isSearching = ref(false);
+const noResults = ref(false);
 
 // Start calculating scroll direction and apply translateY
 const handleScroll = () => {
@@ -88,22 +99,25 @@ const redirectToBuyCoins = () => {
   router.push({name: 'buy-coins'})
 }
 const search = () => {
-  if (searchQuery.value.trim()) {
-    axios.get(`/api/post/posts/?search=${searchQuery.value}`)
+  if (!searchQuery.value) return;
+  isSearching.value = true;
+  noResults.value = false;
+  
+  axios.get(`/api/post/posts/?search=${searchQuery.value}`)
     .then(response => {
         // Handle the response (e.g., update the UI with search results)
         const results = response.data.map(post => (getPostData(post)))
         feedPostStore.setSearchresults(results)
+        noResults.value = results.length === 0;
       })
       .catch(error => {
         // Handle any errors
         console.error("There was an error with the search:", error);
+      })
+      .finally(() => {
+        isSearching.value = false;
       });
-  }else{
-    feedPostStore.setSearchresults([])
-  }
 }
-
 const toggleSearch = () => {
   feedPostStore.toggleSearch()
   if (feedPostStore.isSearchExpanded) {
@@ -116,6 +130,7 @@ const closeSearch = () => {
   if (searchQuery.value === '') {
     feedPostStore.setSearchExpanded(false)
   }
+  noResults.value = false;
 }
 
 onMounted(() => {

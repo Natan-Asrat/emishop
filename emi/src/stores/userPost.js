@@ -15,6 +15,10 @@ export const useUserPostsStore = defineStore({
     addPost(post) {
       this.posts.push(post);
     },
+    
+    changePost(post, index) {
+      this.posts[index] = post;
+    },
     addPosts(p) {
       p.forEach(post => this.addPost(post));
     },

@@ -2,8 +2,13 @@
   <div v-if="product.isActive" class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden product" :data-product-id="product.id" >
     <img :src="product.image" :alt="product.name" class="w-full h-48 object-cover" @click="openProductDetails(product)" />
     <div class="p-4 relative">
-      <HeartIcon v-if="!product.liked" @click="like" class="h-5 w-5 text-gray-500 ml-auto right-5 top-5 absolute" />
-      <HeartHandshakeIcon v-else @click="unlike" class="h-5 w-5 ml-auto right-5 top-5 absolute text-green-300"/>
+      <div v-if="isLoading" class="h-5 w-5 ml-auto right-5 top-5 absolute">
+        <Loader2 class="h-5 w-5 animate-spin text-gray-500"/>
+      </div>
+      <template v-else>
+        <HeartIcon v-if="!product.liked" @click="like" class="h-5 w-5 text-gray-500 ml-auto right-5 top-5 absolute" />
+        <HeartHandshakeIcon v-else @click="unlike" class="h-5 w-5 ml-auto right-5 top-5 absolute text-green-300"/>
+      </template>
       <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ product.name }}</h2>
       <p class="text-gray-600 dark:text-gray-400 mt-1">Price: ${{ product.price.toFixed(2) }}</p>
       <p class="text-sm text-gray-700 dark:text-gray-300 mt-1">
@@ -45,10 +50,11 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits } from 'vue';
-import { HeartIcon, HeartHandshakeIcon } from 'lucide-vue-next';
+import { defineProps, defineEmits, ref } from 'vue';
+import { HeartIcon, HeartHandshakeIcon, Loader2 } from 'lucide-vue-next';
 import axios from 'axios';
 import {getPostData} from '@/utils'
+
 const emit = defineEmits(['reserve', 'setProduct', 'viewDetails', 'incrementQuantity', 'decrementQuantity', 'updateQuantity']);
 
 const props = defineProps({
@@ -62,13 +68,16 @@ const props = defineProps({
   }
 });
 
+const isLoading = ref(false);
+
 const updateQuantity = (event) => {
   const newQuantity = parseInt(event.target.value, 10);
   emit('updateQuantity',props.index, newQuantity );
 };
 
 const like = () => {
-  axios.post(`api/post/posts/${props.product.id}/like/`)
+  isLoading.value = true;
+  axios.post(`/api/post/posts/${props.product.id}/like/`)
   .then(
     response => {
       const post = response.data
@@ -76,10 +85,14 @@ const like = () => {
       emit('setProduct', postData, props.index)
     }
   )
-
+  .finally(() => {
+    isLoading.value = false;
+  });
 }
+
 const unlike = () => {
-  axios.post(`api/post/posts/${props.product.id}/unlike/`)
+  isLoading.value = true;
+  axios.post(`/api/post/posts/${props.product.id}/unlike/`)
   .then(
     response => {
       const post = response.data
@@ -87,7 +100,9 @@ const unlike = () => {
       emit('setProduct', postData, props.index)
     }
   )
-
+  .finally(() => {
+    isLoading.value = false;
+  });
 }
 
 const decrementQuantity = () => {
