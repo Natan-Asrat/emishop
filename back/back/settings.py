@@ -29,7 +29,7 @@ SECRET_KEY = "django-insecure-xp51pjd!)y3c51t)do+25^cu#fq@2qa#xh$bfidj0zxaj=ob$y
 DEBUG = True
 
 SITE_URL = os.environ.get('SITE_URL')
-ALLOWED_HOSTS = [SITE_URL]
+ALLOWED_HOSTS = [os.environ.get('ALLOWED_HOSTS')]
 
 REPORTED_BLOCKLIST_DAYS = 30
 # Application definition
