@@ -53,44 +53,26 @@ export default defineConfig({
         skipWaiting: false,
         clientsClaim: true,
         cleanupOutdatedCaches: true,
-        globPatterns: ['**/*.{js,css,html,png,jpg,svg,ico,woff2}'],
+        globPatterns: [], // No automatic caching
         navigateFallback: null,
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/emishoplive\.onrender\.com\/api\/.*/i,
-            handler: 'NetworkFirst',
+            handler: 'NetworkOnly',
             options: {
               cacheName: 'api-cache',
-              networkTimeoutSeconds: 10,
-              cacheableResponse: {
-                statuses: [0, 200]
-              }
+              networkTimeoutSeconds: 10
             }
           },
           {
-            urlPattern: /\.(js|css|ico|png|jpg|jpeg|svg|webp)$/,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'assets-cache',
-              expiration: {
-                maxEntries: 100,
-                maxAgeSeconds: 7 * 24 * 60 * 60
-              }
-            }
+            // Force NetworkOnly for all image requests
+            urlPattern: /\.(png|jpg|jpeg|svg|gif|webp)$/i,
+            handler: 'NetworkOnly'
           },
           {
-            urlPattern: /^https:\/\/.*\.(png|jpg|jpeg|svg|gif)/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'image-cache',
-              cacheableResponse: {
-                statuses: [0, 200]
-              },
-              expiration: {
-                maxEntries: 100,
-                maxAgeSeconds: 30 * 24 * 60 * 60
-              }
-            }
+            // Force NetworkOnly for all static assets
+            urlPattern: /\.(js|css|ico)$/,
+            handler: 'NetworkOnly'
           }
         ]
       }

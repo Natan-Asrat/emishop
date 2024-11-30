@@ -48,6 +48,7 @@
 import { defineProps, defineEmits } from 'vue';
 import { HeartIcon, HeartHandshakeIcon } from 'lucide-vue-next';
 import axios from 'axios';
+import {getPostData} from '@/utils'
 const emit = defineEmits(['reserve', 'setProduct', 'viewDetails', 'incrementQuantity', 'decrementQuantity', 'updateQuantity']);
 
 const props = defineProps({
@@ -71,23 +72,8 @@ const like = () => {
   .then(
     response => {
       const post = response.data
-      const item = {
-      id: post.id,
-      name: post.title,
-      price: parseFloat(post.price),
-      image: post.images[0],
-      images: post.images, // Assuming single image for now
-      stockLeft: post.quantity,
-      totalStock: post.quantity,
-      liked: post.liked,
-      quantity: 1,
-      description: post.title, // You might want to add description field in your model
-      sellerName: post.created_by.username,
-      sellerAvatar: "https://placehold.co/40", // You might want to add avatar in your UserProfile
-      postedDate: new Date(post.created_at).toLocaleDateString(),
-      embedding: post.embedding
-    }
-      emit('setProduct', item, props.index)
+      const postData = getPostData(post)
+      emit('setProduct', postData, props.index)
     }
   )
 
@@ -97,23 +83,8 @@ const unlike = () => {
   .then(
     response => {
       const post = response.data
-      const item = {
-      id: post.id,
-      name: post.title,
-      price: parseFloat(post.price),
-      image: post.images[0],
-      images: post.images, // Assuming single image for now
-      stockLeft: post.quantity,
-      totalStock: post.initial_quantity,
-      liked: post.liked,
-      quantity: 1,
-      description: post.title, // You might want to add description field in your model
-      sellerName: post.created_by.username,
-      sellerAvatar: "https://placehold.co/40", // You might want to add avatar in your UserProfile
-      postedDate: new Date(post.created_at).toLocaleDateString(),
-      embedding: post.embedding
-    }
-      emit('setProduct', item, props.index)
+      const postData = getPostData(post)
+      emit('setProduct', postData, props.index)
     }
   )
 
