@@ -303,7 +303,7 @@ const toggleAuthMode = () => {
   avatarPreview.value = ''; // Clear avatar preview
 };
 
-const handleFileChange = (event) => {
+const handleFileChange = async (event) => {
   const file = event.target.files[0];
   if (file) {
     if (!file.type.match('image.*')) {
@@ -311,17 +311,37 @@ const handleFileChange = (event) => {
       event.target.value = ''; // Clear the file input
       return;
     }
-    
-    user.avatar = file;
-    // Create preview URL
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      avatarPreview.value = e.target.result;
-    };
-    reader.readAsDataURL(file);
+
+    try {
+      // Create a temporary URL for the file
+      const tempUrl = URL.createObjectURL(file);
+      
+      // Create a new Image object to handle the loading
+      const img = new Image();
+      
+      // Create a promise to handle image loading
+      const loadImage = new Promise((resolve, reject) => {
+        img.onload = () => resolve();
+        img.onerror = () => reject(new Error('Failed to load image'));
+        img.src = tempUrl;
+      });
+
+      // Wait for image to load
+      await loadImage;
+
+      // Now that image is loaded, update the preview and form data
+      avatarPreview.value = tempUrl;
+      user.avatar = file;
+    } catch (error) {
+      showError('Error', 'Failed to load image');
+      event.target.value = ''; // Clear the file input
+    }
   } else {
     avatarPreview.value = '';
+    user.avatar = null;
   }
+  // Clear the input to allow selecting the same file again
+  event.target.value = '';
 };
 
 const openImagePicker = (type) => {

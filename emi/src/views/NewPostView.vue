@@ -305,10 +305,10 @@ export default {
       input.accept = 'image/*';
       
       if (source === 'camera') {
-        input.capture = 'user'; // Changed from 'environment' to 'user' for front camera
-        input.setAttribute('capture', 'user'); // Explicitly set capture attribute
+        input.capture = 'user';
+        input.setAttribute('capture', 'user');
       } else {
-        input.removeAttribute('capture'); // Remove capture for gallery
+        input.removeAttribute('capture');
       }
 
       input.onchange = async (e) => {
@@ -316,32 +316,41 @@ export default {
         if (files.length) {
           for (let i = 0; i < files.length; i++) {
             const file = files[i];
+            
+            if (!file.type.match('image.*')) {
+              this.toastStore.showToast(5000, "Please select an image file", "bg-red-500");
+              continue;
+            }
+
             try {
-              const reader = new FileReader();
+              // Create a temporary URL for the file
+              const tempUrl = URL.createObjectURL(file);
               
-              reader.onload = (event) => {
-                // Create an image element to get dimensions
-                const img = new Image();
+              // Create a new Image object to handle the loading
+              const img = new Image();
+              
+              // Create a promise to handle image loading
+              await new Promise((resolve, reject) => {
                 img.onload = () => {
                   // Only add the image if it loaded successfully
                   this.images.push(file);
-                  this.imagePreviews.push(event.target.result);
+                  this.imagePreviews.push(tempUrl);
+                  resolve();
                 };
-                img.src = event.target.result;
-              };
-
-              reader.onerror = (error) => {
-                console.error('Error reading file:', error);
-                this.$toast.error('Error reading image file');
-              };
-
-              reader.readAsDataURL(file);
+                img.onerror = () => {
+                  URL.revokeObjectURL(tempUrl);
+                  reject(new Error('Failed to load image'));
+                };
+                img.src = tempUrl;
+              });
             } catch (error) {
               console.error('Error processing image:', error);
-              this.$toast.error('Error processing image');
+              this.toastStore.showToast(5000, "Error processing image", "bg-red-500");
             }
           }
         }
+        // Clear the input to allow selecting the same file again
+        e.target.value = '';
       };
 
       // Wrap the click in a try-catch to handle any permissions issues
@@ -349,7 +358,7 @@ export default {
         input.click();
       } catch (error) {
         console.error('Error opening file picker:', error);
-        this.$toast.error('Error accessing camera or gallery');
+        this.toastStore.showToast(5000, "Error accessing camera or gallery", "bg-red-500");
       }
       
       this.closeImageSourceDialog();
