@@ -1,13 +1,5 @@
 routes:
-  # Service Worker and PWA files - must be served directly
-  - source: /service-worker.js
-    destination: /service-worker.js
-  - source: /manifest.webmanifest
-    destination: /manifest.webmanifest
-  - source: /registerSW.js
-    destination: /registerSW.js
-    
-  # Static assets
+  # Static assets with path parameters
   - source: /assets/:path*
     destination: /assets/:path*
   - source: /images/:path*
@@ -15,9 +7,11 @@ routes:
   - source: /icons/:path*
     destination: /icons/:path*
 
-  # SPA routes - use more specific patterns
+  # API routes
   - source: /api/:path*
     destination: /api/:path*
+    
+  # SPA routes
   - source: /:page
     destination: /index.html
   - source: /:page/:id

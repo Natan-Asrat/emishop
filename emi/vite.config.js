@@ -13,6 +13,9 @@ export default defineConfig({
       registerType: 'prompt',
       injectRegister: 'script',
       strategies: 'generateSW',
+      filename: 'sw.js',
+      manifestFilename: 'manifest.webmanifest',
+      registerSWFilename: 'registerSW.js',
       includeAssets: [
         'logo.png',
         'appstore.png',
