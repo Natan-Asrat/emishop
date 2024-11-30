@@ -30,24 +30,43 @@ export default defineConfig({
           {
             src: 'logo.png',
             sizes: '192x192',
-            type: 'image/png'
+            type: 'image/png',
+            purpose: 'any'
           },
           {
             src: 'logo.png',
             sizes: '512x512',
-            type: 'image/png'
+            type: 'image/png',
+            purpose: 'any'
           },
           {
             src: 'logo.png',
             sizes: '192x192',
             type: 'image/png',
-            purpose: 'maskable'
+            purpose: 'maskable',
+            "platform": "wide",
+            "background_color": "#036c84",
+            "padding": "20%"
+          },
+          {
+            src: 'logo.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable',
+            "platform": "wide",
+            "background_color": "#036c84",
+            "padding": "20%"
           }
         ],
-        background_color: '#ffffff',
+        background_color: '#036c84',
         display: 'standalone',
         start_url: '/',
-        scope: '/'
+        scope: '/',
+        shortcuts: [],
+        screenshots: [],
+        orientation: "portrait",
+        categories: ["shopping", "lifestyle"],
+        prefer_related_applications: false
       },
       workbox: {
         skipWaiting: false,
