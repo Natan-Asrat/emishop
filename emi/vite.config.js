@@ -10,8 +10,8 @@ export default defineConfig({
     vue(),
     vueDevTools(),
     VitePWA({
-      registerType: 'autoUpdate',
-      injectRegister: 'auto',
+      registerType: 'prompt',
+      injectRegister: 'script',
       strategies: 'generateSW',
       includeAssets: [
         'logo.png',
@@ -47,11 +47,11 @@ export default defineConfig({
         scope: '/'
       },
       workbox: {
-        skipWaiting: true,
+        skipWaiting: false,
         clientsClaim: true,
         cleanupOutdatedCaches: true,
         globPatterns: ['**/*.{js,css,html,png,jpg,svg,ico,woff2}'],
-        navigateFallback: '/index.html',
+        navigateFallback: null,
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/emishoplive\.onrender\.com\/api\/.*/i,
@@ -65,10 +65,14 @@ export default defineConfig({
             }
           },
           {
-            urlPattern: /^https:\/\/emishoplive\.onrender\.com\/.*/i,
-            handler: 'StaleWhileRevalidate',
+            urlPattern: /\.(js|css|ico|png|jpg|jpeg|svg|webp)$/,
+            handler: 'CacheFirst',
             options: {
-              cacheName: 'site-cache'
+              cacheName: 'assets-cache',
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 7 * 24 * 60 * 60
+              }
             }
           },
           {
@@ -81,7 +85,7 @@ export default defineConfig({
               },
               expiration: {
                 maxEntries: 100,
-                maxAgeSeconds: 30 * 24 * 60 * 60 // 30 days
+                maxAgeSeconds: 30 * 24 * 60 * 60
               }
             }
           }

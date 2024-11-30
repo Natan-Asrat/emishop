@@ -1,6 +1,6 @@
 <template>
   <transition name="slide-up">
-    <div v-if="selectedProduct" class="fixed inset-0 bg-black bg-opacity-50 flex items-end justify-center z-50">
+    <div v-if="selectedProduct" class="fixed inset-0 bg-black bg-opacity-50 flex items-end justify-center z-40">
       <div class="bg-white dark:bg-gray-800 p-6 rounded-t-3xl shadow-xl w-full max-h-[90vh] overflow-y-auto">
         <button @click="closeProductDetails" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700">
           <XIcon class="h-6 w-6 text-white" />

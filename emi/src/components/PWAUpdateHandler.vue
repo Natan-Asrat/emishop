@@ -18,26 +18,40 @@ onMounted(() => {
   if ('serviceWorker' in navigator) {
     wb.value = new Workbox('/service-worker.js');
 
-    // Add event listener for waiting service worker
-    wb.value.addEventListener('waiting', () => {
+    // Add event listeners for various service worker states
+    wb.value.addEventListener('waiting', (event) => {
+      console.log('A new service worker is waiting to be activated');
       updateAvailable.value = true;
     });
 
-    // Register the service worker and check for updates every 5 minutes
-    wb.value.register().then(() => {
+    wb.value.addEventListener('controlling', () => {
+      console.log('A new service worker is now controlling the page');
+      window.location.reload();
+    });
+
+    wb.value.addEventListener('activated', (event) => {
+      console.log('Service worker activated');
+    });
+
+    // Register the service worker
+    wb.value.register().then((registration) => {
+      console.log('Service Worker registered');
+      
+      // Check for updates every 5 minutes
       setInterval(() => {
+        console.log('Checking for updates...');
         wb.value.update();
       }, 5 * 60 * 1000);
+    }).catch((error) => {
+      console.error('Service Worker registration failed:', error);
     });
   }
 });
 
 const updateApp = async () => {
   if (wb.value) {
-    // Send message to service worker to skip waiting
+    console.log('Sending skip waiting message to service worker');
     wb.value.messageSkipWaiting();
-    // Reload the page to activate the new service worker
-    window.location.reload();
   }
 };
 </script>
