@@ -61,99 +61,122 @@ const closeModal = () => {
   modalContent.value = null;
 };
 
-
 onMounted(() => {
   if (token) {
     axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-    ws.value = new WebSocket(
-      `${WS_BASE_URL}/ws/notifications/${userStore.user.id}?token=${token}`
-    );
-    ws.value.onmessage = async (event) => {
-      const message = JSON.parse(event.data)
-      console.log('received', message)
-      if( message.type === 'notification' ){
-        const notification = message.object;
-        notificationStore.addNotification(notification);
+    // First verify the token is still valid
+    axios.get('/api/account/users/me/')
+      .then(() => {
+        // Only establish WebSocket connection if token is valid
+        ws.value = new WebSocket(
+          `${WS_BASE_URL}/ws/notifications/${userStore.user.id}?token=${token}`
+        );
+
+        ws.value.onopen = (event) => {
+          console.log("WebSocket connection opened:", event);
+        };
+
+        ws.value.onerror = (error) => {
+          console.error("WebSocket error:", error);
+          toastStore.showToast(
+            5000,
+            "WebSocket connection error. Please refresh!",
+            "bg-red-300 dark:bg-red-300",
+          );
+        };
+
+        ws.value.onclose = () => {
+          console.log("WebSocket connection closed.");
+          // Try to reconnect after a delay if token is still valid
+          setTimeout(() => {
+            if (userStore.user.access) {
+              console.log("Attempting to reconnect WebSocket...");
+              ws.value = new WebSocket(
+                `${WS_BASE_URL}/ws/notifications/${userStore.user.id}?token=${userStore.user.access}`
+              );
+            }
+          }, 5000);
+        };
+
+        ws.value.onmessage = async (event) => {
+          const message = JSON.parse(event.data)
+          console.log('received', message)
+          if (message.type === 'notification') {
+            const notification = message.object;
+            notificationStore.addNotification(notification);
+            toastStore.showToast(
+              5000,
+              notification.message,
+              "bg-green-500 dark:bg-green-500"
+            )
+            let icon
+            if (notification.type === 'popup') {
+              console.log("popup")
+              isModalVisible.value = true;
+              modalContent.value = {
+                title: notification.title,
+                message: notification.message,
+                reservation: notification.reservation,
+                post: notification.post,
+              };
+            }
+            if (notification.type === 'reservation') {
+              transactionStore.addOrder(notification.reservation);
+              transactionStore.addTransaction(notification.reservation);
+
+            } else if (notification.type === 'status_update') {
+
+              transactionStore.replaceOrders(notification.reservation);
+              transactionStore.replaceTransactions(notification.reservation);
+            }
+            if (notification.type === 'message') {
+              icon = notification.sender.avatar
+            } else if (notification.type === 'reservation' || notification.type === 'status_update' || (notification.type === 'popup' && notification.reservation != null)) {
+              icon = notification.reservation.post.images[0]
+            } else if (notification.type === 'like' || (notification.type === 'popup' && notification.post != null)) {
+              icon = notification.post.images[0]
+            } else {
+              icon = '/logo.png'
+            }
+            if (Notification.permission === "granted") {
+              // Show a notification with the browser's default sound
+              new Notification(notification.title, {
+                body: notification.message,
+                icon,
+              });
+            } else {
+              // If permissions are not granted, request permission
+              Notification.requestPermission().then((permission) => {
+                if (permission === "granted") {
+                  new Notification(notification.title, {
+                    body: notification.message,
+                    icon, // Optional: path to an icon for the notification
+                  });
+                }
+              });
+            }
+
+            try {
+              await markNotificationAsDelivered(notification.id);
+            } catch (error) {
+              console.error("Failed to mark notification as delivered:", error);
+            }
+          } else if (message.type === "post") {
+            const post = message.object;
+            feedPostStore.replacePost(post);
+            favouritePostStore.replacePost(post);
+            userPostStore.replacePost(post);
+            this.postsStore.updateDetailAndCounts(message.object);
+          }
+        }
+      })
+      .catch(() => {
         toastStore.showToast(
           5000,
-          notification.message,
-          "bg-green-500 dark:bg-green-500"
-        )
-        let icon
-        if (notification.type === 'popup') {
-          console.log("popup")
-          isModalVisible.value = true;
-          modalContent.value = {
-            title: notification.title,
-            message: notification.message,
-            reservation: notification.reservation,
-            post: notification.post,
-          };
-        }
-        if(notification.type === 'reservation'){
-          transactionStore.addOrder(notification.reservation);
-          transactionStore.addTransaction(notification.reservation);
-
-        }else if(notification.type==='status_update'){
-
-          transactionStore.replaceOrders(notification.reservation);
-          transactionStore.replaceTransactions(notification.reservation);
-        }
-        if(notification.type === 'message'){
-          icon = notification.sender.avatar
-        }else if(notification.type === 'reservation' || notification.type === 'status_update' || (notification.type === 'popup' && notification.reservation != null)) {
-          icon = notification.reservation.post.images[0]
-        }else if(notification.type === 'like' || (notification.type === 'popup' && notification.post != null)) {
-          icon = notification.post.images[0]
-        }else {
-          icon = '/logo.png'
-        }
-          if (Notification.permission === "granted") {
-            // Show a notification with the browser's default sound
-            new Notification(notification.title, {
-              body: notification.message,
-              icon,
-            });
-          } else {
-            // If permissions are not granted, request permission
-            Notification.requestPermission().then((permission) => {
-              if (permission === "granted") {
-                new Notification(notification.title, {
-                  body: notification.message,
-                  icon, // Optional: path to an icon for the notification
-                });
-              }
-            });
-          }
-
-          try {
-            await markNotificationAsDelivered(notification.id);
-          } catch (error) {
-            console.error("Failed to mark notification as delivered:", error);
-          }
-      }else if (message.type === "post") {
-        const post = message.object;
-        feedPostStore.replacePost(post);
-        favouritePostStore.replacePost(post);
-        userPostStore.replacePost(post);
-        this.postsStore.updateDetailAndCounts(message.object);
-      }
-    }
-    ws.value.onopen = (event) => {
-      console.log("WebSocket connection opened:", event);
-    };
-    ws.value.onerror = (error) => {
-      console.log("WebSocket error:", error);
-      toastStore.showToast(
-        5000,
-        "Something went wrong. Please refresh!",
-        "bg-red-300 dark:bg-red-300",
-      );
-    };
-
-    ws.value.onclose = () => {
-      console.log("WebSocket connection closed.");
-    };
+          "Invalid token. Please refresh!",
+          "bg-red-300 dark:bg-red-300",
+        );
+      });
   } else {
     axios.defaults.headers.common["Authorization"] = "";
   }
