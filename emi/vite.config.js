@@ -47,6 +47,9 @@ export default defineConfig({
         scope: '/'
       },
       workbox: {
+        skipWaiting: true,
+        clientsClaim: true,
+        cleanupOutdatedCaches: true,
         globPatterns: ['**/*.{js,css,html,png,jpg,svg,ico,woff2}'],
         navigateFallback: '/index.html',
         runtimeCaching: [

@@ -3,6 +3,7 @@ import { ref, onMounted, computed } from 'vue';
 import AuthView from '@/views/AuthView.vue'
 import axios from 'axios';
 import { RouterView } from 'vue-router';
+import PWAUpdateHandler from '@/components/PWAUpdateHandler.vue'
 import { useUserStore } from './stores/user';
 import ToastComponent from './components/ToastComponent.vue';
 import { WS_BASE_URL } from './config';
@@ -198,6 +199,7 @@ defineExpose({ logout });
   <AuthView v-else @auth-success="onAuthSuccess" />
   <ToastComponent />
   <PopupComponent v-if="isModalVisible" :notification="modalContent" @closeModal="closeModal" />
+  <PWAUpdateHandler />
   <button 
     @click="toggleTheme" 
     class="fixed bottom-20 right-4 p-3 rounded-full bg-gray-100 dark:bg-gray-800 shadow-lg hover:shadow-xl transition-all duration-300 z-50"
