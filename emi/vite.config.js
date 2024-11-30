@@ -17,7 +17,7 @@ export default defineConfig({
       manifestFilename: 'manifest.webmanifest',
       registerSWFilename: 'registerSW.js',
       includeAssets: [
-        'logo.png',
+        'logo_padded.png',
         'appstore.png',
         'playstore.png'
       ],
@@ -26,39 +26,31 @@ export default defineConfig({
         short_name: 'Emi Shop',
         description: 'Emi Shop',
         theme_color: '#036c84',
+        background_color: '#036c84',
         icons: [
           {
-            src: 'logo.png',
+            src: 'logo_padded.png',
+            sizes: '192x192',
+            type: 'image/png'
+          },
+          {
+            src: 'logo_padded.png',
+            sizes: '512x512',
+            type: 'image/png'
+          },
+          {
+            src: 'logo_padded.png',
             sizes: '192x192',
             type: 'image/png',
-            purpose: 'any'
+            purpose: 'maskable'
           },
           {
-            src: 'logo.png',
+            src: 'logo_padded.png',
             sizes: '512x512',
             type: 'image/png',
-            purpose: 'any'
-          },
-          {
-            src: 'logo.png',
-            sizes: '192x192',
-            type: 'image/png',
-            purpose: 'maskable',
-            "platform": "wide",
-            "background_color": "#036c84",
-            "padding": "20%"
-          },
-          {
-            src: 'logo.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'maskable',
-            "platform": "wide",
-            "background_color": "#036c84",
-            "padding": "20%"
+            purpose: 'maskable'
           }
         ],
-        background_color: '#036c84',
         display: 'standalone',
         start_url: '/',
         scope: '/',
