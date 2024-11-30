@@ -3,7 +3,7 @@
 import { register } from 'register-service-worker'
 
 if (process.env.NODE_ENV === 'production') {
-  register(`${import.meta.env.VITE_PUBLIC_URL}/service-worker.js`, {
+  register(`${window.location.origin}/service-worker.js`, {
     ready () {
       console.log(
         'App is being served from cache by a service worker.\n' +

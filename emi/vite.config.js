@@ -11,6 +11,8 @@ export default defineConfig({
     vueDevTools(),
     VitePWA({
       registerType: 'autoUpdate',
+      injectRegister: 'auto',
+      strategies: 'generateSW',
       includeAssets: [
         'logo.png',
         'appstore.png',
@@ -45,22 +47,38 @@ export default defineConfig({
         scope: '/'
       },
       workbox: {
-        globPatterns: [
-          '**/*.{js,css,html,png,svg,ico,woff2}'
-        ],
+        globPatterns: ['**/*.{js,css,html,png,jpg,svg,ico,woff2}'],
+        navigateFallback: '/index.html',
         runtimeCaching: [
           {
-            urlPattern: /^https:\/\/emishoplive\.onrender\.com\/.*$/,
+            urlPattern: /^https:\/\/emishoplive\.onrender\.com\/api\/.*/i,
             handler: 'NetworkFirst',
             options: {
               cacheName: 'api-cache',
-              networkTimeoutSeconds: 5,
-              expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 60 * 60 * 24 // 24 hours
-              },
+              networkTimeoutSeconds: 10,
               cacheableResponse: {
                 statuses: [0, 200]
+              }
+            }
+          },
+          {
+            urlPattern: /^https:\/\/emishoplive\.onrender\.com\/.*/i,
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'site-cache'
+            }
+          },
+          {
+            urlPattern: /^https:\/\/.*\.(png|jpg|jpeg|svg|gif)/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'image-cache',
+              cacheableResponse: {
+                statuses: [0, 200]
+              },
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 30 * 24 * 60 * 60 // 30 days
               }
             }
           }
