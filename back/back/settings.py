@@ -28,8 +28,9 @@ SECRET_KEY = "django-insecure-xp51pjd!)y3c51t)do+25^cu#fq@2qa#xh$bfidj0zxaj=ob$y
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-SITE_URL = "http://localhost:8000"
+SITE_URL = os.environ.get('SITE_URL')
+ALLOWED_HOSTS = [SITE_URL]
+
 REPORTED_BLOCKLIST_DAYS = 30
 # Application definition
 
