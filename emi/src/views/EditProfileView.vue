@@ -24,14 +24,36 @@
 
         <form @submit.prevent="submitForm" class="space-y-6">
           <div class="space-y-4">
-            <div class="space-y-2">
-              <label for="avatar" class="text-sm font-medium text-gray-700 dark:text-gray-300">Avatar</label>
-              <input
-                type="file"
-                @change="handleFileChange"
-                class="w-full py-2 px-4 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                id="avatar"
-              />
+            <div class="flex flex-col items-center space-y-2">
+              <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Avatar</label>
+              <div class="flex items-center justify-center">
+                <input
+                  type="file"
+                  @change="handleFileChange"
+                  accept="image/*"
+                  class="hidden"
+                  id="avatar"
+                  ref="fileInput"
+                />
+                <button 
+                  type="button"
+                  @click="$refs.fileInput.click()"
+                  class="relative group cursor-pointer"
+                >
+                  <img 
+                    v-if="avatarPreview || userStore.user.avatar" 
+                    :src="avatarPreview || userStore.user.avatar" 
+                    class="h-20 w-20 rounded-full object-cover border-2 border-gray-200 group-hover:opacity-75 transition-opacity"
+                    alt="Avatar preview"
+                  />
+                  <div 
+                    v-else 
+                    class="h-20 w-20 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center group-hover:bg-gray-300 dark:group-hover:bg-gray-600 transition-colors"
+                  >
+                    <span class="text-gray-500 dark:text-gray-400">Upload</span>
+                  </div>
+                </button>
+              </div>
             </div>
 
             <div class="space-y-2">
@@ -116,11 +138,13 @@ const form = reactive({
 
 const changePassword = ref(false);
 const errors = reactive([]);
+const avatarPreview = ref(null);
 
 const handleFileChange = (event) => {
   const file = event.target.files[0];
   if (file) {
     form.avatar = file;
+    avatarPreview.value = URL.createObjectURL(file);
   }
 };
 
