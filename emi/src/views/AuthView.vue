@@ -313,28 +313,26 @@ const handleFileChange = async (event) => {
     }
 
     try {
-      // Create a temporary URL for the file
-      const tempUrl = URL.createObjectURL(file);
-      
-      // Create a new Image object to handle the loading
-      const img = new Image();
-      
-      // Create a promise to handle image loading
-      const loadImage = new Promise((resolve, reject) => {
-        img.onload = () => resolve();
-        img.onerror = () => reject(new Error('Failed to load image'));
-        img.src = tempUrl;
+      await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        
+        reader.onload = (event) => {
+          const img = new Image();
+          img.onload = () => {
+            avatarPreview.value = event.target.result;
+            user.avatar = file;
+            resolve();
+          };
+          img.onerror = () => reject(new Error('Failed to load image'));
+          img.src = event.target.result;
+        };
+        
+        reader.onerror = () => reject(new Error('Failed to read file'));
+        reader.readAsDataURL(file);
       });
-
-      // Wait for image to load
-      await loadImage;
-
-      // Now that image is loaded, update the preview and form data
-      avatarPreview.value = tempUrl;
-      user.avatar = file;
     } catch (error) {
+      console.error('Error processing image:', error);
       showError('Error', 'Failed to load image');
-      event.target.value = ''; // Clear the file input
     }
   } else {
     avatarPreview.value = '';
