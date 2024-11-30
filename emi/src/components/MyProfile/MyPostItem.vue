@@ -4,7 +4,7 @@
     <div class="p-4 relative">
       <Trash @click="deletePost" class="h-5 w-5 text-red-500 ml-auto right-12 top-5 absolute" />
 
-      <HeartIcon v-if="!product.liked" @click="like" class="h-5 w-5 text-red-500 ml-auto right-5 top-5 absolute" />
+      <HeartIcon v-if="!product.liked" @click="like" class="h-5 w-5 text-gray-500 ml-auto right-5 top-5 absolute" />
       <HeartHandshakeIcon v-else @click="unlike" class="h-5 w-5 ml-auto right-5 top-5 absolute text-green-300"/>
       <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ product.name }}</h2>
       <p class="text-gray-600 dark:text-gray-400 mt-1">Price: ${{ product.price.toFixed(2) }}</p>
