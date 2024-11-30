@@ -30,7 +30,6 @@ DEBUG = True
 
 SITE_URL = os.environ.get('SITE_URL')
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS').split(',')
-
 REPORTED_BLOCKLIST_DAYS = 30
 # Application definition
 
@@ -50,7 +49,7 @@ INSTALLED_APPS = [
     "django_filters",
     "rest_framework_simplejwt",
     "corsheaders",
-    "whitenoise",
+    "whitenoise.runserver_nostatic",
 ]
 
 MIDDLEWARE = [
@@ -160,7 +159,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = "static/"
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Media files
 MEDIA_URL = "/media/"

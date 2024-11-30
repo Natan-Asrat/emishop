@@ -11,3 +11,4 @@ channels_redis==4.2.0
 python-dotenv==1.0.1
 django-filter==24.3
 paypalrestsdk==1.13.3
+whitenoise==6.6.0
