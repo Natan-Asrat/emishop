@@ -1,25 +1,31 @@
 <template>
-  <div class="mb-8 bg-black bg-opacity-30 p-6 rounded-lg backdrop-filter backdrop-blur-lg">
-    <div v-if="images.length === 0" class="flex justify-center">
-      <input type="file" @change="handleFileUpload" multiple accept="image/*" class="hidden" ref="fileInput" />
-      <button @click="showImageSourceDialog" class="btn btn-primary">
-        <Plus class="h-5 w-5 mr-2" />
-        Add Image
-      </button>
+  <div class="mb-6">
+    <div class="flex items-center justify-between mb-2">
+      <label class="block text-sm font-medium dark:text-blue-300 text-black">Images</label>
+      <span class="text-sm dark:text-blue-300 text-black">{{ images.length }}/5 images</span>
     </div>
-    <div v-else class="flex overflow-x-auto space-x-4 pb-4">
-      <div v-for="(image, index) in images" :key="index" class="relative flex-shrink-0">
-        <img :src="imagePreviews[index]" alt="Product image" class="w-24 h-24 object-cover rounded-lg shadow-md" />
-        <button @click="removeImage(index)" class="absolute top-1 right-1 bg-red-500 text-white rounded-full p-2 shadow-md hover:bg-red-600 transition-colors duration-300">
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-4">
+      <div v-for="(preview, index) in imagePreviews" :key="index" class="relative aspect-square">
+        <img :src="preview" alt="Preview" class="w-full h-full object-cover rounded-lg" />
+        <button
+          @click="$emit('removeImage', index)"
+          class="absolute top-2 right-2 p-1 bg-red-500 rounded-full text-white hover:bg-red-600 transition-colors duration-300"
+        >
           <X class="h-4 w-4" />
         </button>
       </div>
-      <button @click="showImageSourceDialog" class="flex-shrink-0 w-24 h-24 bg-blue-500 bg-opacity-50 rounded-lg flex items-center justify-center shadow-md hover:bg-blue-600 hover:bg-opacity-50 transition-colors duration-300">
-        <Plus class="h-8 w-8 text-white" />
+      <button
+        v-if="images.length < 5"
+        @click="$emit('showImageSourceDialog')"
+        class="aspect-square flex items-center justify-center border-2 border-dashed dark:border-blue-500 border-blue-800 rounded-lg hover:bg-blue-500 hover:bg-opacity-10 transition-colors duration-300"
+      >
+        <Plus class="h-8 w-8 dark:text-blue-400 text-blue-800" />
       </button>
     </div>
+    <p class="text-sm dark:text-blue-300 text-black">Add up to 5 images of your product</p>
   </div>
 </template>
+
 <script setup>
 import { ref, defineEmits, defineProps } from 'vue';
 import { Plus, X } from 'lucide-vue-next'
@@ -34,11 +40,4 @@ defineProps({
     required: true
   },
 });
-const fileInput = ref(null);
-const showImageSourceDialog = () => {
-  emit('showImageSourceDialog');
-};
-const removeImage = (index) => {
-  emit('removeImage', index);
-}
 </script>

@@ -9,9 +9,13 @@
           id="title"
           v-model="title"
           type="text"
-          class="w-full px-3 py-2 bg-black bg-opacity-30 border border-blue-500 rounded-md shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500 text-black dark:text-white placeholder-gray-700 dark:placeholder-blue-300"
+          class="w-full px-3 py-2 bg-white dark:bg-black dark:bg-opacity-30 border border-blue-500 rounded-md shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500 text-black dark:text-white placeholder-gray-700 dark:placeholder-blue-300"
           placeholder="Enter product title"
         />
+        <div v-if="errors.title" class="mt-2 flex items-center space-x-2 bg-red-50 dark:bg-red-900/30 p-2 rounded">
+          <AlertCircle class="h-4 w-4 text-red-700 dark:text-red-400" />
+          <p class="text-sm text-red-700 dark:text-red-400 font-semibold">{{ errors.title }}</p>
+        </div>
       </div>
 
         <!-- Tags Input -->
@@ -36,10 +40,14 @@
             @keydown.space.prevent="addTag"
             @keydown.enter.prevent="addTag"
             type="text"
-            class="flex-grow px-3 py-2 bg-black bg-opacity-30 border border-blue-500 rounded-l-md shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500 text-black dark:text-white placeholder-gray-700 dark:placeholder-blue-300"
+            class="flex-grow px-3 py-2 bg-white dark:bg-black dark:bg-opacity-30 border border-blue-500 rounded-l-md shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500 text-black dark:text-white placeholder-gray-700 dark:placeholder-blue-300"
             placeholder="Enter tags"
           />
           <button @click="addTag" class="btn btn-primary rounded-l-none h-10 w-10 bg-blue-800 dark:bg-blue-500">Add</button>
+        </div>
+        <div v-if="errors.tags" class="mt-2 flex items-center space-x-2 bg-red-50 dark:bg-red-900/30 p-2 rounded">
+          <AlertCircle class="h-4 w-4 text-red-700 dark:text-red-400" />
+          <p class="text-sm text-red-700 dark:text-red-400 font-semibold">{{ errors.tags }}</p>
         </div>
       </div>
 
@@ -49,7 +57,7 @@
         <div class="flex items-center">
           <select
             v-model="selectedCurrency"
-            class="mr-2 bg-black bg-opacity-30 border border-blue-500 rounded-md shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500 text-black dark:text-white placeholder-gray-700 dark:placeholder-blue-300"
+            class="mr-2 bg-white dark:bg-black dark:bg-opacity-30 border border-blue-500 rounded-md shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500 text-black dark:text-white"
           >
             <option v-for="currency in currencies" :key="currency" :value="currency">{{ currency }}</option>
           </select>
@@ -59,13 +67,24 @@
             @input="formatPrice"
             @focus="enableCurrencySelection"
             type="text"
-            class="flex-grow px-3 py-2 bg-black bg-opacity-30 border border-blue-500 rounded-md shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500 text-black dark:text-white placeholder-gray-700 dark:placeholder-blue-300"
+            class="flex-grow px-3 py-2 bg-white dark:bg-black dark:bg-opacity-30 border border-blue-500 rounded-md shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500 text-black dark:text-white placeholder-gray-700 dark:placeholder-blue-300"
             placeholder="Enter price (min 1,000)"
           />
         </div>
-        <p v-if="showAdvertisedPrice" class="mt-2 text-sm text-blue-300">
-          Advertised price with commission: {{ getAdvertisedPrice() }} {{ selectedCurrency }}
-        </p>
+        <div v-if="errors.price" class="mt-2 flex items-center space-x-2 bg-red-50 dark:bg-red-900/30 p-2 rounded">
+          <AlertCircle class="h-4 w-4 text-red-700 dark:text-red-400" />
+          <p class="text-sm text-red-700 dark:text-red-400 font-semibold">{{ errors.price }}</p>
+        </div>
+        <div v-if="errors.currency" class="mt-2 flex items-center space-x-2 bg-red-50 dark:bg-red-900/30 p-2 rounded">
+          <AlertCircle class="h-4 w-4 text-red-700 dark:text-red-400" />
+          <p class="text-sm text-red-700 dark:text-red-400 font-semibold">{{ errors.currency }}</p>
+        </div>
+        <div v-if="showAdvertisedPrice" class="mt-2 flex items-center space-x-2 bg-blue-50 dark:bg-blue-900/30 p-2 rounded">
+          <Info class="h-4 w-4 text-blue-900 dark:text-blue-300" />
+          <p class="text-sm text-blue-900 dark:text-blue-300 font-semibold">
+            Advertised price with commission: {{ getAdvertisedPrice() }} {{ selectedCurrency }}
+          </p>
+        </div>
       </div>
 
         <!-- Quantity Input -->
@@ -83,9 +102,8 @@
             v-model="quantity"
             type="number"
             min="1"
-            class="w-20 px-3 py-2 bg-black bg-opacity-30 border-t border-b border-blue-500 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
+            class="w-20 px-3 py-2 bg-white dark:bg-black dark:bg-opacity-30 border-t border-b border-blue-500 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 text-black dark:text-white"
           />
-
           <button
             @click="incrementQuantity"
             class="bg-blue-800 dark:bg-gray-700 text-gray-200 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 h-10 w-10 rounded-r"
@@ -93,16 +111,39 @@
             +
           </button>        
         </div>
-        <p v-if="showQuantityWarning" class="mt-2 text-sm text-blue-900 dark:text-yellow-400">Make sure you have {{ quantity }} items</p>
+        <div v-if="showQuantityWarning" class="mt-2 flex items-center space-x-2 bg-blue-50 dark:bg-blue-900/30 p-2 rounded">
+          <Info class="h-4 w-4 text-blue-900 dark:text-yellow-400" />
+          <p class="text-sm text-blue-900 dark:text-yellow-400 font-semibold">Make sure you have {{ quantity }} items</p>
+        </div>
       </div>
 
         <!-- Action Buttons -->
-      <div class="flex justify-between">
-        <button @click="cancelPost" class="btn btn-secondary dark:text-white  text-black">
-          Cancel
+      <div class="flex justify-between space-x-4">
+        <button 
+          @click="$router.go(-1)" 
+          class="flex-1 px-6 py-3 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 rounded-lg shadow-md hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600 transition-colors duration-200 ease-in-out font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 flex items-center justify-center space-x-2"
+        >
+          <X class="h-5 w-5" />
+          <span>Cancel</span>
         </button>
-        <button @click="submitPost" class="btn btn-primary dark:text-white text-black">
-          Post
+        <button 
+          @click="submitPost" 
+          :disabled="isLoading" 
+          class="flex-1 px-6 py-3 rounded-lg shadow-md font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 flex items-center justify-center space-x-2 transition-colors duration-200 ease-in-out"
+          :class="[
+            isLoading || !isFormValid 
+              ? 'bg-blue-400 dark:bg-blue-600 cursor-not-allowed text-white'
+              : 'bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white'
+          ]"
+        >
+          <template v-if="isLoading">
+            <Loader2 class="h-5 w-5 animate-spin" />
+            <span>Processing...</span>
+          </template>
+          <template v-else>
+            <Send class="h-5 w-5" />
+            <span>Post Item</span>
+          </template>
         </button>
       </div>
     </main>
@@ -117,12 +158,12 @@
 import NewPostHeader from '@/components/NewPost/NewPostHeader.vue';
 import NewPostImageSourceDialog from '@/components/NewPost/NewPostImageSourceDialog.vue';
 import NewPostImageUpload from '@/components/NewPost/NewPostImageUpload.vue';
-import { X } from 'lucide-vue-next'
 import axios from 'axios'
 import NewPostProcessing from '@/components/NewPost/NewPostProcessing.vue';
 import ReportedNotAllowed from '@/components/NewPost/ReportedNotAllowed.vue';
 import { useToastStore } from '@/stores/toast';
 import LoadingComponent from '@/components/NewPost/LoadingComponent.vue';
+import { AlertCircle, Info, X, Send, Loader2 } from 'lucide-vue-next'
 export default {
   components: {
     NewPostHeader,
@@ -131,7 +172,11 @@ export default {
     X,
     NewPostProcessing,
     ReportedNotAllowed,
-    LoadingComponent
+    LoadingComponent,
+    AlertCircle,
+    Info,
+    Send,
+    Loader2
   },
   setup() {
     const toastStore = useToastStore();
@@ -156,7 +201,14 @@ export default {
       progress: 'Downloading AI model',
       reportedReservation: null,
       reported: false,
-      isLoading: true
+      isLoading: true,
+      errors: {
+        images: '',
+        title: '',
+        tags: '',
+        price: '',
+        currency: ''
+      }
     }
   },
   computed: {
@@ -168,36 +220,75 @@ export default {
       return ((actualPrice / (1 - this.commissionRate))).toFixed(2);
     },
     showQuantityWarning() {
-      return this.quantity >= 2
+      return this.quantity >= 2;
     },
+    isValidImageCount() {
+      return this.images.length > 0 && this.images.length <= 5;
+    },
+    formattedPrice() {
+      return parseFloat(this.price.replace(/,/g, '')) || 0;
+    },
+    isFormValid() {
+      return this.title.trim() !== '' && this.tags.length >= 3 && this.formattedPrice >= 10 && this.selectedCurrency !== '';
+    }
   },
   methods: {
-    checkReportedOnSeller() {
-      this.isLoading = true;
-      axios.get('api/account/users/me/')
-      .then(
-        response => {
-          console.log("user", response.data)
-          this.isLoading = false;
-          const reported_on = response.data.reported;
-          this.reported = reported_on;
-          if(reported_on){
-            this.reportedReservation = response.data.reportedReservation;
-          }
-        }
-      )
-      .catch(
-        error => {
-          this.isLoading = false;
+    validateForm() {
+      let isValid = true;
+      this.errors = {
+        images: '',
+        title: '',
+        tags: '',
+        price: '',
+        currency: ''
+      };
 
-          console.log("erro", error)
-          this.toastStore.showToast(
-            5000,
-            "Something went wrong. Please try again!",
-            "bg-red-300 dark:bg-red-300",
-          );
-        }
-      )
+      // Title validation
+      if (!this.title.trim()) {
+        this.errors.title = 'Title is required';
+        isValid = false;
+      } else if (this.title.trim().length < 3) {
+        this.errors.title = 'Title must be at least 3 characters';
+        isValid = false;
+      }
+
+      // Tags validation
+      if (this.tags.length < 3) {
+        this.errors.tags = 'Please add at least 3 tags';
+        isValid = false;
+      }
+
+      // Price validation
+      if (!this.formattedPrice) {
+        this.errors.price = 'Price is required';
+        isValid = false;
+      } else if (this.formattedPrice < 10) {
+        this.errors.price = 'Price must be at least $10';
+        isValid = false;
+      }
+
+      // Currency validation
+      if (!this.selectedCurrency) {
+        this.errors.currency = 'Please select a currency';
+        isValid = false;
+      }
+
+      // Image validation
+      if (!this.validateImages()) {
+        isValid = false;
+      }
+
+      if (!isValid) {
+        // Show the first error in toast
+        const firstError = Object.values(this.errors).find(error => error !== '');
+        this.toastStore.showToast(
+          5000,
+          firstError,
+          "bg-red-300 dark:bg-red-300"
+        );
+      }
+
+      return isValid;
     },
     removeImage(index) {
       this.images.splice(index, 1);
@@ -264,7 +355,23 @@ export default {
     incrementQuantity () {
       this.quantity++;
     },
+    validateImages() {
+      if (this.images.length === 0) {
+        this.errors.images = 'Please add at least one image';
+        return false;
+      }
+      if (this.images.length > 5) {
+        this.errors.images = 'Maximum 5 images allowed';
+        return false;
+      }
+      this.errors.images = '';
+      return true;
+    },
     async submitPost() {
+      if (!this.validateForm()) {
+        return;
+      }
+      
       this.isProcessing = true;
       let processingComplete = false;
       try{
@@ -303,7 +410,33 @@ export default {
         await new Promise(resolve => setTimeout(resolve, delay));
         this.isProcessing = false; // Hide the processing modal
       }
-    }
+    },
+    checkReportedOnSeller() {
+      this.isLoading = true;
+      axios.get('api/account/users/me/')
+      .then(
+        response => {
+          console.log("user", response.data)
+          this.isLoading = false;
+          const reported_on = response.data.reported;
+          this.reported = reported_on;
+          if(reported_on){
+            this.reportedReservation = response.data.reportedReservation;
+          }
+        }
+      )
+      .catch(
+        error => {
+          this.isLoading = false;
+          console.log("erro", error)
+          this.toastStore.showToast(
+            5000,
+            "Something went wrong. Please try again!",
+            "bg-red-300 dark:bg-red-300",
+          );
+        }
+      )
+    },
   },
   mounted() {
     this.checkReportedOnSeller();

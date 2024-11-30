@@ -4,7 +4,7 @@
         <div class="flex justify-between h-16">
           <div class="flex items-center">
             <button class="dark:text-blue-400 text-white hover:text-blue-300 transition-colors duration-300">
-              <ArrowLeft class="h-6 w-6" @click="$router.push({name: 'home'})" />
+              <ArrowLeft class="h-6 w-6" @click="$router.go(-1)" />
             </button>
             <h1 class="ml-4 text-xl font-semibold bg-clip-text text-transparent bg-gradient-to-r from-blue-200 to-purple-200 dark:from-blue-400 dark:to-purple-500">New Post</h1>
           </div>
