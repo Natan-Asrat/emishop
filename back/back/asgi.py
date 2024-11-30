@@ -24,8 +24,8 @@ from notification import routing
 application = ProtocolTypeRouter(
     {
         "http": get_asgi_application(),
-        "websocket": AllowedHostsOriginValidator(
+        "websocket": 
             JWTAuthMiddleware(URLRouter(routing.ws_urlpatterns))
-        ),
+        
     }
 )
