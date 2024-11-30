@@ -12,24 +12,19 @@ export const useToastStore = defineStore({
 
   actions: {
     showToast(ms, message, classes) {
+      console.log("showing toast", message);
       this.ms = parseInt(ms);
       this.message = message;
-      this.classes = classes || "";
+      this.classes = `${classes || ""} -translate-y-28`;
       this.isVisible = true;
 
+      // Hide toast after duration
       setTimeout(() => {
-        this.classes += " -translate-y-28";
-      }, 10);
-      
-      setTimeout(() => {
-        if (this.classes) {
-          this.classes = this.classes.replace(" -translate-y-28", "");
-        }
-      }, this.ms - 500);
-
-      setTimeout(() => {
-        this.isVisible = false;
-      }, this.ms);
+        this.classes = this.classes.replace(" -translate-y-28", "");
+        setTimeout(() => {
+          this.isVisible = false;
+        }, this.ms); // Match the CSS transition duration
+      }, 500);
     },
   },
 });

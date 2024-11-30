@@ -2,12 +2,40 @@
 import { useToastStore } from "@/stores/toast";
 const store = useToastStore();
 </script>
+
 <template>
   <div
     v-if="store.isVisible"
     :class="store.classes"
-    class="transition ease-in-out shadow-xl delay-500 duration-500 px-6 py-3 fixed top-full right-8 rounded-lg"
+    class="transition ease-in-out shadow-lg delay-2000 duration-2000 px-6 py-3 fixed top-4 right-1/2 translate-x-1/2 rounded-lg z-[9999]"
   >
     {{ store.message }}
   </div>
 </template>
+
+<style scoped>
+.toast-enter-active,
+.toast-leave-active {
+  transition: all 2s ease;
+}
+
+.toast-enter-from {
+  opacity: 0;
+  transform: translateY(-100%);
+}
+
+.toast-leave-to {
+  opacity: 0;
+  transform: translateY(-100%);
+}
+
+.toast-enter-to,
+.toast-leave-from {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.toast-move {
+  transition: transform 2s ease;
+}
+</style>
