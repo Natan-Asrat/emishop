@@ -33,12 +33,11 @@
                       id="avatar"
                       ref="fileInput"
                       :disabled="isLoading"
-                      capture="user"
                     />
                     <div class="flex flex-col items-center">
                       <button 
                         type="button"
-                        @click="openImagePicker('gallery')"
+                        @click="$refs.fileInput.click()"
                         :disabled="isLoading"
                         class="relative group cursor-pointer disabled:cursor-not-allowed mb-2"
                       >
@@ -67,24 +66,14 @@
                           </svg>
                         </div>
                       </button>
-                      <div class="flex gap-2">
-                        <button 
-                          type="button"
-                          @click="openImagePicker('camera')"
-                          :disabled="isLoading"
-                          class="px-3 py-1 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600 disabled:opacity-50"
-                        >
-                          Camera
-                        </button>
-                        <button 
-                          type="button"
-                          @click="openImagePicker('gallery')"
-                          :disabled="isLoading"
-                          class="px-3 py-1 bg-gray-500 text-white rounded-md text-sm hover:bg-gray-600 disabled:opacity-50"
-                        >
-                          Gallery
-                        </button>
-                      </div>
+                      <button 
+                        type="button"
+                        @click="$refs.fileInput.click()"
+                        :disabled="isLoading"
+                        class="px-3 py-1 bg-gray-500 text-white rounded-md text-sm hover:bg-gray-600 disabled:opacity-50"
+                      >
+                        Choose Image
+                      </button>
                     </div>
                   </div>
                   <p class="text-center text-xs text-gray-500 dark:text-gray-400 mt-2">
@@ -340,17 +329,6 @@ const handleFileChange = async (event) => {
   }
   // Clear the input to allow selecting the same file again
   event.target.value = '';
-};
-
-const openImagePicker = (type) => {
-  if (isLoading.value) return;
-  
-  if (type === 'camera') {
-    document.getElementById('avatar').capture = 'user';
-  } else {
-    document.getElementById('avatar').capture = null;
-  }
-  document.getElementById('avatar').click();
 };
 
 const validateForm = () => {
