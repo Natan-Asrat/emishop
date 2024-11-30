@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import AuthView from '@/views/AuthView.vue'
 import axios from 'axios';
 import { RouterView } from 'vue-router';
@@ -13,6 +13,8 @@ import { useUserPostsStore } from './stores/userPost';
 import { useTransactionsStore } from './stores/transactions';
 import { useNotificationStore } from './stores/notification';
 import PopupComponent from './components/App/PopupComponent.vue';
+import { useThemeStore } from './stores/theme'
+import { Sun, Moon, Monitor } from 'lucide-vue-next'
 
 const notificationStore = useNotificationStore();
 const feedPostStore = useFeedPostStore();
@@ -21,11 +23,37 @@ const userPostStore = useUserPostsStore();
 const transactionStore = useTransactionsStore();
 const toastStore = useToastStore();
 const userStore = useUserStore();
+const themeStore = useThemeStore()
 const isAuthenticated = ref(false);
 const token = userStore.user.access;
 const ws = ref(null)
 const isModalVisible = ref(false);
 const modalContent = ref(null);
+
+const currentThemeIcon = computed(() => {
+  switch (themeStore.theme) {
+    case 'system':
+      return { icon: Moon, title: 'Switch to dark mode' }
+    case 'dark':
+      return { icon: Sun, title: 'Switch to light mode' }
+    case 'light':
+      return { icon: Monitor, title: 'Switch to system preference' }
+  }
+})
+
+function toggleTheme() {
+  switch (themeStore.theme) {
+    case 'system':
+      themeStore.updateTheme('dark')
+      break
+    case 'dark':
+      themeStore.updateTheme('light')
+      break
+    case 'light':
+      themeStore.updateTheme('system')
+      break
+  }
+}
 
 const closeModal = () => {
   isModalVisible.value = false;
@@ -166,11 +194,18 @@ defineExpose({ logout });
 </script>
 
 <template>
-
   <RouterView v-if="isAuthenticated" />
   <AuthView v-else @auth-success="onAuthSuccess" />
   <ToastComponent />
   <PopupComponent v-if="isModalVisible" :notification="modalContent" @closeModal="closeModal" />
-
-
+  <button 
+    @click="toggleTheme" 
+    class="fixed bottom-20 right-4 p-3 rounded-full bg-gray-100 dark:bg-gray-800 shadow-lg hover:shadow-xl transition-all duration-300 z-50"
+    :title="currentThemeIcon.title"
+  >
+    <component 
+      :is="currentThemeIcon.icon" 
+      class="w-6 h-6 text-gray-800 dark:text-gray-200"
+    />
+  </button>
 </template>

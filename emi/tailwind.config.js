@@ -2,11 +2,11 @@
 export default {
   content: [
     "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
+    "./src/**/*.{vue,js,ts,jsx,tsx}",
   ],
+  darkMode: 'class', // Using class for manual control
   theme: {
     extend: {},
   },
   plugins: [],
 }
-

@@ -46,8 +46,7 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: [
-          '**/*.{js,css,html,png,svg,ico,woff2}',
-          'assets/**/*.{png,svg,jpg,jpeg}'
+          '**/*.{js,css,html,png,svg,ico,woff2}'
         ],
         runtimeCaching: [
           {
@@ -85,7 +84,6 @@ export default defineConfig({
       output: {
         manualChunks: {
           'vendor': ['vue', 'vue-router', 'pinia'],
-          'ui': ['@headlessui/vue', '@heroicons/vue'],
           'tensorflow': ['@tensorflow/tfjs', '@tensorflow-models/universal-sentence-encoder']
         }
       }

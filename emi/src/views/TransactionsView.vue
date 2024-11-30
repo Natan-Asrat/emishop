@@ -19,11 +19,11 @@
       }">
         <span class="dark:text-gray-100 text-gray-900 inline-flex items-center mr-3">
           <span v-if="!trueForReservationFalseForOrder">
-            <span v-if="transactionStore.reservationsCount != null" class="inline-block rounded-full bg-gray-500 w-5 h-5 text-center mr-2" :class="{'bg-red-500': transactionStore.reservationsCount.pending > 0}">
+            <span v-if="transactionStore.reservationsCount != null" class="inline-block rounded-full bg-gray-500 w-5 h-5 text-center mr-2 text-white  dark:text-black" :class="{'bg-red-500': transactionStore.reservationsCount.pending > 0}">
               {{ transactionStore.reservationsCount.pending }}
             </span> Reservations</span>
             <span v-else>
-              <span v-if="transactionStore.ordersCount != null" class="inline-block rounded-full bg-gray-500 w-5 h-5 text-center mr-2" :class="{'bg-green-500': transactionStore.ordersCount.pending > 0}">
+              <span v-if="transactionStore.ordersCount != null" class="inline-block rounded-full bg-gray-500 w-5 h-5 text-center mr-2 text-white  dark:text-black" :class="{'bg-green-500': transactionStore.ordersCount.pending > 0}">
                 {{ transactionStore.ordersCount.pending }}
               </span>
               Orders

@@ -17,9 +17,10 @@
         @incrementQuantity="favouriteStore.incrementProductQuantity"
         @decrementQuantity="favouriteStore.decrementProductQuantity"
       />
+      
+    <div v-if="favouriteStore.posts.length == 0" class="text-center dark:text-gray-100 text-gray-900">
+      You don't have any liked posts here!
     </div>
-    <div v-if="favouriteStore.posts.length === 0" class="text-center my-auto dark:text-gray-100">
-      You don't have any posts here!
     </div>
     <InsufficientCoinsComponent v-if="showInsufficientCoinsModal" :requiredCoins="requiredCoins" :userCoins="userStore.user.coins" @closeInsufficientCoinsModal="showInsufficientCoinsModal = false"  />
 

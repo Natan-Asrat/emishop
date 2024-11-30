@@ -1,6 +1,7 @@
 <template>
-  <nav ref="navbarRef" class="w-full bg-slate-950
+  <nav ref="navbarRef" class="w-full
     z-20 top-0 left-0 fixed
+
     border-b
     transition-transform duration-300" :style="{ transform: `translateY(${navbarTransform})` }">
      <slot />

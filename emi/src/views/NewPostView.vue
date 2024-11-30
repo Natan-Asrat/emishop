@@ -1,22 +1,22 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-gray-900 to-blue-900 text-white">
+  <div class="min-h-screen bg-gradient-to-br from-gray-100 to-blue-400 dark:bg-gradient-to-br dark:from-gray-900 dark:to-blue-900 text-white">
     <NewPostHeader />
     <main class="max-w-3xl mx-auto pt-20 pb-24 px-4 sm:px-6 lg:px-8">
       <NewPostImageUpload  :images="images" :imagePreviews="imagePreviews" @close="closeImageSourceDialog" @removeImage="removeImage" @showImageSourceDialog="showImageSourceDialog"/>
       <div class="mb-6">
-        <label for="title" class="block text-sm font-medium mb-2 text-blue-300">Title</label>
+        <label for="title" class="block text-sm font-medium mb-2 dark:text-blue-300 text-black">Title</label>
         <input
           id="title"
           v-model="title"
           type="text"
-          class="w-full px-3 py-2 bg-black bg-opacity-30 border border-blue-500 rounded-md shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-blue-300"
+          class="w-full px-3 py-2 bg-black bg-opacity-30 border border-blue-500 rounded-md shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500 text-black dark:text-white placeholder-gray-700 dark:placeholder-blue-300"
           placeholder="Enter product title"
         />
       </div>
 
         <!-- Tags Input -->
       <div class="mb-6">
-        <label for="tags" class="block text-sm font-medium mb-2 text-blue-300">Tags</label>
+        <label for="tags" class="block text-sm font-medium mb-2 dark:text-blue-300 text-black">Tags</label>
         <div class="flex flex-wrap gap-2 mb-2">
           <span
             v-for="(tag, index) in tags"
@@ -36,20 +36,20 @@
             @keydown.space.prevent="addTag"
             @keydown.enter.prevent="addTag"
             type="text"
-            class="flex-grow px-3 py-2 bg-black bg-opacity-30 border border-blue-500 rounded-l-md shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-blue-300"
+            class="flex-grow px-3 py-2 bg-black bg-opacity-30 border border-blue-500 rounded-l-md shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500 text-black dark:text-white placeholder-gray-700 dark:placeholder-blue-300"
             placeholder="Enter tags"
           />
-          <button @click="addTag" class="btn btn-primary rounded-l-none">Add</button>
+          <button @click="addTag" class="btn btn-primary rounded-l-none h-10 w-10 bg-blue-800 dark:bg-blue-500">Add</button>
         </div>
       </div>
 
         <!-- Price Input -->
       <div class="mb-6">
-        <label for="price" class="block text-sm font-medium mb-2 text-blue-300">Price</label>
+        <label for="price" class="block text-sm font-medium mb-2 dark:text-blue-300 text-black">Price</label>
         <div class="flex items-center">
           <select
             v-model="selectedCurrency"
-            class="mr-2 bg-black bg-opacity-30 border border-blue-500 rounded-md shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
+            class="mr-2 bg-black bg-opacity-30 border border-blue-500 rounded-md shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500 text-black dark:text-white placeholder-gray-700 dark:placeholder-blue-300"
           >
             <option v-for="currency in currencies" :key="currency" :value="currency">{{ currency }}</option>
           </select>
@@ -59,7 +59,7 @@
             @input="formatPrice"
             @focus="enableCurrencySelection"
             type="text"
-            class="flex-grow px-3 py-2 bg-black bg-opacity-30 border border-blue-500 rounded-md shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-blue-300"
+            class="flex-grow px-3 py-2 bg-black bg-opacity-30 border border-blue-500 rounded-md shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500 text-black dark:text-white placeholder-gray-700 dark:placeholder-blue-300"
             placeholder="Enter price (min 1,000)"
           />
         </div>
@@ -70,9 +70,14 @@
 
         <!-- Quantity Input -->
       <div class="mb-8">
-        <label for="quantity" class="block text-sm font-medium mb-2 text-blue-300">Quantity</label>
+        <label for="quantity" class="block text-sm font-medium mb-2 dark:text-blue-300 text-black">Quantity</label>
         <div class="flex items-center">
-          <button @click="decrementQuantity" class="btn btn-secondary rounded-r-none">-</button>
+          <button
+            @click="decrementQuantity"
+            class="bg-blue-800 dark:bg-gray-700 text-gray-200 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 h-10 w-10 rounded-l"
+          >
+            -
+          </button>          
           <input
             id="quantity"
             v-model="quantity"
@@ -80,17 +85,23 @@
             min="1"
             class="w-20 px-3 py-2 bg-black bg-opacity-30 border-t border-b border-blue-500 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
           />
-          <button @click="incrementQuantity" class="btn btn-secondary rounded-l-none">+</button>
+
+          <button
+            @click="incrementQuantity"
+            class="bg-blue-800 dark:bg-gray-700 text-gray-200 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 h-10 w-10 rounded-r"
+          >
+            +
+          </button>        
         </div>
-        <p v-if="showQuantityWarning" class="mt-2 text-sm text-yellow-400">Make sure you have {{ quantity }} items</p>
+        <p v-if="showQuantityWarning" class="mt-2 text-sm text-blue-900 dark:text-yellow-400">Make sure you have {{ quantity }} items</p>
       </div>
 
         <!-- Action Buttons -->
       <div class="flex justify-between">
-        <button @click="cancelPost" class="btn btn-secondary">
+        <button @click="cancelPost" class="btn btn-secondary dark:text-white  text-black">
           Cancel
         </button>
-        <button @click="submitPost" class="btn btn-primary">
+        <button @click="submitPost" class="btn btn-primary dark:text-white text-black">
           Post
         </button>
       </div>

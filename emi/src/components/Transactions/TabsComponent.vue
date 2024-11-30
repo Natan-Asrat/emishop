@@ -12,8 +12,8 @@
           ? 'bg-white dark:bg-gray-700 shadow text-blue-700 dark:text-blue-200'
           : 'text-gray-700 dark:text-gray-300 hover:bg-white/[0.12] hover:text-blue-700 dark:hover:text-blue-200'
         ]">
-        <span v-if="trueForReservationFalseForOrder && transactionStore.reservationsCount != null" class="mr-1 inline-block w-5 h-5 rounded-full" :class="{ 'bg-blue-600 dark:bg-blue-400 text-black': tab.toLowerCase() === 'pending', 'bg-green-600 dark:bg-green-400 text-black': tab.toLowerCase() === 'completed', 'bg-red-600 dark:bg-red-400 text-black': tab.toLowerCase() === 'cancelled' }">{{ transactionStore.reservationsCount[tab.toLowerCase()] }} </span>
-        <span v-if="!trueForReservationFalseForOrder && transactionStore.ordersCount != null" class="mr-1 inline-block w-5 h-5 rounded-full" :class="{ 'bg-blue-600 dark:bg-blue-400 text-black': tab.toLowerCase() === 'pending', 'bg-green-600 dark:bg-green-400 text-black': tab.toLowerCase() === 'completed', 'bg-red-600 dark:bg-red-400 text-black': tab.toLowerCase() === 'cancelled' }">{{ transactionStore.ordersCount[tab.toLowerCase()] }}</span>
+        <span v-if="trueForReservationFalseForOrder && transactionStore.reservationsCount != null" class="mr-1 inline-block w-5 h-5 rounded-full text-white dark:text-black" :class="{ 'bg-blue-600 dark:bg-blue-400': tab.toLowerCase() === 'pending', 'bg-green-600 dark:bg-green-400': tab.toLowerCase() === 'completed', 'bg-red-600 dark:bg-red-400': tab.toLowerCase() === 'cancelled' }">{{ transactionStore.reservationsCount[tab.toLowerCase()] }} </span>
+        <span v-if="!trueForReservationFalseForOrder && transactionStore.ordersCount != null" class="mr-1 inline-block w-5 h-5 rounded-full  text-white dark:text-black" :class="{ 'bg-blue-600 dark:bg-blue-400': tab.toLowerCase() === 'pending', 'bg-green-600 dark:bg-green-400': tab.toLowerCase() === 'completed', 'bg-red-600 dark:bg-red-400': tab.toLowerCase() === 'cancelled' }">{{ transactionStore.ordersCount[tab.toLowerCase()] }}</span>
          {{ tab }}
       </button>
       </div>

@@ -12,6 +12,10 @@
           @deletePost="deletePost"
         />
       </div>
+      
+    <div class="text-center dark:text-gray-100" v-if="!feedPostStore.posts || feedPostStore.posts.length === 0">
+      You don't have any posts yet.
+    </div>
       <SelectedProduct :isDeleting="isDeleting" :selectedProduct="selectedProduct" @deletePost="deletePost" @closeProductDetails="closeProductDetails" />
     </div>
   </main>
