@@ -16,7 +16,7 @@ const wb = ref(null);
 
 onMounted(() => {
   if ('serviceWorker' in navigator) {
-    wb.value = new Workbox('/service-worker.js');
+    wb.value = new Workbox('/sw.js');
 
     // Add event listeners for various service worker states
     wb.value.addEventListener('waiting', (event) => {

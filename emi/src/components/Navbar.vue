@@ -122,7 +122,7 @@ const toggleSearch = () => {
   feedPostStore.toggleSearch()
   if (feedPostStore.isSearchExpanded) {
     nextTick(() => {
-      searchInput.value?.focus
+      searchInput.value?.focus()
     });
   }
 }
