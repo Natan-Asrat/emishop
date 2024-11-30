@@ -15,7 +15,7 @@ import { useTransactionsStore } from './stores/transactions';
 import { useNotificationStore } from './stores/notification';
 import PopupComponent from './components/App/PopupComponent.vue';
 import { useThemeStore } from './stores/theme'
-import { Sun, Moon, Monitor } from 'lucide-vue-next';
+import { Sun, Moon, Monitor, Smartphone } from 'lucide-vue-next';
 import { Dialog, DialogPanel, DialogTitle } from '@headlessui/vue';
 
 const notificationStore = useNotificationStore();
@@ -258,21 +258,27 @@ defineExpose({ logout });
       <div class="fixed inset-0 bg-black/30 backdrop-blur-sm" aria-hidden="true" />
       
       <div class="fixed inset-0 flex w-screen items-center justify-center p-4">
-        <DialogPanel class="mx-auto max-w-sm rounded-2xl bg-white dark:bg-gray-800 p-8 text-center shadow-xl">
-          <DialogTitle as="h3" class="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-            Mobile Only Experience
+        <DialogPanel class="mx-auto max-w-sm rounded-2xl bg-white dark:bg-gray-800 p-6 text-center">
+          <div class="flex justify-center mb-4">
+            <Smartphone class="w-16 h-16 text-blue-500" />
+          </div>
+          
+          <DialogTitle class="text-2xl font-medium leading-6 text-gray-900 dark:text-white mb-4">
+            Please Use Mobile Device
           </DialogTitle>
           
           <div class="mt-4">
-            <p class="text-lg text-gray-600 dark:text-gray-300 mb-6">
-              Emi Shop is designed exclusively for mobile devices. 
-              Please access the app from your phone for the best experience.
+            <p class="text-gray-600 dark:text-gray-300">
+              Emi Shop is designed for the best experience on mobile devices. 
+              Please access the app from your phone or tablet for optimal usage.
             </p>
             
-            <div class="mt-6 bg-blue-50 dark:bg-blue-900/30 rounded-xl p-5">
-              <p class="text-blue-700 dark:text-blue-300 font-medium">
-                💫 For optimal experience, visit this site on your mobile device and add it to your home screen!
-              </p>
+            <div class="mt-6 flex flex-col gap-4">
+              <div class="p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+                <p class="text-sm text-blue-700 dark:text-blue-300">
+                  💡 Tip: Use your mobile device's browser or add to home screen for the best experience!
+                </p>
+              </div>
             </div>
           </div>
         </DialogPanel>
