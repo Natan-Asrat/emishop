@@ -131,7 +131,7 @@ export default {
           isActive: post.is_active,
           description: post.title,
           sellerName: post.created_by.username,
-          sellerAvatar: "https://placehold.co/40",
+          sellerAvatar: post.created_by.avatar,
           postedDate: new Date(post.created_at).toLocaleDateString(),
           embedding: post.embedding
         }));

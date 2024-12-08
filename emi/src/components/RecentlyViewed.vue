@@ -27,14 +27,14 @@ const open = (post) => {
       name: post.title,
       price: parseFloat(post.price),
       image: post.images[0],
-      images: post.images, // Assuming single image for now
+      images: post.images,
       stockLeft: post.quantity,
       totalStock: post.initial_quantity,
       liked: post.liked,
       quantity: 1,
-      description: post.title, // You might want to add description field in your model
+      description: post.title, 
       sellerName: post.created_by.username,
-      sellerAvatar: "https://placehold.co/40", // You might want to add avatar in your UserProfile
+      sellerAvatar: post.created_by.avatar,
       postedDate: new Date(post.created_at).toLocaleDateString(),
       embedding: post.embedding
     }

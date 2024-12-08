@@ -80,14 +80,14 @@ const click = () => {
       name: props.notification?.post.title,
       price: parseFloat(props.notification?.post.price),
       image: props.notification?.post.images[0],
-      images: props.notification?.post.images, // Assuming single image for now
+      images: props.notification?.post.images, 
       stockLeft: props.notification?.post.quantity,
       totalStock: props.notification?.post.initial_quantity,
       liked: props.notification?.post.liked,
       quantity: 1,
-      description: props.notification?.post.title, // You might want to add description field in your model
+      description: props.notification?.post.title, 
       sellerName: props.notification?.post.created_by.username,
-      sellerAvatar: "https://placehold.co/40", // You might want to add avatar in your UserProfile
+      sellerAvatar: post.created_by.avatar, 
       postedDate: new Date(props.notification?.post.created_at).toLocaleDateString(),
       embedding: props.notification?.post.embedding
     }
