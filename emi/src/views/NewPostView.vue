@@ -95,12 +95,6 @@
           <AlertCircle class="h-4 w-4 text-red-700 dark:text-red-400" />
           <p class="text-sm text-red-700 dark:text-red-400 font-semibold">{{ errors.currency }}</p>
         </div>
-        <div v-if="price" class="mt-2 flex items-center space-x-2 bg-blue-50 dark:bg-blue-900/30 p-2 rounded">
-          <Info class="h-4 w-4 text-blue-900 dark:text-blue-300" />
-          <p class="text-sm text-blue-900 dark:text-blue-300 font-semibold">
-            Advertised price with commission: {{ getAdvertisedPrice() }} {{ selectedCurrency }}
-          </p>
-        </div>
       </div>
 
         <!-- Quantity Input -->
@@ -256,12 +250,6 @@ export default {
     }
   },
   methods: {
-    getAdvertisedPrice() {
-      const actualPrice = parseFloat(this.price.replace(/,/g, ''));
-      const advertisedPrice = (actualPrice / (1 - this.commissionRate));
-      const roundedPrice = Math.max(Math.round(advertisedPrice), actualPrice + 1);
-      return roundedPrice.toFixed(0);
-    },
     validateForm() {
       let isValid = true;
       this.errors = {
@@ -406,7 +394,7 @@ export default {
           .map(val => val / tagEmbeddings.length);
         const formData = new FormData();
         formData.append('title', this.title);
-        formData.append('price', parseFloat(this.getAdvertisedPrice()).toFixed(0).replace(/,/g, '')); 
+        formData.append('price', parseFloat(this.price.replace(/,/g, '')) || null);
         formData.append('currency', this.selectedCurrency);
         formData.append('quantity', this.quantity || null);
         formData.append('tags', JSON.stringify(this.tags)); // Assuming tags are sent as a JSON string
