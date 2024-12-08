@@ -12,3 +12,6 @@ python-dotenv==1.0.1
 django-filter==24.3
 paypalrestsdk==1.13.3
 whitenoise==6.6.0
+django-debug-toolbar==4.4.6
+boto3==1.35.73
+django-storages==1.14.4

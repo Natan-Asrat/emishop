@@ -11,6 +11,10 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "back.settings")
+debug =  os.environ.get("DEBUG", "false")
+if debug == "true":
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "back.settings.local")
+else:
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "back.settings.production")
 
 application = get_wsgi_application()
