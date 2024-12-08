@@ -1,5 +1,5 @@
 <template>
-  <TransitionRoot appear :show="showImageDialog" as="template">
+  <TransitionRoot appear :show="isOpen" as="template">
     <Dialog as="div" @close="closeImageSourceDialog" class="relative z-50">
       <TransitionChild
         as="template"
@@ -46,22 +46,31 @@
     </Dialog>
   </TransitionRoot>
 </template>
+
 <script setup>
-import { defineProps, defineEmits } from 'vue'
+import { defineProps, defineEmits, watch } from 'vue'
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue';
 import { Camera, Image } from 'lucide-vue-next'
-defineProps({
-  showImageDialog: {
+
+const props = defineProps({
+  isOpen: {
     type: Boolean,
     required: true
   }
 })
-const emit = defineEmits(['close','selectImageSource'])
+
+const emit = defineEmits(['close', 'select-source'])
 
 const closeImageSourceDialog = () => {
   emit('close')
 }
-const selectImageSource = async (source) => {
-  emit('selectImageSource', source)
+
+const selectImageSource = (source) => {
+  emit('select-source', source)
 };
+
+// Add a watcher to log prop changes
+watch(() => props.isOpen, (newValue) => {
+  console.log('Modal open state changed:', newValue)
+})
 </script>

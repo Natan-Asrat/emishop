@@ -36,7 +36,7 @@
                     />
                     <button 
                       type="button"
-                      @click="$refs.fileInput.click()"
+                      @click="showImageSourceDialog()"
                       :disabled="isLoading"
                       class="relative group cursor-pointer disabled:cursor-not-allowed"
                     >
@@ -249,16 +249,30 @@
         </div>
       </Dialog>
     </TransitionRoot>
+
+    <ImageSourceDialog 
+      :isOpen="showImageDialog" 
+      @close="closeImageSourceDialog" 
+      @select-source="selectImageSource" 
+    />
+    <WebRTCCamera 
+      v-if="showWebRTCCamera" 
+      @close="closeCameraModal"
+      @image-confirmed="handleWebRTCImageCapture"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, defineExpose } from 'vue'
 import axios from 'axios';
 import { Dialog, DialogPanel, DialogTitle, TransitionRoot, TransitionChild } from '@headlessui/vue'
 import { useToastStore } from '@/stores/toast';
 import { useUserStore } from '@/stores/user';
+import ImageSourceDialog from '@/components/ImageSourceDialog.vue';
+import WebRTCCamera from '@/components/WebRTCCamera.vue';
 
+const fileInput = ref(null);
 const userStore = useUserStore();
 const toastStore = useToastStore();
 const isSignUp = ref(false);
@@ -267,6 +281,9 @@ const isErrorModalOpen = ref(false);
 const errorTitle = ref('');
 const errorMessage = ref('');
 const avatarPreview = ref('');
+const showImageDialog = ref(false);
+const showWebRTCCamera = ref(false);
+const avatarFile = ref(null);
 
 const user = reactive({
   username: '',
@@ -315,15 +332,8 @@ const handleFileChange = (event) => {
       return;
     }
     
-    user.avatar = file;
-    // Create preview URL
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      avatarPreview.value = e.target.result;
-    };
-    reader.readAsDataURL(file);
-  } else {
-    avatarPreview.value = '';
+    avatarFile.value = file;
+    avatarPreview.value = URL.createObjectURL(file);
   }
 };
 
@@ -343,7 +353,7 @@ const validateForm = () => {
     if (!user.password2) errors.password2 = "Confirm your password";
     if (user.password1.length < 8) errors.password1 = "Password must be at least 8 characters long";
     if (user.password1 !== user.password2) errors.password2 = "Passwords do not match";
-    if (!user.avatar) errors.avatar = "Please select an avatar";
+    if (!avatarFile.value) errors.avatar = "Please select an avatar";
 
     if (Object.values(errors).some((error) => error)) {
       showError('Validation Error', Object.values(errors).find(error => error));
@@ -377,7 +387,7 @@ const handleAuth = async () => {
       formData.append("name", user.nickname);
       formData.append("password1", user.password1);
       formData.append("password2", user.password2);
-      if (user.avatar) formData.append("avatar", user.avatar);
+      if (avatarFile.value) formData.append("avatar", avatarFile.value);
 
       const response = await axios.post("/api/account/users/", formData, {
         headers: { "Content-Type": "multipart/form-data" },
@@ -424,4 +434,58 @@ const handleAuth = async () => {
     isLoading.value = false;
   }
 };
+
+const showImageSourceDialog = () => {
+  showImageDialog.value = true;
+}
+
+const closeImageSourceDialog = () => {
+  showImageDialog.value = false;
+}
+
+const selectImageSource = (source) => {
+  closeImageSourceDialog();
+  if (source === 'camera') {
+    showWebRTCCamera.value = true;
+  } else if (source === 'gallery') {
+    // Trigger file input for gallery selection
+    if (fileInput.value) {
+      fileInput.value.click();
+    }
+  }
+}
+
+const handleWebRTCImageCapture = (imageData) => {
+  // Convert base64 to File object
+  const blob = dataURItoBlob(imageData);
+  const file = new File([blob], 'captured-image.jpg', { type: 'image/jpeg' });
+  
+  // Update avatar preview and file
+  avatarFile.value = file;
+  avatarPreview.value = imageData;
+  
+  // Close camera modal
+  closeCameraModal();
+}
+
+const closeCameraModal = () => {
+  showWebRTCCamera.value = false;
+}
+
+const dataURItoBlob = (dataURI) => {
+  const byteString = atob(dataURI.split(',')[1]);
+  const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+  const ab = new ArrayBuffer(byteString.length);
+  const ia = new Uint8Array(ab);
+  
+  for (let i = 0; i < byteString.length; i++) {
+    ia[i] = byteString.charCodeAt(i);
+  }
+  
+  return new Blob([ab], { type: mimeString });
+}
+
+defineExpose({
+  fileInput
+});
 </script>

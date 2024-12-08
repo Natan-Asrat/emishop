@@ -37,7 +37,7 @@
                 />
                 <button 
                   type="button"
-                  @click="$refs.fileInput.click()"
+                  @click="showImageSourceDialog()"
                   class="relative group cursor-pointer"
                 >
                   <img 
@@ -115,16 +115,30 @@
         </form>
       </div>
     </div>
+
+    <ImageSourceDialog 
+      :isOpen="showImageDialog" 
+      @close="closeImageSourceDialog" 
+      @select-source="selectImageSource" 
+    />
+    <WebRTCCamera 
+      v-if="showWebRTCCamera" 
+      @close="closeCameraModal"
+      @image-confirmed="handleWebRTCImageCapture"
+    />
   </div>
 </template>
 
 <script setup>
-import { reactive, ref } from "vue";
+import { reactive, ref, defineExpose } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
 import { useToastStore } from "@/stores/toast";
 import { useUserStore } from "@/stores/user";
 import { XIcon } from "lucide-vue-next";
+import ImageSourceDialog from '@/components/ImageSourceDialog.vue';
+import WebRTCCamera from '@/components/WebRTCCamera.vue';
+
 const router = useRouter();
 const userStore = useUserStore();
 const toastStore = useToastStore();
@@ -139,6 +153,59 @@ const form = reactive({
 const changePassword = ref(false);
 const errors = reactive([]);
 const avatarPreview = ref(null);
+const fileInput = ref(null);
+const showImageDialog = ref(false);
+const showWebRTCCamera = ref(false);
+
+const showImageSourceDialog = () => {
+  showImageDialog.value = true;
+}
+
+const closeImageSourceDialog = () => {
+  showImageDialog.value = false;
+}
+
+const selectImageSource = (source) => {
+  closeImageSourceDialog();
+  if (source === 'camera') {
+    showWebRTCCamera.value = true;
+  } else if (source === 'gallery') {
+    // Trigger file input for gallery selection
+    if (fileInput.value) {
+      fileInput.value.click();
+    }
+  }
+}
+
+const handleWebRTCImageCapture = (imageData) => {
+  // Convert base64 to File object
+  const blob = dataURItoBlob(imageData);
+  const file = new File([blob], 'captured-image.jpg', { type: 'image/jpeg' });
+  
+  // Update avatar preview and file
+  form.avatar = file;
+  avatarPreview.value = imageData;
+  
+  // Close camera modal
+  closeCameraModal();
+}
+
+const closeCameraModal = () => {
+  showWebRTCCamera.value = false;
+}
+
+const dataURItoBlob = (dataURI) => {
+  const byteString = atob(dataURI.split(',')[1]);
+  const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+  const ab = new ArrayBuffer(byteString.length);
+  const ia = new Uint8Array(ab);
+  
+  for (let i = 0; i < byteString.length; i++) {
+    ia[i] = byteString.charCodeAt(i);
+  }
+  
+  return new Blob([ab], { type: mimeString });
+}
 
 const handleFileChange = (event) => {
   const file = event.target.files[0];
@@ -180,4 +247,9 @@ const submitForm = async () => {
     errors.push(error.response?.data?.message || "An error occurred.");
   }
 };
+
+// Expose fileInput ref to template
+defineExpose({
+  fileInput
+});
 </script>

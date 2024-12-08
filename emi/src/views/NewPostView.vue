@@ -2,7 +2,23 @@
   <div class="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
     <NewPostHeader />
     <main class="max-w-3xl mx-auto pt-20 pb-24 px-4 sm:px-6 lg:px-8">
-      <NewPostImageUpload  :images="images" :imagePreviews="imagePreviews" @close="closeImageSourceDialog" @removeImage="removeImage" @showImageSourceDialog="showImageSourceDialog"/>
+      <NewPostImageUpload 
+        :images="images" 
+        :imagePreviews="imagePreviews" 
+        @close="closeImageSourceDialog" 
+        @removeImage="removeImage" 
+        @showImageSourceDialog="showImageSourceDialog"
+      />
+      
+      <input 
+        type="file" 
+        ref="fileInput" 
+        @change="handleFileUpload" 
+        accept="image/*" 
+        multiple 
+        class="hidden"
+      />
+
       <div class="mb-6">
         <label for="title" class="block text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">Title</label>
         <input
@@ -147,7 +163,16 @@
         </button>
       </div>
     </main>
-    <NewPostImageSourceDialog :showImageDialog="showImageDialog" @close="closeImageSourceDialog" @selectImageSource="selectImageSource" />
+    <ImageSourceDialog 
+      :isOpen="showImageDialog" 
+      @close="closeImageSourceDialog" 
+      @select-source="selectImageSource" 
+    />
+    <WebRTCCamera 
+      v-if="showWebRTCCamera" 
+      @close="closeCameraModal"
+      @image-confirmed="handleWebRTCImageCapture"
+    />
     <NewPostProcessing :progress="progress" :isProcessing="isProcessing" />
     <ReportedNotAllowed v-if="reported" @closeModal="closeNotAllowedModal" :reservation="reportedReservation"/>
     <LoadingComponent v-if="isLoading" :isLoading="isLoading" />
@@ -156,7 +181,7 @@
 
 <script>
 import NewPostHeader from '@/components/NewPost/NewPostHeader.vue';
-import NewPostImageSourceDialog from '@/components/NewPost/NewPostImageSourceDialog.vue';
+import ImageSourceDialog from '@/components/ImageSourceDialog.vue';
 import NewPostImageUpload from '@/components/NewPost/NewPostImageUpload.vue';
 import axios from 'axios'
 import NewPostProcessing from '@/components/NewPost/NewPostProcessing.vue';
@@ -164,11 +189,12 @@ import ReportedNotAllowed from '@/components/NewPost/ReportedNotAllowed.vue';
 import { useToastStore } from '@/stores/toast';
 import LoadingComponent from '@/components/NewPost/LoadingComponent.vue';
 import { AlertCircle, Info, X, Send, Loader2 } from 'lucide-vue-next'
+import WebRTCCamera from '@/components/WebRTCCamera.vue'
 export default {
   components: {
     NewPostHeader,
     NewPostImageUpload,
-    NewPostImageSourceDialog,
+    ImageSourceDialog,
     X,
     NewPostProcessing,
     ReportedNotAllowed,
@@ -176,7 +202,8 @@ export default {
     AlertCircle,
     Info,
     Send,
-    Loader2
+    Loader2,
+    WebRTCCamera
   },
   setup() {
     const toastStore = useToastStore();
@@ -208,7 +235,10 @@ export default {
         tags: '',
         price: '',
         currency: ''
-      }
+      },
+      showWebRTCCamera: false,
+      imagePreview: '',
+      selectedImage: null
     }
   },
   computed: {
@@ -296,35 +326,24 @@ export default {
       this.$router.push({name: 'home'})
     },
     showImageSourceDialog() {
+      console.log('Showing image source dialog');
+      this.showImageDialog = true;
+    },
+    openImageSourceDialog() {
+      console.log('Opening image source dialog');
       this.showImageDialog = true;
     },
     selectImageSource(source) {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = 'image/*';
-      if (source === 'camera') {
-        input.capture = 'environment';
-      }
-      input.onchange = (e) => {
-        const files = e.target.files;
-        if (files.length) {
-          for (let i = 0; i < files.length; i++) {
-            const file = files[i];
-              const reader = new FileReader();
-
-              reader.onload = (event) => {
-                this.images.push(file);
-                this.imagePreviews.push(event.target.result);
-              };
-
-              reader.readAsDataURL(file);
-          }
-        }
-      };
-      input.click();
+      console.log('Selected image source:', source);
       this.closeImageSourceDialog();
+      if (source === 'camera') {
+        this.showWebRTCCamera = true;
+      } else if (source === 'gallery') {
+        this.$refs.fileInput.click();
+      }
     },
     closeImageSourceDialog() {
+      console.log('Closing image source dialog');
       this.showImageDialog = false;
     },
     removeTag(index) {
@@ -436,6 +455,42 @@ export default {
         }
       )
     },
+    handleImageCapture(imageData) {
+      this.imagePreview = imageData
+      this.selectedImage = this.dataURItoBlob(imageData)
+    },
+    handleWebRTCImageCapture(imageData) {
+      this.imagePreview = imageData
+      this.selectedImage = this.dataURItoBlob(imageData)
+      this.showWebRTCCamera = false
+      this.images.push(this.selectedImage)
+      this.imagePreviews.push(imageData)
+    },
+    dataURItoBlob(dataURI) {
+      const byteString = atob(dataURI.split(',')[1]);
+      const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+      const ab = new ArrayBuffer(byteString.length);
+      const ia = new Uint8Array(ab);
+      for (let i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+      }
+      return new Blob([ab], { type: mimeString });
+    },
+    handleFileUpload(event) {
+      const files = event.target.files;
+      for (let i = 0; i < files.length; i++) {
+        this.images.push(files[i]);
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          this.imagePreviews.push(e.target.result);
+        };
+        reader.readAsDataURL(files[i]);
+      }
+    },
+    closeCameraModal() {
+      this.showWebRTCCamera = false;
+      this.showImageDialog = false;
+    }
   },
   mounted() {
     this.checkReportedOnSeller();
