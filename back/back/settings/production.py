@@ -8,6 +8,8 @@ if not SECRET_KEY:
 INSTALLED_APPS = ["channels"] + INSTALLED_APPS + [
     "storages",
 ]
+print("INSTALLED_APPS in production:", INSTALLED_APPS)
+
 SITE_URL = os.environ.get('SITE_URL')
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
 if not ALLOWED_HOSTS or ALLOWED_HOSTS == ['']:
