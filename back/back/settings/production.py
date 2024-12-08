@@ -36,7 +36,6 @@ SIMPLE_JWT = {
     "ROTATE_REFRESH_TOKENS": False,
 }
 
-PAYPAL_MODE = 'live'
 
 CORS_ALLOWED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS').split(',')
 if not CORS_ALLOWED_ORIGINS or CORS_ALLOWED_ORIGINS == [""]:

@@ -66,6 +66,10 @@ REST_FRAMEWORK = {
 
 
 AUTH_USER_MODEL = "account.User"
+PAYPAL_MODE = os.environ.get('PAYPAL_MODE')
+if not PAYPAL_MODE:
+    raise ValueError("PAYPAL_MODE is not set or empty")
+
 PAYPAL_CLIENT_ID = os.environ.get('PAYPAL_CLIENT_ID')
 if not PAYPAL_CLIENT_ID:
     raise ValueError("PAYPAL_CLIENT_ID is not set or empty")

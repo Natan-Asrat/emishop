@@ -4,7 +4,6 @@ DEBUG = True
 SECRET_KEY = "django-insecure-xp51pjd!)y3c51t)do+25^cu#fq@2qa#xh$bfidj0zxaj=ob$y"
 
 REPORTED_BLOCKLIST_DAYS = 30
-PAYPAL_MODE = 'sandbox'
 
 SITE_URL = os.environ.get('SITE_URL', 'http://localhost:8000')
 ALLOWED_HOSTS = ["*"]
