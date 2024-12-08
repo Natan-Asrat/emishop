@@ -159,45 +159,12 @@ const changePassword = ref(false);
 const errors = reactive([]);
 const avatarPreview = ref(null);
 
-const handleFileChange = async (event) => {
+const handleFileChange = (event) => {
   const file = event.target.files[0];
   if (file) {
-    if (!file.type.match('image.*')) {
-      toastStore.showToast(5000, "Please select an image file", "bg-red-500");
-      event.target.value = ''; // Clear the file input
-      return;
-    }
-
-    try {
-      // Create a temporary URL for the file
-      const tempUrl = URL.createObjectURL(file);
-      
-      // Create a new Image object to handle the loading
-      const img = new Image();
-      
-      // Create a promise to handle image loading
-      const loadImage = new Promise((resolve, reject) => {
-        img.onload = () => resolve();
-        img.onerror = () => reject(new Error('Failed to load image'));
-        img.src = tempUrl;
-      });
-
-      // Wait for image to load
-      await loadImage;
-
-      // Now that image is loaded, update the preview and form data
-      avatarPreview.value = tempUrl;
-      form.avatar = file;
-    } catch (error) {
-      toastStore.showToast(5000, "Failed to load image", "bg-red-500");
-      event.target.value = ''; // Clear the file input
-    }
-  } else {
-    avatarPreview.value = '';
-    form.avatar = null;
+    form.avatar = file;
+    avatarPreview.value = URL.createObjectURL(file);
   }
-  // Clear the input to allow selecting the same file again
-  event.target.value = '';
 };
 
 const openImagePicker = (type) => {
