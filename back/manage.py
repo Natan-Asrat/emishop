@@ -7,7 +7,7 @@ load_dotenv()
 
 def main():
     """Run administrative tasks."""
-    debug =  os.getenv("DEBUG", "true")
+    debug =  os.environ.get("DEBUG", "true")
     print("debug", debug)
     os.environ["DEBUG"] = debug
 

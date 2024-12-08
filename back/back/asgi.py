@@ -9,10 +9,6 @@ https://docs.djangoproject.com/en/5.1/howto/deployment/asgi/
 
 import os
 import django
-from channels.routing import ProtocolTypeRouter, URLRouter
-from channels.auth import AuthMiddlewareStack
-from channels.security.websocket import AllowedHostsOriginValidator
-from django.core.asgi import get_asgi_application
 from dotenv import load_dotenv
 load_dotenv()
 debug =  os.environ.get("DEBUG", "true")
@@ -23,6 +19,11 @@ else:
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "back.settings.production")
     
 django.setup()
+from channels.routing import ProtocolTypeRouter, URLRouter
+from channels.auth import AuthMiddlewareStack
+from channels.security.websocket import AllowedHostsOriginValidator
+from django.core.asgi import get_asgi_application
+
 
 # Import after django setup
 from notification.ws_middleware import JWTAuthMiddleware
