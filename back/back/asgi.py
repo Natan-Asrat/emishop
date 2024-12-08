@@ -13,8 +13,10 @@ from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
 from channels.security.websocket import AllowedHostsOriginValidator
 from django.core.asgi import get_asgi_application
-
-debug =  os.environ.get("DEBUG", "false")
+from dotenv import load_dotenv
+load_dotenv()
+debug =  os.environ.get("DEBUG", "true")
+print("debug", debug)
 if debug == "true":
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "back.settings.local")
 else:
