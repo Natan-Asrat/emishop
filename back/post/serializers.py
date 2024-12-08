@@ -2,6 +2,7 @@ from rest_framework import serializers
 from account.serializers import UserSerializer
 from .models import Post, PostImage
 from django.conf import settings
+from urllib.parse import urljoin
 
 class PostSerializer(serializers.ModelSerializer):
     created_by = UserSerializer(read_only=True)
@@ -13,9 +14,17 @@ class PostSerializer(serializers.ModelSerializer):
         fields = ['id', 'is_active', 'liked', 'created_by', 'title', 'images', 'price', 'currency', 'quantity', 'initial_quantity', 'tags', 'embedding', 'created_at', 'updated_at', 'created_at_formatted', 'updated_at_formatted']
 
     def get_images(self, obj):
-        # Get all related images for the post
-        image_urls = [f"{settings.SITE_URL}{image.image.url}" for image in obj.images.all()]
-        return image_urls  # Return list of image URLs
+        image_urls = []
+        for image in obj.images.all():
+            if image.image:
+                base_url = settings.SITE_URL
+                media_url = settings.MEDIA_URL
+                image_url = urljoin(
+                    base_url, 
+                    media_url + str(image.image)
+                )
+                image_urls.append(image_url)
+        return image_urls
 
 
 class PostCreateSerializer(serializers.ModelSerializer):

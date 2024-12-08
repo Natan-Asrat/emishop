@@ -161,12 +161,11 @@ if not AWS_S3_REGION_NAME:
     raise ValueError("AWS_S3_REGION_NAME is not set or empty")
 
 DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
-
-# Serve from S3
-# MEDIA_URL = f"https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/media/"
-
-# Serve from ec2
-MEDIA_URL = "/media/"
+FROM_S3 = os.environ.get("FROM_S3", "false")
+if FROM_S3 == "true":
+    MEDIA_URL = f"https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/media/"
+else:
+    MEDIA_URL = "/media/"
 
 
 MEDIA_ROOT = os.environ.get("MEDIA_ROOT", "/media")

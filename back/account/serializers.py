@@ -23,9 +23,14 @@ class UserSerializer(serializers.ModelSerializer):
         if obj.avatar:
             base_url = settings.SITE_URL  
             media_url = settings.MEDIA_URL
-            avatar_url = urljoin(
-                base_url, media_url + str(obj.avatar)
-            )  
+            if settings.FROM_S3 == "true":
+                avatar_url = urljoin(
+                    media_url + str(obj.avatar)
+                )  
+            else:
+                avatar_url = urljoin(
+                    base_url, media_url + str(obj.avatar)
+                )  
             return avatar_url
         return None
 
@@ -72,4 +77,3 @@ class UserCreateSerializer(serializers.ModelSerializer):
         user.set_password(password)  # Hash the password
         user.save()
         return user
-

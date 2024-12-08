@@ -17,6 +17,7 @@ from post.serializers import PostSerializer
 from post.models import Like
 from django.db.models import Exists, OuterRef
 from .pagination import CustomPageNumberPagination
+from urllib.parse import urljoin
 
 class UserViewSet(
     mixins.CreateModelMixin,
@@ -139,7 +140,20 @@ class UserViewSet(
         user = request.user
         blocklist_threshold_date = now() - timedelta(days=settings.REPORTED_BLOCKLIST_DAYS)
 
-        avatar_url = request.build_absolute_uri(user.avatar.url) if user.avatar else None
+        # Handle avatar URL based on FROM_S3 setting
+        if user.avatar:
+            if settings.FROM_S3 == "true":
+                # For S3, use media_url directly
+                avatar_url = urljoin(
+                    settings.MEDIA_URL, 
+                    str(user.avatar)
+                )
+            else:
+                # For local, use request.build_absolute_uri
+                avatar_url = request.build_absolute_uri(user.avatar.url)
+        else:
+            avatar_url = None
+
         reported_reservation = Reservation.objects.filter(post__created_by=request.user, status='reported', reported_at__gte=blocklist_threshold_date).order_by('-reported_at').select_related('buyer', 'post', 'post__created_by').prefetch_related('post__images').first()
         is_reported_on = False
         if reported_reservation is not None:
@@ -163,7 +177,18 @@ class UserViewSet(
         blocklist_threshold_date = now() - timedelta(days=settings.REPORTED_BLOCKLIST_DAYS)
 
         # Avatar URL
-        avatar_url = request.build_absolute_uri(user.avatar.url) if user.avatar else None
+        if user.avatar:
+            if settings.FROM_S3 == "true":
+                # For S3, use media_url directly
+                avatar_url = urljoin(
+                    settings.MEDIA_URL, 
+                    str(user.avatar)
+                )
+            else:
+                # For local, use request.build_absolute_uri
+                avatar_url = request.build_absolute_uri(user.avatar.url)
+        else:
+            avatar_url = None
 
         # Pre-aggregate data
         stats = Reservation.objects.filter(
