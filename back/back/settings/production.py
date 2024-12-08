@@ -8,9 +8,11 @@ if not SECRET_KEY:
 INSTALLED_APPS = ["channels"] + INSTALLED_APPS + [
     "storages",
 ]
-print("INSTALLED_APPS in production:", INSTALLED_APPS)
 
 SITE_URL = os.environ.get('SITE_URL')
+if not SITE_URL:
+    raise ValueError("SITE_URL is not set or empty")
+
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
 if not ALLOWED_HOSTS or ALLOWED_HOSTS == ['']:
     raise ValueError("ALLOWED_HOSTS is not set or empty")

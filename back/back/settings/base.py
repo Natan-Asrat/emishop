@@ -67,7 +67,17 @@ REST_FRAMEWORK = {
 
 AUTH_USER_MODEL = "account.User"
 PAYPAL_CLIENT_ID = os.environ.get('PAYPAL_CLIENT_ID')
+if not PAYPAL_CLIENT_ID:
+    raise ValueError("PAYPAL_CLIENT_ID is not set or empty")
+
 PAYPAL_CLIENT_SECRET = os.environ.get('PAYPAL_CLIENT_SECRET')
+if not PAYPAL_CLIENT_SECRET:
+    raise ValueError("PAYPAL_CLIENT_SECRET is not set or empty")
+
+CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS', '').split(',')
+if not CSRF_TRUSTED_ORIGINS or CSRF_TRUSTED_ORIGINS == [""]:
+    raise ValueError("CSRF_TRUSTED_ORIGINS is not set or empty")
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {
