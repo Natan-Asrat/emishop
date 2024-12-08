@@ -7,7 +7,7 @@ REPORTED_BLOCKLIST_DAYS = 30
 PAYPAL_MODE = 'sandbox'
 
 SITE_URL = 'http://localhost:8000'
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 INSTALLED_APPS += [
     'debug_toolbar',
 ]
