@@ -15,6 +15,7 @@ from notification.serializers import ConversationSerializer
 import logging
 from django.utils import timezone
 from django.db.models import Count
+from .pagination import CustomPageNumberPagination
 logger = logging.getLogger(__name__)
 
 # Create your views here.
@@ -22,6 +23,7 @@ class ReservationViewSet(viewsets.ModelViewSet):
     serializer_class = ReservationSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['status']
+    pagination_class = CustomPageNumberPagination
     def get_queryset(self):
         if self.action == 'list':
             return Reservation.objects.filter(buyer=self.request.user).order_by('-created_at')
@@ -211,6 +213,7 @@ class OrderViewSet(viewsets.ModelViewSet):
     serializer_class = ReservationSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['status']
+    pagination_class = CustomPageNumberPagination
     def get_queryset(self):
         if self.action == 'list':
             return Reservation.objects.filter(post__created_by=self.request.user).order_by('-created_at')

@@ -16,17 +16,20 @@
     <div class="text-center dark:text-gray-100" v-if="!feedPostStore.posts || feedPostStore.posts.length === 0">
       You don't have any posts yet.
     </div>
+    <SpinnerComponent v-if="feedPostStore.isLoading"/>
       <SelectedProduct :isDeleting="isDeleting" :selectedProduct="selectedProduct" @deletePost="deletePost" @closeProductDetails="closeProductDetails" />
     </div>
   </main>
+  
 </template>
 <script setup>
 import MyPostItem from '@/components/MyProfile/MyPostItem.vue';
 import axios from 'axios';
 // import { useRouter } from 'vue-router';
-import { onMounted, ref  } from 'vue';
+import { onMounted, ref, onUnmounted  } from 'vue';
 import { useUserPostsStore } from '@/stores/userPost';
 import { useToastStore } from '@/stores/toast';
+import SpinnerComponent from '@/components/SpinnerComponent.vue';
 // import { useUserStore } from '@/stores/user';
 import SelectedProduct from '@/components/MyProfile/SelectedProduct.vue';
 const toastStore = useToastStore();
@@ -43,7 +46,7 @@ const deletePost = (post) => {
       console.log(error)
       toastStore.showToast(
               5000,
-              "Something went wrong. Please refresh!",
+              "Something went wrong. Please refresh!)",
               "bg-red-300 dark:bg-red-300"
             )
     }
@@ -84,57 +87,75 @@ const closeProductDetails = () => {
 }
 
 const fetchPosts = async () => {
-  if (isLoading.value || !hasMore.value) return
+  if (feedPostStore.isLoading || !feedPostStore.hasMore) return
 
-  isLoading.value = true
+  feedPostStore.isLoading = true
   try {
-    let response = await axios.get(`api/account/users/myposts/`)
-    const newProducts = response.data.map(post => ({
+    let response = await axios.get(`api/account/users/myposts/`, {
+      params: {
+        page: feedPostStore.page,
+        page_size: 10  // Match backend default page size
+      }
+    })
+    console.log("Full response:", response.data)
+    
+    const newProducts = response.data.results.map(post => ({
       id: post.id,
       name: post.title,
       price: parseFloat(post.price),
       image: post.images[0],
-      images: post.images, // Assuming single image for now
+      images: post.images,
       stockLeft: post.quantity,
       totalStock: post.initial_quantity,
       liked: post.liked,
       quantity: 1,
-      isActive: post.is_active,
-      description: post.title, // You might want to add description field in your model
-      sellerName: post.created_by.username,
-      sellerAvatar: "https://placehold.co/40", // You might want to add avatar in your UserProfile
-      postedDate: new Date(post.created_at).toLocaleDateString(),
-      embedding: post.embedding
+      currency: post.currency,
+      tags: post.tags,
+      created_by: post.created_by,
+      created_at: post.created_at,
+      isActive: post.is_active
     }))
 
-    feedPostStore.addPosts(newProducts)
-    hasMore.value = newProducts.length > 0
-    page.value++
+    if (feedPostStore.page === 1) {
+      feedPostStore.setPosts(newProducts)
+    } else {
+      feedPostStore.addPosts(newProducts)
+    }
+
+    // Update hasMore based on the 'next' field in the response
+    feedPostStore.hasMore = response.data.next !== null
+    if (feedPostStore.hasMore) {
+      feedPostStore.incrementPage()
+    }
   } catch (error) {
     console.error('Error fetching posts:', error)
+    toastStore.showToast(
+      5000,
+      "Error loading posts. Please try again!",
+      "bg-red-300 dark:bg-red-300"
+    )
   } finally {
-    isLoading.value = false
+    feedPostStore.isLoading = false
   }
 }
 
-
+const handleScroll = () => {
+  const mainContent = document.documentElement
+  const scrolledToBottom = mainContent.scrollTop + mainContent.clientHeight >= mainContent.scrollHeight - 100
+  if (scrolledToBottom) {
+    fetchPosts()
+  }
+}
 
 onMounted(async () => {
+  feedPostStore.resetPagination()
   await fetchPosts()
+  window.addEventListener('scroll', handleScroll)
 })
 
-
-// watch(
-//   () => props.reachedLast,
-//   async (newVal) => {
-//     if (newVal) {
-//       if(newVal === true){
-//         await fetchPosts()
-//         emits('resetLastElement')
-//       }
-//     }
-//   }
-// );
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll)
+})
 
 defineExpose({
   openProductDetails,

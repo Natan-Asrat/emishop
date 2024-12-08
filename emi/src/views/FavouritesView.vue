@@ -2,7 +2,7 @@
   <div class="min-h-screen bg-gray-900 dark:bg-gray-100">
     <NavbarWrapper class="bg-gray-100 dark:bg-gray-900 p-4">
       <h1 class="text-2xl text-gray-900 dark:text-gray-100 font-bold mb-6">Favourites</h1>
-    <div v-if="isLoading" class='mb-5 text-center dark:text-gray-100'>Loading...</div>
+    <div v-if="favouriteStore.isLoading" class='mb-5 text-center dark:text-gray-100'>Loading...</div>
 
     </NavbarWrapper>
     <div class="space-y-4 min-h-screen bg-gray-200 dark:bg-gray-600 p-4 mb-12" style="padding-top: 108px">
@@ -21,6 +21,8 @@
     <div v-if="favouriteStore.posts.length == 0" class="text-center dark:text-gray-100 text-gray-900">
       You don't have any liked posts here!
     </div>
+    <SpinnerComponent v-if="favouriteStore.isLoading"/>
+
     </div>
     <InsufficientCoinsComponent v-if="showInsufficientCoinsModal" :requiredCoins="requiredCoins" :userCoins="userStore.user.coins" @closeInsufficientCoinsModal="showInsufficientCoinsModal = false"  />
 
@@ -29,6 +31,7 @@
 
 </template>
 <script>
+import SpinnerComponent from '@/components/SpinnerComponent.vue';
 import FavouriteItem from '@/components/Favourites/FavouriteItem.vue';
 import { useFavouritesStore } from '@/stores/favouritePost';
 import { useUserStore } from '@/stores/user';
@@ -44,8 +47,6 @@ export default {
       isReserving: false,
       requiredCoins: 0,
       showInsufficientCoinsModal: false,
-      isLoading: false,
-      hasMore: true,
     }
   },
   setup() {
@@ -64,7 +65,8 @@ export default {
     FavouriteItem,
     FooterComponent,
     NavbarWrapper,
-    InsufficientCoinsComponent
+    InsufficientCoinsComponent,
+    SpinnerComponent
   },
   methods: {
     setCurrentTab(tab) {
@@ -108,30 +110,69 @@ export default {
         this.isReserving = false;
       }
     },
-    async fetchPosts() {
-      if (this.isLoading || !this.hasMore) return
+    async fetchFavorites() {
+      if (this.favouriteStore.isLoading || !this.favouriteStore.hasMore) return;
 
-      this.isLoading = true
+      this.favouriteStore.isLoading = true;
+      
       try {
-        const response = await axios.get(`api/post/posts/favourites/`)
+        const response = await axios.get(`api/post/posts/favourites/?page=${this.favouriteStore.page}&page_size=10`);
+        
+        const newProducts = response.data.results.map(post => ({
+          id: post.id,
+          name: post.title,
+          price: parseFloat(post.price),
+          image: post.images[0],
+          images: post.images,
+          stockLeft: post.quantity,
+          totalStock: post.initial_quantity,
+          liked: post.liked,
+          quantity: 1,
+          isActive: post.is_active,
+          description: post.title,
+          sellerName: post.created_by.username,
+          sellerAvatar: "https://placehold.co/40",
+          postedDate: new Date(post.created_at).toLocaleDateString(),
+          embedding: post.embedding
+        }));
 
-        const newProducts = response.data.map(post => (getPostData(post)))
+        // Update store
+        if (this.favouriteStore.page === 1) {
+          this.favouriteStore.setPosts(newProducts);
+        } else {
+          this.favouriteStore.addPosts(newProducts);
+        }
 
-        this.favouriteStore.addPosts(newProducts)
-        // hasMore.value = newProducts.length > 0
-        // page.value++
+        // Update pagination
+        this.favouriteStore.hasMore = response.data.next !== null;
+        if (this.favouriteStore.hasMore) {
+          this.favouriteStore.incrementPage();
+        }
+
       } catch (error) {
-        console.error('Error fetching posts:', error)
+        console.error('Error fetching favorites:', error);
       } finally {
-        this.isLoading = false
+        this.favouriteStore.isLoading = false;
+      }
+    },
+    handleScroll() {
+      if (this.favouriteStore.isLoading || !this.favouriteStore.hasMore) return;
+      
+      const bottomOfWindow = document.documentElement.scrollTop + window.innerHeight === document.documentElement.offsetHeight;
+      
+      if (bottomOfWindow) {
+        this.fetchFavorites();
       }
     }
-
   },
-  async mounted() {
-    await this.fetchPosts()
+  mounted() {
+    this.favouriteStore.resetPagination();
+    this.fetchFavorites();
+    window.addEventListener('scroll', this.handleScroll);
+  },
+  unmounted() {
+    window.removeEventListener('scroll', this.handleScroll);
   }
 }
 
 </script>
-

@@ -1,24 +1,20 @@
 <template>
-
   <div class="min-h-screen bg-gray-100 dark:bg-gray-900 p-4">
     <NavbarWrapper class="bg-gray-100 dark:bg-gray-900 p-4">
       <h1 class="text-2xl text-gray-900 dark:text-gray-100 font-bold mb-6">Notifications</h1>
-    <div v-if="isLoading" class='mb-5 text-center dark:text-gray-100'>Loading...</div>
     <TabsComponent :currentTab="currentTab" @setCurrentTab="setCurrentTab"/>
-
     </NavbarWrapper>
     <div class="space-y-4 mt-6 mb-12" style="margin-top: 213px">
       <NotificationGroupComponent @setPopupContent="setPopupContent" @setIsPopupVisible="setIsPopupVisible" @openProductDetails="openProductDetails" v-for="notificationGroup in notificationStore.groupedNotifications" :key="notificationGroup" :notificationGroup="notificationGroup" />
-
     </div>
     <div class="text-center dark:text-gray-100" v-if="notificationStore.notifications.length === 0">
       You don't have any notifications.
     </div>
     <FooterComponent />
+    <SpinnerComponent v-if="isLoading"/>
     <PopupComponent v-if="isPopupVisible" :notification="popupContent" @closeModal="closeModal" />
     <SelectedProduct :isReserving="isReserving" :selectedProduct="selectedProduct" @reserveProduct="reserveProduct" @closeProductDetails="closeProductDetails" />
     <InsufficientCoinsComponent v-if="showInsufficientCoinsModal" :requiredCoins="requiredCoins" :userCoins="userStore.user.coins" @closeInsufficientCoinsModal="showInsufficientCoinsModal = false" />
-
   </div>
 </template>
 <script>
@@ -33,6 +29,7 @@ import { useUserStore } from "@/stores/user";
 import SelectedProduct from "@/components/Feed/SelectedProduct.vue";
 import PopupComponent from "@/components/App/PopupComponent.vue";
 import InsufficientCoinsComponent from "@/components/InsufficientCoinsComponent.vue"
+import SpinnerComponent from "@/components/SpinnerComponent.vue";
 export default {
   name: "NotificationView",
   components: {
@@ -42,6 +39,7 @@ export default {
     NotificationGroupComponent,
     SelectedProduct,
     PopupComponent,
+    SpinnerComponent,
     InsufficientCoinsComponent
   },
   data() {
@@ -54,6 +52,8 @@ export default {
       isPopupVisible: false,
       popupContent: null,
       isLoading: false,
+      page: 1,
+      hasMore: true,
     }
   },
   setup() {
@@ -69,55 +69,35 @@ export default {
   methods: {
     fetchNotifications() {
       console.log("fetching", this.currentTab)
-      if(this.currentTab === 'All'){
-        this.isLoading = true;
-        axios.get('api/notification/notifications/')
-        .then(
-          response => {
-            console.log("resp all", response.data)
-            this.isLoading = false;
+      const url = this.currentTab === 'All' 
+        ? `api/notification/notifications/?page=${this.page}`
+        : `/api/notification/notifications/?type=${this.currentTab.toLowerCase()}&page=${this.page}`;
 
-            this.notificationStore.setNotifications(response.data)
+      this.isLoading = true;
+      axios.get(url)
+        .then(response => {
+          console.log("resp", response.data)
+          this.isLoading = false;
+          
+          // Check if we have more pages
+          this.hasMore = response.data.next !== null;
+          
+          // If it's first page, set notifications, otherwise append
+          if (this.page === 1) {
+            this.notificationStore.setNotifications(response.data.results)
+          } else {
+            this.notificationStore.addNotifications(response.data.results)
           }
-        )
-        .catch(
-          error => {
-            console.log("error", error)
-            this.isLoading = false;
-
-            this.toastStore.showToast(
-              5000,
-              "Something went wrong. Please refresh!",
-              "bg-red-300 dark:bg-red-300"
-            )
-          }
-        )
-      }else {
-        this.isLoading = true;
-
-        axios.get(`/api/notification/notifications/?type=${this.currentTab.toLowerCase()}`)
-        .then(
-          response => {
-            console.log("resp", response.data)
-            this.isLoading = false;
-
-            this.notificationStore.setNotifications(response.data)
-          }
-        )
-        .catch(
-          error => {
-            console.log("error", error)
-            this.isLoading = false;
-
-            this.toastStore.showToast(
-              5000,
-              "Something went wrong. Please refresh!",
-              "bg-red-300 dark:bg-red-300"
-            )
-          }
-        )
-
-      }
+        })
+        .catch(error => {
+          console.log("error", error)
+          this.isLoading = false;
+          this.toastStore.showToast(
+            5000,
+            "Something went wrong. Please refresh!",
+            "bg-red-300 dark:bg-red-300"
+          )
+        })
     },
     closeModal() {
       this.isPopupVisible = false;
@@ -175,11 +155,26 @@ export default {
     },
     setCurrentTab(tab) {
       this.currentTab = tab
-    }
-
+      this.page = 1
+      this.hasMore = true
+    },
+    handleScroll() {
+      if (this.isLoading || !this.hasMore) return;
+      
+      const bottomOfWindow = document.documentElement.scrollTop + window.innerHeight === document.documentElement.offsetHeight;
+      
+      if (bottomOfWindow) {
+        this.page += 1;
+        this.fetchNotifications();
+      }
+    },
   },
   mounted() {
     this.fetchNotifications()
+    window.addEventListener('scroll', this.handleScroll)
+  },
+  unmounted() {
+    window.removeEventListener('scroll', this.handleScroll) 
   },
   watch: {
     currentTab: {
@@ -190,6 +185,5 @@ export default {
       immediate: true,
     }
   }
-
 }
 </script>

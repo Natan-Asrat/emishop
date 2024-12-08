@@ -8,23 +8,32 @@ from .serializers import ConversationSerializer, MessageSerializer, Notification
 from .models import Notification
 from django.db.models import Count, Q
 from django_filters.rest_framework import DjangoFilterBackend
+from .pagination import CustomPageNumberPagination
 # Create your views here.
 
 class ConversationViewSet(viewsets.ModelViewSet):
     queryset = Conversation.objects.all()
     serializer_class = ConversationSerializer
     filter_backends = [DjangoFilterBackend]
+    pagination_class = CustomPageNumberPagination
     filterset_fields = ['type']
     @action(detail=True, methods=['GET'])
     def messages(self, request, pk=None):
         conversation = self.get_object()
         messages = Message.objects.filter(conversation=conversation)
+        
+        paginated_messages = self.paginate_queryset(messages)
+        
+        if paginated_messages is not None:
+            serializer = MessageSerializer(paginated_messages, many=True)
+            return self.get_paginated_response(serializer.data)
         serializer = MessageSerializer(messages, many=True)
         return Response(serializer.data)
     
 class NotificationViewSet(mixins.ListModelMixin, mixins.UpdateModelMixin, viewsets.GenericViewSet):
     serializer_class = NotificationSerializer
     queryset = Notification.objects.all()
+    pagination_class = CustomPageNumberPagination
     def get_queryset(self):
         queryset = self.queryset.filter(user=self.request.user)
         notification_type = self.request.query_params.get('type')

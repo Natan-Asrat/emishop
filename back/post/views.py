@@ -13,11 +13,12 @@ from rest_framework.filters import SearchFilter
 from django.utils.timezone import now, timedelta
 from django.conf import settings
 from transaction.models import Reservation
+from .pagination import CustomPageNumberPagination
 import uuid
 # Create your views here.
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.filter(is_active=True)
-
+    pagination_class = CustomPageNumberPagination
     filter_backends = (SearchFilter,)
     search_fields = [
         'title',
@@ -84,6 +85,11 @@ class PostViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['GET'])
     def favourites(self, request):
         liked_posts = Post.objects.filter(likes__liked_by=request.user, is_active=True)
+        paginated_queryset = self.paginate_queryset(liked_posts)
+        if paginated_queryset is not None:
+            serializer = self.get_serializer(paginated_queryset, many=True)
+            return self.get_paginated_response(serializer.data)
+        
         serializer = self.get_serializer(liked_posts, many=True)
         return Response(serializer.data)
 
@@ -112,14 +118,20 @@ class PostViewSet(viewsets.ModelViewSet):
             posts = Post.objects.filter(is_active=True).annotate(
                     similarity=CosineDistance('embedding', user_embedding),
                     liked=Exists(liked_subquery)
-                ).exclude(created_by__id__in=reported_seller_ids).order_by('similarity')[:1]
+                ).exclude(created_by__id__in=reported_seller_ids).order_by('similarity')
 
         else:
             # Exclude posts from reported sellers and return diverse range of posts
             posts = Post.objects.filter(is_active=True).exclude(
                 created_by__id__in=reported_seller_ids
-            ).order_by('?').annotate(liked=Exists(liked_subquery))[:20]
+            ).order_by('?').annotate(liked=Exists(liked_subquery))
 
+        paginated_posts = self.paginate_queryset(posts)
+        
+        if paginated_posts is not None:
+            serializer = self.get_serializer(paginated_posts, many=True)
+            return self.get_paginated_response(serializer.data)
+        
         serializer = self.get_serializer(posts, many=True)
         return Response(serializer.data)
 
@@ -215,8 +227,9 @@ class PostViewSet(viewsets.ModelViewSet):
 
         # Retrieve posts with the valid IDs
         posts = self.queryset.filter(id__in=valid_ids)
-
-        # Serialize the posts
+        paginated_queryset = self.paginate_queryset(posts)
+        if paginated_queryset is not None:
+            serializer = self.get_serializer(paginated_queryset, many=True)
+            return self.get_paginated_response(serializer.data)
         serializer = self.get_serializer(posts, many=True)
-
         return Response(serializer.data, status=status.HTTP_200_OK)

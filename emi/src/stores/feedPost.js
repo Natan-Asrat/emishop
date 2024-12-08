@@ -6,6 +6,9 @@ export const useFeedPostStore = defineStore({
     posts: [],
     searchResults: [],
     isSearchExpanded: false,
+    page: 1,
+    hasMore: true,
+    isLoading: false
   }),
   actions: {
     setSearchExpanded(expanded) {
@@ -24,10 +27,23 @@ export const useFeedPostStore = defineStore({
       this.searchResults = results;
     },
     addPost(post) {
-      this.posts.push(post);
+      const exists = this.posts.some(p => p.id === post.id);
+      if (!exists) {
+        this.posts.push(post);
+      }
     },
-    addPosts(p) {
-      p.forEach(post => this.addPost(post));
+    addPosts(posts) {
+      const newPosts = [];
+      posts.forEach(post => {
+        const exists = this.posts.some(p => p.id === post.id);
+        if (!exists) {
+          newPosts.push(post);
+        }
+      });
+      this.posts = [...this.posts, ...newPosts];
+    },
+    setPosts(posts) {
+      this.posts = posts;
     },
     changePost(post, index) {
       this.posts[index] = post;
@@ -47,6 +63,13 @@ export const useFeedPostStore = defineStore({
         this.posts[index].quantity = quantity;
       }
     },
-
+    resetPagination() {
+      this.page = 1;
+      this.hasMore = true;
+      this.posts = [];
+    },
+    incrementPage() {
+      this.page += 1;
+    },
   }
 })

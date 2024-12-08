@@ -66,6 +66,8 @@ const closeModal = () => {
 const checkScreenSize = () => {
   if (window.innerWidth > 768) {
     showMobileWarning.value = true;
+  } else {
+    showMobileWarning.value = false;
   }
 };
 
@@ -252,6 +254,7 @@ defineExpose({ logout });
   <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
     <Dialog 
       :open="showMobileWarning"
+      v-if="showMobileWarning"
       class="relative z-50"
       static
     >

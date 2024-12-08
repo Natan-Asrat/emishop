@@ -15,7 +15,9 @@
           @decrementQuantity="feedPostStore.decrementQuantity"
         />
       </div>
-      <div class="text-center text-gray-900 dark:text-gray-100 mt-4" v-if="!isLoading && feedPostStore.posts.length === 0">
+      <SpinnerComponent v-if="feedPostStore.isLoading"/>
+
+      <div class="text-center text-gray-900 dark:text-gray-100 mt-4" v-if="!feedPostStore.isLoading && feedPostStore.posts.length === 0">
         <p class="text-lg">There are no posts yet. Be the first to post!</p>
       </div>
       <InsufficientCoinsComponent v-if="showInsufficientCoinsModal" :requiredCoins="requiredCoins" :userCoins="userStore.user.coins" @closeInsufficientCoinsModal="showInsufficientCoinsModal = false"  />
@@ -33,7 +35,7 @@ import { useFeedPostStore } from '@/stores/feedPost';
 import { useRecommendationStore } from '@/stores/recommendation';
 import { useUserStore } from '@/stores/user';
 import SelectedProduct from '@/components/Feed/SelectedProduct.vue';
-
+import SpinnerComponent from '@/components/SpinnerComponent.vue';
 const recommendationStore = useRecommendationStore();
 const feedPostStore = useFeedPostStore();
 const userStore = useUserStore();
@@ -49,18 +51,14 @@ const showInsufficientCoinsModal = ref(false)
 const selectedProduct = ref(null)
 const isReserving = ref(false);
 const router = useRouter();
-const isLoading = ref(false);
-const hasMore = ref(true)
-const page = ref(1)
-const userEmbedding = ref(new Array(recommendationStore.EMBEDDING_SIZE).fill(0))
-
+const requiredCoins = ref(0)
 
 const handleSetProduct = (product, index) => {
   console.log("set", product)
   console.log("prev", feedPostStore.posts[index])
   feedPostStore.changePost(product, index);
 }
-const requiredCoins = ref(0)
+
 const openProductDetails = (product) => {
   selectedProduct.value = product
   recommendationStore.updatePostInteraction(product.id, 'detailView')
@@ -116,84 +114,88 @@ const reserveProduct = async (product) => {
 };
 
 const fetchPosts = async () => {
-  if (isLoading.value || !hasMore.value) return
+  if (feedPostStore.isLoading || !feedPostStore.hasMore) return
 
-  isLoading.value = true
+  feedPostStore.isLoading = true
   try {
     const mainEmbeddings = JSON.parse(localStorage.getItem('mainEmbeddings') || '[]')
     let response
 
     if (mainEmbeddings !== null && mainEmbeddings.length >= 60) {
-      // If we have enough interaction data, send user embedding
-      // response = await axios.post(`${API_URL}/posts/feed/`, {
-      //   user_embedding: userEmbedding.value
-      // })
-      response = await axios.post(`api/post/posts/feed/`, {user_embedding: userEmbedding.value})
+      // If we have enough interaction data, send user embedding in batches of 10
+      response = await axios.post(`api/post/posts/feed/?page=${feedPostStore.page}`, {
+        user_embedding: recommendationStore.userEmbedding,
+        page_size: 10
+      })
     } else {
-      // Otherwise, get diverse results
-      response = await axios.get(`api/post/posts/feed/`)
+      // Otherwise, get diverse results in batches of 10
+      response = await axios.get(`api/post/posts/feed/?page=${feedPostStore.page}&page_size=10`)
     }
-    console.log("res", response.data)
-    const newProducts = response.data.map(post => ({
+    console.log("Response:", response.data)
+    
+    const newProducts = response.data.results.map(post => ({
       id: post.id,
       name: post.title,
       price: parseFloat(post.price),
       image: post.images[0],
-      images: post.images, // Assuming single image for now
+      images: post.images,
       stockLeft: post.quantity,
       totalStock: post.initial_quantity,
       liked: post.liked,
       quantity: 1,
       isActive: post.is_active,
-      description: post.title, // You might want to add description field in your model
+      description: post.title,
       sellerName: post.created_by.username,
-      sellerAvatar: "https://placehold.co/40", // You might want to add avatar in your UserProfile
+      sellerAvatar: "https://placehold.co/40",
       postedDate: new Date(post.created_at).toLocaleDateString(),
       embedding: post.embedding
     }))
-    for(const product of newProducts){
-      recommendationStore.updatePostInteraction(product.id, 'view')
 
+    // Update store with new products
+    if (feedPostStore.page === 1) {
+      feedPostStore.setPosts(newProducts)
+    } else {
+      feedPostStore.addPosts(newProducts)
     }
 
-    feedPostStore.addPosts(newProducts)
-    hasMore.value = newProducts.length > 0
-    page.value++
+    // Update pagination
+    feedPostStore.hasMore = response.data.next !== null
+    if (feedPostStore.hasMore) {
+      feedPostStore.incrementPage()
+    }
+
+    // Track interactions
+    for(const product of newProducts){
+      recommendationStore.updatePostInteraction(product.id, 'view')
+    }
+
   } catch (error) {
     console.error('Error fetching posts:', error)
   } finally {
-    isLoading.value = false
+    feedPostStore.isLoading = false
   }
 }
 
+// Handle scroll
+const handleScroll = () => {
+  if (feedPostStore.isLoading || !feedPostStore.hasMore) return;
+  
+  const bottomOfWindow = document.documentElement.scrollTop + window.innerHeight === document.documentElement.offsetHeight;
+  
+  if (bottomOfWindow) {
+    fetchPosts();
+  }
+}
 
-
-onMounted(async () => {
-  recommendationStore.loadUserData();
-  await fetchPosts()
-
-  nextTick(() => {
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-          const productId = entry.target.dataset.productId; // Ensure your elements have a data-product-id attribute
-          if (entry.isIntersecting) {
-              // Element is in the viewport
-              recommendationStore.updateVisibility(productId, true);
-          } else {
-              // Element has left the viewport
-              recommendationStore.updateVisibility(productId, false);
-          }
-      });
-  });
-
-  // Assuming you have elements with the class 'product' and data-product-id
-  const productElements = document.querySelectorAll('.product');
-  productElements.forEach((element) => observer.observe(element));
-  })
+// Lifecycle hooks
+onMounted(() => {
+  feedPostStore.resetPagination()
+  fetchPosts()
+  window.addEventListener('scroll', handleScroll)
 })
 
 onUnmounted(() => {
-  recommendationStore.saveUserData()
+  window.removeEventListener('scroll', handleScroll)
 })
 
 watch(

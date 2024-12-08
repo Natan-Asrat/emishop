@@ -10,7 +10,7 @@ export const useNotificationStore = defineStore({
   }),
   actions: {
     setNotifications(notifications) {
-      this.notifications= notifications
+      this.notifications = notifications
       this.sort()
       this.updateGroupedNotifications()
       this.updateCounts()
@@ -22,23 +22,23 @@ export const useNotificationStore = defineStore({
       this.updateCounts()
     },
     addNotifications(notifications) {
-      notifications.map(newNotification => {
-        const existingIndex = this.notifications.findIndex(nt => nt.id === newNotification.id);
+      const newNotifications = this.notifications.slice();
+      notifications.forEach(newNotification => {
+        const existingIndex = newNotifications.findIndex(nt => nt.id === newNotification.id);
         if (existingIndex !== -1) {
-          this.notifications[existingIndex] = newNotification; // Replace if exists
+          newNotifications[existingIndex] = newNotification; // Replace if exists
         } else {
-          this.notifications.push(newNotification); // Add new
+          newNotifications.push(newNotification); // Add new
         }
-        return newNotification;
       });
 
       // Replace with a fresh array reference to ensure reactivity
-      this.notifications = [...this.notifications];
+      this.notifications = newNotifications;
       this.sort()
       this.updateGroupedNotifications()
       this.updateCounts()
     },
-    sort () {
+    sort() {
       this.notifications.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
     },
     getTimeLabel(date) {
@@ -79,12 +79,12 @@ export const useNotificationStore = defineStore({
 
     updateCounts() {
       axios.get('api/notification/notifications/count/')
-      .then(
-        response => {
-          console.log("count", response.data)
-          this.count = response.data
-        }
-      )
+        .then(
+          response => {
+            console.log("count", response.data)
+            this.count = response.data
+          }
+        )
     }
 
   }

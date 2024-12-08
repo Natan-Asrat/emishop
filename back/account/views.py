@@ -16,27 +16,54 @@ from django.db.models import Count, Q
 from post.serializers import PostSerializer
 from post.models import Like
 from django.db.models import Exists, OuterRef
+from .pagination import CustomPageNumberPagination
+
 class UserViewSet(
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
     viewsets.GenericViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    pagination_class = PageNumberPagination
+    pagination_class = CustomPageNumberPagination
+
     def get_permissions(self):
         if self.action == 'create':
             return [AllowAny()]
         return super().get_permissions()
+
     @action(detail=False, methods=['get'])
     def myposts(self, request, pk=None):
         user = request.user
+        print(f"User: {user}")  # Debug print
+        print(f"User ID: {user.id}")  # Debug print
+        
+        # Get page and page_size from query parameters
+        page_number = request.query_params.get('page', 1)
+        page_size = request.query_params.get('page_size', 10)
+        
+        print(f"Page Number: {page_number}")
+        print(f"Page Size: {page_size}")
+        
         liked_subquery = Like.objects.filter(
             post=OuterRef("pk"),  # Refers to the current post in the main queryset
             liked_by=user,
         )
+        
         posts = user.posts.filter(is_active=True).annotate(liked=Exists(liked_subquery))
+        
+        print(f"Total posts count: {posts.count()}")  # Debug print
+        
+        paginated_queryset = self.paginate_queryset(posts)
+        
+        print(f"Paginated queryset: {paginated_queryset}")  # Debug print
+        
+        if paginated_queryset is not None:
+            serializer = PostSerializer(paginated_queryset, many=True)
+            return self.get_paginated_response(serializer.data)
+        
         serializer = PostSerializer(posts, many=True)
         return Response(serializer.data)
+
     @action(detail=True, methods=['get'])
     def followers(self, request, pk=None):
         user = self.get_object()
@@ -49,6 +76,7 @@ class UserViewSet(
         # If no pagination is applied, return all followers
         serializer = UserSerializer(followers, many=True)
         return Response(serializer.data)
+
     @action(detail=True, methods=['get'])
     def following(self, request, pk=None):
         user = self.get_object()

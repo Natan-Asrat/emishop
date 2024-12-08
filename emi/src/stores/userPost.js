@@ -3,7 +3,10 @@ import { defineStore } from "pinia";
 export const useUserPostsStore = defineStore({
   id: 'user_posts',
   state: () => ({
-    posts: []
+    posts: [],
+    page: 1,
+    hasMore: true,
+    isLoading: false,
   }),
   actions: {
     replacePost(post) {
@@ -13,7 +16,10 @@ export const useUserPostsStore = defineStore({
       }
     },
     addPost(post) {
-      this.posts.push(post);
+      // Only add if not already exists
+      if (!this.posts.find(p => p.id === post.id)) {
+        this.posts.push(post);
+      }
     },
     
     changePost(post, index) {
@@ -21,6 +27,17 @@ export const useUserPostsStore = defineStore({
     },
     addPosts(p) {
       p.forEach(post => this.addPost(post));
+    },
+    setPosts(posts) {
+      this.posts = posts;
+    },
+    resetPagination() {
+      this.page = 1;
+      this.hasMore = true;
+      this.posts = [];
+    },
+    incrementPage() {
+      this.page += 1;
     },
   }
 })

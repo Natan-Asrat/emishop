@@ -51,8 +51,17 @@
     <div v-if="isLoading" class='mb-5 text-center dark:text-gray-100'>Loading...</div>
   <TabsComponent :trueForReservationFalseForOrder="trueForReservationFalseForOrder" @setCurrentTab="setCurrentTab" :currentTab="currentTab"/>
     <div class="space-y-4 mb-16">
-      <TransactionComponent :trueForReservationFalseForOrder="trueForReservationFalseForOrder" @removeTransaction="removeTransaction" @setTransaction="handleSetTransaction" v-for="(transaction, index) in filteredTransactions" :key="transaction.id" :index="index" :transaction="transaction" />
+      <TransactionComponent 
+        :trueForReservationFalseForOrder="trueForReservationFalseForOrder" 
+        @removeTransaction="removeTransaction" 
+        @setTransaction="handleSetTransaction" 
+        v-for="(transaction, index) in filteredTransactions" 
+        :key="transaction.id" 
+        :index="index" 
+        :transaction="transaction" 
+      />
     </div>
+    <SpinnerComponent v-if="transactionStore.isLoadingTransactions || transactionStore.isLoadingOrders"/>
     <div class="text-center dark:text-gray-100" v-if="!filteredTransactions || filteredTransactions.length === 0">
       You don't have any transactions yet.
     </div>
@@ -66,6 +75,7 @@ import { useTransactionsStore } from '@/stores/transactions';
 import FooterComponent from '@/components/FooterComponent.vue';
 import axios from 'axios';
 import { ArrowLeft, ArrowRight, BellIcon } from 'lucide-vue-next';
+import SpinnerComponent from '@/components/SpinnerComponent.vue';
 export default {
   components: {
     TabsComponent,
@@ -73,7 +83,8 @@ export default {
     FooterComponent,
     ArrowLeft,
     ArrowRight,
-    BellIcon
+    BellIcon,
+    SpinnerComponent
   },
   setup() {
     const transactionStore = useTransactionsStore();
@@ -125,38 +136,105 @@ export default {
         this.transactionStore.removeOrder(id);
       }
     },
-    fetchTransactions() {
-      this.isLoading = true;
-      axios.get(`/api/transaction/reservations/?status=${this.currentTab.toLowerCase()}`)
-      .then(
-        response => {
-          console.log(response.data)
-          this.transactionStore.addTransactions(response.data);
-          this.isLoading = false;
+    async fetchTransactions() {
+      const status = this.currentTab.toLowerCase()
+      if (this.transactionStore.isLoadingTransactions || 
+          !this.transactionStore.hasMoreTransactions[status]) return
+
+      this.transactionStore.isLoadingTransactions = true
+      try {
+        const response = await axios.get('api/transaction/reservations/', {
+          params: { 
+            page: this.transactionStore.transactionPages[status],
+            status: status
+          }
+        })
+
+        const newTransactions = response.data.results
+
+        // Add new transactions, filtering out duplicates
+        this.transactionStore.addTransactions(newTransactions, status)
+
+        // Update has more flag for this specific status
+        this.transactionStore.hasMoreTransactions[status] = response.data.next !== null
+        
+        // Increment page for this specific status if more exist
+        if (this.transactionStore.hasMoreTransactions[status]) {
+          this.transactionStore.incrementPage('transactions', status)
         }
-      )
+      } catch (error) {
+        console.error('Error fetching transactions:', error)
+      } finally {
+        this.transactionStore.isLoadingTransactions = false
+      }
     },
-    fetchOrders(){
-      this.isLoading = true;
-      axios.get(`/api/transaction/orders/?status=${this.currentTab.toLowerCase()}`)
-      .then(
-        response => {
-          console.log("orders", response.data)
-          this.transactionStore.addOrders(response.data);
-          this.isLoading = false;
+
+    async fetchOrders() {
+      const status = this.currentTab.toLowerCase()
+      if (this.transactionStore.isLoadingOrders || 
+          !this.transactionStore.hasMoreOrders[status]) return
+
+      this.transactionStore.isLoadingOrders = true
+      try {
+        const response = await axios.get('api/transaction/orders/', {
+          params: { 
+            page: this.transactionStore.orderPages[status],
+            status: status
+          }
+        })
+
+        const newOrders = response.data.results
+
+        // Add new orders, filtering out duplicates
+        this.transactionStore.addOrders(newOrders, status)
+
+        // Update has more flag for this specific status
+        this.transactionStore.hasMoreOrders[status] = response.data.next !== null
+        
+        // Increment page for this specific status if more exist
+        if (this.transactionStore.hasMoreOrders[status]) {
+          this.transactionStore.incrementPage('orders', status)
         }
-      )
+      } catch (error) {
+        console.error('Error fetching orders:', error)
+      } finally {
+        this.transactionStore.isLoadingOrders = false
+      }
+    },
+
+    handleScroll() {
+      const scrolledToBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 100
+      if (scrolledToBottom) {
+        if (this.trueForReservationFalseForOrder) {
+          this.fetchTransactions()
+        } else {
+          this.fetchOrders()
+        }
+      }
     }
   },
+
+  mounted() {
+    window.addEventListener('scroll', this.handleScroll)
+  },
+
+  beforeUnmount() {
+    window.removeEventListener('scroll', this.handleScroll)
+  },
+
   watch: {
     currentTab: {
       handler(newTab) {
-        console.log(newTab);
-        console.log("tra", this.transactionStore.transactions);
+        const status = newTab.toLowerCase()
+        const type = this.trueForReservationFalseForOrder ? 'transactions' : 'orders'
+        
+        // Reset pagination for the specific status
+        this.transactionStore.resetPagination(type, status)
+        
         if(this.trueForReservationFalseForOrder){
-          this.fetchTransactions();
+          this.fetchTransactions()
         }else{
-          this.fetchOrders();
+          this.fetchOrders()
         }
       },
       immediate: true,
@@ -164,17 +242,20 @@ export default {
 
     trueForReservationFalseForOrder: {
       handler(newTab) {
-        console.log(newTab);
-        console.log("tra", this.transactionStore.transactions);
+        const status = this.currentTab.toLowerCase()
+        const type = this.trueForReservationFalseForOrder ? 'transactions' : 'orders'
+        
+        // Reset pagination for the specific status
+        this.transactionStore.resetPagination(type, status)
+        
         if(this.trueForReservationFalseForOrder){
-          this.fetchTransactions();
+          this.fetchTransactions()
         }else{
-          this.fetchOrders();
+          this.fetchOrders()
         }
       },
       immediate: true,
     }
-
   }
 }
 </script>

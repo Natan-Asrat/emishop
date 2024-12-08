@@ -8,6 +8,28 @@ export const useTransactionsStore = defineStore({
     orders: [],
     reservationsCount: null,
     ordersCount: null,
+    transactionPages: {
+      pending: 1,
+      completed: 1,
+      cancelled: 1
+    },
+    orderPages: {
+      pending: 1,
+      completed: 1,
+      cancelled: 1
+    },
+    hasMoreTransactions: {
+      pending: true,
+      completed: true,
+      cancelled: true
+    },
+    hasMoreOrders: {
+      pending: true,
+      completed: true,
+      cancelled: true
+    },
+    isLoadingTransactions: false,
+    isLoadingOrders: false,
   }),
   actions: {
     addTransaction(transaction) {
@@ -40,36 +62,20 @@ export const useTransactionsStore = defineStore({
       this.orders = [...this.orders];
     },
 
-    addTransactions(transactions) {
+    addTransactions(transactions, status) {
       this.updateCounts()
-      transactions.map(newTransaction => {
-        const existingIndex = this.transactions.findIndex(tr => tr.id === newTransaction.id);
-        if (existingIndex !== -1) {
-          this.transactions[existingIndex] = newTransaction; // Replace if exists
-        } else {
-          this.transactions.push(newTransaction); // Add new
-        }
-        return newTransaction;
-      });
-
-      // Replace with a fresh array reference to ensure reactivity
-      this.transactions = [...this.transactions];
+      const filteredTransactions = transactions.filter(
+        newTrans => !this.transactions.some(existingTrans => existingTrans.id === newTrans.id)
+      )
+      this.transactions.push(...filteredTransactions)
     },
 
-    addOrders(transactions) {
+    addOrders(transactions, status) {
       this.updateCounts()
-      transactions.map(newTransaction => {
-        const existingIndex = this.orders.findIndex(tr => tr.id === newTransaction.id);
-        if (existingIndex !== -1) {
-          this.orders[existingIndex] = newTransaction; // Replace if exists
-        } else {
-          this.orders.push(newTransaction); // Add new
-        }
-        return newTransaction;
-      });
-
-      // Replace with a fresh array reference to ensure reactivity
-      this.orders = [...this.orders];
+      const filteredOrders = transactions.filter(
+        newOrder => !this.orders.some(existingOrder => existingOrder.id === newOrder.id)
+      )
+      this.orders.push(...filteredOrders)
     },
     replaceTransactions(transaction) {
       this.updateCounts()
@@ -102,10 +108,10 @@ export const useTransactionsStore = defineStore({
     },
     removeOrder(id) {
       this.updateCounts()
-      this.order = this.order.filter(transaction => transaction.id !== id);
+      this.orders = this.orders.filter(transaction => transaction.id !== id);
 
       // Ensure reactivity by replacing the array reference
-      this.order = [...this.order];
+      this.orders = [...this.orders];
     },
     getTransactions() {
       return this.transactions
@@ -130,7 +136,35 @@ export const useTransactionsStore = defineStore({
           this.reservationsCount = response.data
         }
       )
-    }
+    },
+    resetPagination(type = 'transactions', status = null) {
+      if (type === 'transactions') {
+        if (status) {
+          this.transactionPages[status] = 1
+          this.hasMoreTransactions[status] = true
+        } else {
+          this.transactionPages = { pending: 1, completed: 1, cancelled: 1 }
+          this.hasMoreTransactions = { pending: true, completed: true, cancelled: true }
+        }
+        this.transactions = []
+      } else if (type === 'orders') {
+        if (status) {
+          this.orderPages[status] = 1
+          this.hasMoreOrders[status] = true
+        } else {
+          this.orderPages = { pending: 1, completed: 1, cancelled: 1 }
+          this.hasMoreOrders = { pending: true, completed: true, cancelled: true }
+        }
+        this.orders = []
+      }
+    },
 
+    incrementPage(type, status) {
+      if (type === 'transactions') {
+        this.transactionPages[status] += 1
+      } else if (type === 'orders') {
+        this.orderPages[status] += 1
+      }
+    },
   }
 })
