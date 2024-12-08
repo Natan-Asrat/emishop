@@ -1,15 +1,15 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-gray-100 to-blue-400 dark:bg-gradient-to-br dark:from-gray-900 dark:to-blue-900 text-white">
+  <div class="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
     <NewPostHeader />
     <main class="max-w-3xl mx-auto pt-20 pb-24 px-4 sm:px-6 lg:px-8">
       <NewPostImageUpload  :images="images" :imagePreviews="imagePreviews" @close="closeImageSourceDialog" @removeImage="removeImage" @showImageSourceDialog="showImageSourceDialog"/>
       <div class="mb-6">
-        <label for="title" class="block text-sm font-medium mb-2 dark:text-blue-300 text-black">Title</label>
+        <label for="title" class="block text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">Title</label>
         <input
           id="title"
           v-model="title"
           type="text"
-          class="w-full px-3 py-2 bg-white dark:bg-black dark:bg-opacity-30 border border-blue-500 rounded-md shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500 text-black dark:text-white placeholder-gray-700 dark:placeholder-blue-300"
+          class="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 rounded-md shadow-inner focus:outline-none focus:ring-2 focus:ring-gray-500 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
           placeholder="Enter product title"
         />
         <div v-if="errors.title" class="mt-2 flex items-center space-x-2 bg-red-50 dark:bg-red-900/30 p-2 rounded">
@@ -20,15 +20,15 @@
 
         <!-- Tags Input -->
       <div class="mb-6">
-        <label for="tags" class="block text-sm font-medium mb-2 dark:text-blue-300 text-black">Tags</label>
+        <label for="tags" class="block text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">Tags</label>
         <div class="flex flex-wrap gap-2 mb-2">
           <span
             v-for="(tag, index) in tags"
             :key="index"
-            class="bg-blue-500 bg-opacity-50 text-white px-3 py-2 rounded-full text-md flex items-center"
+            class="bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 rounded-full text-md flex items-center"
           >
             {{ tag }}
-            <button @click="removeTag(index)" class="ml-1 text-white hover:text-blue-200 transition-colors duration-300">
+            <button @click="removeTag(index)" class="ml-1 text-gray-900 dark:text-gray-100 hover:text-gray-700 dark:hover:text-gray-300 transition-colors duration-300">
               <X class="h-4 w-4" />
             </button>
           </span>
@@ -40,10 +40,10 @@
             @keydown.space.prevent="addTag"
             @keydown.enter.prevent="addTag"
             type="text"
-            class="flex-grow px-3 py-2 bg-white dark:bg-black dark:bg-opacity-30 border border-blue-500 rounded-l-md shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500 text-black dark:text-white placeholder-gray-700 dark:placeholder-blue-300"
+            class="flex-grow px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 rounded-l-md shadow-inner focus:outline-none focus:ring-2 focus:ring-gray-500 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
             placeholder="Enter tags"
           />
-          <button @click="addTag" class="btn btn-primary rounded-l-none h-10 w-10 bg-blue-800 dark:bg-blue-500">Add</button>
+          <button @click="addTag" class="btn btn-primary rounded-l-none h-10 w-10 bg-gray-900 dark:bg-gray-700 text-gray-100 dark:text-gray-200">Add</button>
         </div>
         <div v-if="errors.tags" class="mt-2 flex items-center space-x-2 bg-red-50 dark:bg-red-900/30 p-2 rounded">
           <AlertCircle class="h-4 w-4 text-red-700 dark:text-red-400" />
@@ -53,11 +53,11 @@
 
         <!-- Price Input -->
       <div class="mb-6">
-        <label for="price" class="block text-sm font-medium mb-2 dark:text-blue-300 text-black">Price</label>
+        <label for="price" class="block text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">Price</label>
         <div class="flex items-center">
           <select
             v-model="selectedCurrency"
-            class="mr-2 bg-white dark:bg-black dark:bg-opacity-30 border border-blue-500 rounded-md shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500 text-black dark:text-white"
+            class="mr-2 bg-white dark:bg-gray-800 border border-gray-300 rounded-md shadow-inner focus:outline-none focus:ring-2 focus:ring-gray-500 text-gray-900 dark:text-gray-100"
           >
             <option v-for="currency in currencies" :key="currency" :value="currency">{{ currency }}</option>
           </select>
@@ -67,7 +67,7 @@
             @input="formatPrice"
             @focus="enableCurrencySelection"
             type="text"
-            class="flex-grow px-3 py-2 bg-white dark:bg-black dark:bg-opacity-30 border border-blue-500 rounded-md shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500 text-black dark:text-white placeholder-gray-700 dark:placeholder-blue-300"
+            class="flex-grow px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 rounded-md shadow-inner focus:outline-none focus:ring-2 focus:ring-gray-500 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
             placeholder="Enter price (min 1,000)"
           />
         </div>
@@ -79,7 +79,7 @@
           <AlertCircle class="h-4 w-4 text-red-700 dark:text-red-400" />
           <p class="text-sm text-red-700 dark:text-red-400 font-semibold">{{ errors.currency }}</p>
         </div>
-        <div v-if="showAdvertisedPrice" class="mt-2 flex items-center space-x-2 bg-blue-50 dark:bg-blue-900/30 p-2 rounded">
+        <div v-if="price" class="mt-2 flex items-center space-x-2 bg-blue-50 dark:bg-blue-900/30 p-2 rounded">
           <Info class="h-4 w-4 text-blue-900 dark:text-blue-300" />
           <p class="text-sm text-blue-900 dark:text-blue-300 font-semibold">
             Advertised price with commission: {{ getAdvertisedPrice() }} {{ selectedCurrency }}
@@ -89,11 +89,11 @@
 
         <!-- Quantity Input -->
       <div class="mb-8">
-        <label for="quantity" class="block text-sm font-medium mb-2 dark:text-blue-300 text-black">Quantity</label>
+        <label for="quantity" class="block text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">Quantity</label>
         <div class="flex items-center">
           <button
             @click="decrementQuantity"
-            class="bg-blue-800 dark:bg-gray-700 text-gray-200 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 h-10 w-10 rounded-l"
+            class="bg-gray-900 dark:bg-gray-700 text-gray-100 dark:text-gray-200 hover:text-gray-700 dark:hover:text-gray-300 h-10 w-10 rounded-l"
           >
             -
           </button>          
@@ -102,11 +102,11 @@
             v-model="quantity"
             type="number"
             min="1"
-            class="w-20 px-3 py-2 bg-white dark:bg-black dark:bg-opacity-30 border-t border-b border-blue-500 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 text-black dark:text-white"
+            class="w-20 px-3 py-2 bg-white dark:bg-gray-800 border-t border-b border-gray-300 text-center focus:outline-none focus:ring-2 focus:ring-gray-500 text-gray-900 dark:text-gray-100"
           />
           <button
             @click="incrementQuantity"
-            class="bg-blue-800 dark:bg-gray-700 text-gray-200 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 h-10 w-10 rounded-r"
+            class="bg-gray-900 dark:bg-gray-700 text-gray-100 dark:text-gray-200 hover:text-gray-700 dark:hover:text-gray-300 h-10 w-10 rounded-r"
           >
             +
           </button>        
@@ -212,13 +212,6 @@ export default {
     }
   },
   computed: {
-    showAdvertisedPrice() {
-      return parseFloat(this.price.replace(/,/g, '')) >= 1000;
-    },
-    getAdvertisedPrice() {
-      const actualPrice = parseFloat(this.price.replace(/,/g, ''));
-      return ((actualPrice / (1 - this.commissionRate))).toFixed(2);
-    },
     showQuantityWarning() {
       return this.quantity >= 2;
     },
@@ -233,6 +226,12 @@ export default {
     }
   },
   methods: {
+    getAdvertisedPrice() {
+      const actualPrice = parseFloat(this.price.replace(/,/g, ''));
+      const advertisedPrice = (actualPrice / (1 - this.commissionRate));
+      const roundedPrice = Math.max(Math.round(advertisedPrice), actualPrice + 1);
+      return roundedPrice.toFixed(0);
+    },
     validateForm() {
       let isValid = true;
       this.errors = {
@@ -388,7 +387,7 @@ export default {
           .map(val => val / tagEmbeddings.length);
         const formData = new FormData();
         formData.append('title', this.title);
-        formData.append('price', parseFloat(this.price.replace(/,/g, '')) || null);
+        formData.append('price', parseFloat(this.getAdvertisedPrice()).toFixed(0).replace(/,/g, '')); 
         formData.append('currency', this.selectedCurrency);
         formData.append('quantity', this.quantity || null);
         formData.append('tags', JSON.stringify(this.tags)); // Assuming tags are sent as a JSON string
