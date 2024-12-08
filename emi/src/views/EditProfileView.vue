@@ -34,44 +34,25 @@
                   class="hidden"
                   id="avatar"
                   ref="fileInput"
-                  capture="user"
                 />
-                <div class="flex flex-col items-center">
-                  <button 
-                    type="button"
-                    @click="openImagePicker('gallery')"
-                    class="relative group cursor-pointer mb-2"
+                <button 
+                  type="button"
+                  @click="$refs.fileInput.click()"
+                  class="relative group cursor-pointer"
+                >
+                  <img 
+                    v-if="avatarPreview || userStore.user.avatar" 
+                    :src="avatarPreview || userStore.user.avatar" 
+                    class="h-20 w-20 rounded-full object-cover border-2 border-gray-200 group-hover:opacity-75 transition-opacity"
+                    alt="Avatar preview"
+                  />
+                  <div 
+                    v-else 
+                    class="h-20 w-20 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center group-hover:bg-gray-300 dark:group-hover:bg-gray-600 transition-colors"
                   >
-                    <img 
-                      v-if="avatarPreview || userStore.user.avatar" 
-                      :src="avatarPreview || userStore.user.avatar" 
-                      class="h-20 w-20 rounded-full object-cover border-2 border-gray-200 group-hover:opacity-75 transition-opacity"
-                      alt="Avatar preview"
-                    />
-                    <div 
-                      v-else 
-                      class="h-20 w-20 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center group-hover:bg-gray-300 dark:group-hover:bg-gray-600 transition-colors"
-                    >
-                      <span class="text-gray-500 dark:text-gray-400">Upload</span>
-                    </div>
-                  </button>
-                  <div class="flex gap-2">
-                    <button 
-                      type="button"
-                      @click="openImagePicker('camera')"
-                      class="px-3 py-1 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600"
-                    >
-                      Camera
-                    </button>
-                    <button 
-                      type="button"
-                      @click="openImagePicker('gallery')"
-                      class="px-3 py-1 bg-gray-500 text-white rounded-md text-sm hover:bg-gray-600"
-                    >
-                      Gallery
-                    </button>
+                    <span class="text-gray-500 dark:text-gray-400">Upload</span>
                   </div>
-                </div>
+                </button>
               </div>
             </div>
 
@@ -166,15 +147,6 @@ const handleFileChange = (event) => {
     avatarPreview.value = URL.createObjectURL(file);
   }
 };
-
-const openImagePicker = (type) => {
-  if (type === 'camera') {
-    document.getElementById('avatar').capture = 'user';
-  } else {
-    document.getElementById('avatar').capture = null;
-  }
-  document.getElementById('avatar').click();
-}
 
 const submitForm = async () => {
   errors.splice(0); // Clear errors

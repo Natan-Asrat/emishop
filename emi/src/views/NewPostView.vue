@@ -299,59 +299,30 @@ export default {
     showImageSourceDialog() {
       this.showImageDialog = true;
     },
-    async selectImageSource(source) {
+    selectImageSource(source) {
       const input = document.createElement('input');
       input.type = 'file';
       input.accept = 'image/*';
-      
       if (source === 'camera') {
-        input.capture = 'user'; // Changed from 'environment' to 'user' for front camera
-        input.setAttribute('capture', 'user'); // Explicitly set capture attribute
-      } else {
-        input.removeAttribute('capture'); // Remove capture for gallery
+        input.capture = 'environment';
       }
-
-      input.onchange = async (e) => {
+      input.onchange = (e) => {
         const files = e.target.files;
         if (files.length) {
           for (let i = 0; i < files.length; i++) {
             const file = files[i];
-            try {
               const reader = new FileReader();
-              
-              reader.onload = (event) => {
-                // Create an image element to get dimensions
-                const img = new Image();
-                img.onload = () => {
-                  // Only add the image if it loaded successfully
-                  this.images.push(file);
-                  this.imagePreviews.push(event.target.result);
-                };
-                img.src = event.target.result;
-              };
 
-              reader.onerror = (error) => {
-                console.error('Error reading file:', error);
-                this.$toast.error('Error reading image file');
+              reader.onload = (event) => {
+                this.images.push(file);
+                this.imagePreviews.push(event.target.result);
               };
 
               reader.readAsDataURL(file);
-            } catch (error) {
-              console.error('Error processing image:', error);
-              this.$toast.error('Error processing image');
-            }
           }
         }
       };
-
-      // Wrap the click in a try-catch to handle any permissions issues
-      try {
-        input.click();
-      } catch (error) {
-        console.error('Error opening file picker:', error);
-        this.$toast.error('Error accessing camera or gallery');
-      }
-      
+      input.click();
       this.closeImageSourceDialog();
     },
     closeImageSourceDialog() {
