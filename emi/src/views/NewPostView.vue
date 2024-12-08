@@ -323,22 +323,25 @@ export default {
             }
 
             try {
+              // Create a temporary URL for the file
+              const tempUrl = URL.createObjectURL(file);
+              
+              // Create a new Image object to handle the loading
+              const img = new Image();
+              
+              // Create a promise to handle image loading
               await new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                
-                reader.onload = (event) => {
-                  const img = new Image();
-                  img.onload = () => {
-                    this.images.push(file);
-                    this.imagePreviews.push(event.target.result);
-                    resolve();
-                  };
-                  img.onerror = () => reject(new Error('Failed to load image'));
-                  img.src = event.target.result;
+                img.onload = () => {
+                  // Only add the image if it loaded successfully
+                  this.images.push(file);
+                  this.imagePreviews.push(tempUrl);
+                  resolve();
                 };
-                
-                reader.onerror = () => reject(new Error('Failed to read file'));
-                reader.readAsDataURL(file);
+                img.onerror = () => {
+                  URL.revokeObjectURL(tempUrl);
+                  reject(new Error('Failed to load image'));
+                };
+                img.src = tempUrl;
               });
             } catch (error) {
               console.error('Error processing image:', error);
