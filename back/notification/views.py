@@ -12,15 +12,13 @@ from .pagination import CustomPageNumberPagination
 # Create your views here.
 
 class ConversationViewSet(viewsets.ModelViewSet):
-    queryset = Conversation.objects.all()
+    queryset = Conversation.objects.select_related('buyer', 'seller').all()
     serializer_class = ConversationSerializer
-    filter_backends = [DjangoFilterBackend]
     pagination_class = CustomPageNumberPagination
-    filterset_fields = ['type']
     @action(detail=True, methods=['GET'])
     def messages(self, request, pk=None):
         conversation = self.get_object()
-        messages = Message.objects.filter(conversation=conversation)
+        messages = Message.objects.filter(conversation=conversation).select_related('sender')
         
         paginated_messages = self.paginate_queryset(messages)
         
@@ -35,7 +33,7 @@ class NotificationViewSet(mixins.ListModelMixin, mixins.UpdateModelMixin, viewse
     queryset = Notification.objects.all()
     pagination_class = CustomPageNumberPagination
     def get_queryset(self):
-        queryset = self.queryset.filter(user=self.request.user)
+        queryset = self.queryset.filter(user=self.request.user).select_related('post', 'user', 'sender', 'reservation', 'post__created_by', 'reservation__buyer', 'reservation__post', 'reservation__post__created_by').prefetch_related('post__images', 'reservation__post__images')
         notification_type = self.request.query_params.get('type')
 
         if notification_type == 'reservations':

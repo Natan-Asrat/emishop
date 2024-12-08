@@ -17,7 +17,7 @@ from .pagination import CustomPageNumberPagination
 import uuid
 # Create your views here.
 class PostViewSet(viewsets.ModelViewSet):
-    queryset = Post.objects.filter(is_active=True)
+    queryset = Post.objects.filter(is_active=True).select_related('created_by').prefetch_related('images')
     pagination_class = CustomPageNumberPagination
     filter_backends = (SearchFilter,)
     search_fields = [
@@ -84,7 +84,7 @@ class PostViewSet(viewsets.ModelViewSet):
             return Response(status=status.HTTP_404_NOT_FOUND)
     @action(detail=False, methods=['GET'])
     def favourites(self, request):
-        liked_posts = Post.objects.filter(likes__liked_by=request.user, is_active=True)
+        liked_posts = Post.objects.filter(likes__liked_by=request.user, is_active=True).select_related('created_by').prefetch_related('images')
         paginated_queryset = self.paginate_queryset(liked_posts)
         if paginated_queryset is not None:
             serializer = self.get_serializer(paginated_queryset, many=True)
@@ -101,7 +101,7 @@ class PostViewSet(viewsets.ModelViewSet):
         reported_seller_ids = Reservation.objects.filter(
             status='reported',
             reported_at__gte=blocklist_threshold_date
-        ).values_list('post__created_by_id', flat=True)
+        ).select_related('buyer', 'post', 'post__created_by').prefetch_related('post__images').values_list('post__created_by_id', flat=True)
 
         user_embedding = request.data.get('user_embedding')
         
@@ -115,14 +115,14 @@ class PostViewSet(viewsets.ModelViewSet):
                 user_embedding = [float(x) for x in user_embedding.split(',')]
             elif isinstance(user_embedding, list):
                 user_embedding = [float(x) for x in user_embedding]      
-            posts = Post.objects.filter(is_active=True).annotate(
+            posts = Post.objects.filter(is_active=True).select_related('created_by').prefetch_related('images').annotate(
                     similarity=CosineDistance('embedding', user_embedding),
                     liked=Exists(liked_subquery)
                 ).exclude(created_by__id__in=reported_seller_ids).order_by('similarity')
 
         else:
             # Exclude posts from reported sellers and return diverse range of posts
-            posts = Post.objects.filter(is_active=True).exclude(
+            posts = Post.objects.filter(is_active=True).select_related('created_by').prefetch_related('images').exclude(
                 created_by__id__in=reported_seller_ids
             ).order_by('?').annotate(liked=Exists(liked_subquery))
 

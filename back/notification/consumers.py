@@ -13,7 +13,7 @@ class ChatConsumer(WebsocketConsumer):
     def connect(self):
         self.user = self.scope["user"]
         self.conversation_id = self.scope["url_route"]["kwargs"]["conversation_id"]
-        self.conversation = Conversation.objects.get(id=self.conversation_id)
+        self.conversation = Conversation.objects.select_related('buyer', 'seller').get(id=self.conversation_id)
         self.user_id = self.user.get("user_id", None)
         async_to_sync(self.channel_layer.group_add)(
             self.conversation_id, self.channel_name
@@ -98,6 +98,8 @@ class NotificationConsumer(WebsocketConsumer):
             Notification.objects.filter(
                 user_id = self.user_id,
                 read = True
+            ).select_related('post', 'user', 'sender', 'reservation', 'post__created_by', 'reservation__buyer', 'reservation__post', 'reservation__post__created_by'
+            ).prefetch_related('post__images', 'reservation__post__images'
             ).order_by("-created_at")
             .first()
         )
@@ -108,6 +110,8 @@ class NotificationConsumer(WebsocketConsumer):
                     user_id = self.user_id,
                     read = False,
                     created_at__gt = last_delivered_at
+                ).select_related('post', 'user', 'sender', 'reservation', 'post__created_by', 'reservation__buyer', 'reservation__post', 'reservation__post__created_by'
+                ).prefetch_related('post__images', 'reservation__post__images'
                 ).order_by("-created_at")
             )
         else:
@@ -115,6 +119,8 @@ class NotificationConsumer(WebsocketConsumer):
                 Notification.objects.filter(
                     user_id = self.user_id,
                     read = False
+                ).select_related('post', 'user', 'sender', 'reservation', 'post__created_by', 'reservation__buyer', 'reservation__post', 'reservation__post__created_by'
+                ).prefetch_related('post__images', 'reservation__post__images'
                 ).order_by("-created_at")
             )
     def send_notifications_with_delay(self):

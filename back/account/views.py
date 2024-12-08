@@ -140,7 +140,7 @@ class UserViewSet(
         blocklist_threshold_date = now() - timedelta(days=settings.REPORTED_BLOCKLIST_DAYS)
 
         avatar_url = request.build_absolute_uri(user.avatar.url) if user.avatar else None
-        reported_reservation = Reservation.objects.filter(post__created_by=request.user, status='reported', reported_at__gte=blocklist_threshold_date).order_by('-reported_at').first()
+        reported_reservation = Reservation.objects.filter(post__created_by=request.user, status='reported', reported_at__gte=blocklist_threshold_date).order_by('-reported_at').select_related('buyer', 'post', 'post__created_by').prefetch_related('post__images').first()
         is_reported_on = False
         if reported_reservation is not None:
             is_reported_on = True
@@ -168,7 +168,7 @@ class UserViewSet(
         # Pre-aggregate data
         stats = Reservation.objects.filter(
             Q(post__created_by=user) | Q(buyer=user)
-        ).aggregate(
+        ).select_related('buyer', 'post', 'post__created_by').prefetch_related('post__images').aggregate(
             ordered_count=Count('id', filter=Q(post__created_by=user)),
             delivered_count=Count('id', filter=Q(post__created_by=user, status='completed')),
             reserved_count=Count('id', filter=Q(buyer=user)),
@@ -181,7 +181,7 @@ class UserViewSet(
             post__created_by=request.user,
             status='reported',
             reported_at__gte=blocklist_threshold_date
-        ).order_by('-reported_at').first()
+        ).order_by('-reported_at').select_related('buyer', 'post', 'post__created_by').prefetch_related('post__images').first()
 
         is_reported_on = False
         if reported_reservation is not None:

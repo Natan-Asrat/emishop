@@ -26,8 +26,8 @@ class ReservationViewSet(viewsets.ModelViewSet):
     pagination_class = CustomPageNumberPagination
     def get_queryset(self):
         if self.action == 'list':
-            return Reservation.objects.filter(buyer=self.request.user).order_by('-created_at')
-        return Reservation.objects.all()
+            return Reservation.objects.filter(buyer=self.request.user).order_by('-created_at').select_related('buyer', 'post', 'post__created_by').prefetch_related('post__images')
+        return Reservation.objects.all().select_related('buyer', 'post', 'post__created_by').prefetch_related('post__images')
     @transaction.atomic
     def create(self, request, *args, **kwargs):
         post_id = request.data.get('post_id')
@@ -89,7 +89,7 @@ class ReservationViewSet(viewsets.ModelViewSet):
 
         # Query counts grouped by status
         status_counts = (
-            Reservation.objects.filter(buyer=request.user)
+            Reservation.objects.filter(buyer=request.user).select_related('buyer', 'post', 'post__created_by').prefetch_related('post__images')
             .values('status')  # Group by status
             .annotate(count=Count('status'))  # Count occurrences of each status
         )
@@ -193,7 +193,7 @@ class ReservationViewSet(viewsets.ModelViewSet):
         reservation = self.get_object()
         buyer = reservation.buyer
         seller = reservation.post.created_by
-        conversation = Conversation.objects.filter(buyer=buyer, seller=seller)
+        conversation = Conversation.objects.filter(buyer=buyer, seller=seller).select_related('buyer', 'seller')
         if conversation.exists():
             conversation = conversation.first()
         else:
@@ -216,8 +216,8 @@ class OrderViewSet(viewsets.ModelViewSet):
     pagination_class = CustomPageNumberPagination
     def get_queryset(self):
         if self.action == 'list':
-            return Reservation.objects.filter(post__created_by=self.request.user).order_by('-created_at')
-        return Reservation.objects.all()
+            return Reservation.objects.filter(post__created_by=self.request.user).order_by('-created_at').select_related('buyer', 'post', 'post__created_by').prefetch_related('post__images')
+        return Reservation.objects.all().select_related('buyer', 'post', 'post__created_by').prefetch_related('post__images')
 
     @action(detail=False, methods=['GET'])
     def count(self, request, pk=None):
@@ -226,7 +226,7 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         # Query counts grouped by status
         status_counts = (
-            Reservation.objects.filter(post__created_by=request.user)
+            Reservation.objects.filter(post__created_by=request.user).select_related('buyer', 'post', 'post__created_by').prefetch_related('post__images')
             .values('status')  # Group by status
             .annotate(count=Count('status'))  # Count occurrences of each status
         )
@@ -325,7 +325,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         reservation = self.get_object()
         buyer = reservation.buyer
         seller = reservation.post.created_by
-        conversation = Conversation.objects.filter(buyer=buyer, seller=seller)
+        conversation = Conversation.objects.filter(buyer=buyer, seller=seller).select_related('buyer', 'seller')
         if conversation.exists():
             conversation = conversation.first()
         else:
