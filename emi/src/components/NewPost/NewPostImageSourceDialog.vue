@@ -26,17 +26,19 @@
           >
             <DialogPanel class="w-full max-w-md transform overflow-hidden rounded-2xl bg-gray-900 p-6 text-left align-middle shadow-xl transition-all">
               <DialogTitle as="h3" class="text-lg font-medium leading-6 text-white mb-4">
-                Choose Image
+                Choose Image Source
               </DialogTitle>
-              <div class="flex justify-center">
-                <button @click="selectImageSource('gallery')" class="btn btn-secondary text-white px-6 py-3">
-                  <Image class="h-5 w-5 text-white mx-auto mb-2" />
-                  Choose from Gallery
+              <div class="flex space-x-4">
+                <button @click="selectImageSource('camera')" class="btn btn-primary flex-1 text-white">
+                  <Camera class="h-5 w-5  text-white mx-auto" />
+                  Camera
+                </button>
+                <button @click="selectImageSource('gallery')" class="btn btn-secondary flex-1 text-white">
+                  <Image class="h-5 w-5 text-white mx-auto" />
+                  Gallery
                 </button>
               </div>
-              <div class="flex justify-center">
-                <button @click="closeImageSourceDialog" class="mt-4 text-blue-400 hover:text-blue-300 transition-colors duration-300">Cancel</button>
-              </div>
+              <button @click="closeImageSourceDialog" class="mt-4 text-blue-400 hover:text-blue-300 transition-colors duration-300 text-white">Cancel</button>
             </DialogPanel>
           </TransitionChild>
         </div>
@@ -47,7 +49,7 @@
 <script setup>
 import { defineProps, defineEmits } from 'vue'
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue';
-import { Image } from 'lucide-vue-next'
+import { Camera, Image } from 'lucide-vue-next'
 defineProps({
   showImageDialog: {
     type: Boolean,

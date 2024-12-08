@@ -303,7 +303,13 @@ export default {
       const input = document.createElement('input');
       input.type = 'file';
       input.accept = 'image/*';
-      input.multiple = true;
+      
+      if (source === 'camera') {
+        input.capture = 'user';
+        input.setAttribute('capture', 'user');
+      } else {
+        input.removeAttribute('capture');
+      }
 
       input.onchange = async (e) => {
         const files = e.target.files;
@@ -349,7 +355,7 @@ export default {
         input.click();
       } catch (error) {
         console.error('Error opening file picker:', error);
-        this.toastStore.showToast(5000, "Error accessing gallery", "bg-red-500");
+        this.toastStore.showToast(5000, "Error accessing camera or gallery", "bg-red-500");
       }
       
       this.closeImageSourceDialog();

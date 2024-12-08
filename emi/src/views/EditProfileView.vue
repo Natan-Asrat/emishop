@@ -34,11 +34,12 @@
                   class="hidden"
                   id="avatar"
                   ref="fileInput"
+                  capture="user"
                 />
                 <div class="flex flex-col items-center">
                   <button 
                     type="button"
-                    @click="$refs.fileInput.click()"
+                    @click="openImagePicker('gallery')"
                     class="relative group cursor-pointer mb-2"
                   >
                     <img 
@@ -54,13 +55,22 @@
                       <span class="text-gray-500 dark:text-gray-400">Upload</span>
                     </div>
                   </button>
-                  <button 
-                    type="button"
-                    @click="$refs.fileInput.click()"
-                    class="px-3 py-1 bg-gray-500 text-white rounded-md text-sm hover:bg-gray-600"
-                  >
-                    Choose Image
-                  </button>
+                  <div class="flex gap-2">
+                    <button 
+                      type="button"
+                      @click="openImagePicker('camera')"
+                      class="px-3 py-1 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600"
+                    >
+                      Camera
+                    </button>
+                    <button 
+                      type="button"
+                      @click="openImagePicker('gallery')"
+                      class="px-3 py-1 bg-gray-500 text-white rounded-md text-sm hover:bg-gray-600"
+                    >
+                      Gallery
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -187,6 +197,15 @@ const handleFileChange = async (event) => {
   // Clear the input to allow selecting the same file again
   event.target.value = '';
 };
+
+const openImagePicker = (type) => {
+  if (type === 'camera') {
+    document.getElementById('avatar').capture = 'user';
+  } else {
+    document.getElementById('avatar').capture = null;
+  }
+  document.getElementById('avatar').click();
+}
 
 const submitForm = async () => {
   errors.splice(0); // Clear errors
