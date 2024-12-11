@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
     <div class="max-w-3xl mx-auto">
-      <div class="min-h-screen p-4 rounded-lg shadow-lg flex flex-col">
+      <div class="min-h-screen py-4 px-5 rounded-lg shadow-lg flex flex-col">
         <div class="flex flex-col bg-white h-full dark:bg-gray-800 flex-grow">
           <HeaderComponent :recipientName="recipientName" />
           <ReservationPreview v-if="reservation" :reservation="reservation"/>
