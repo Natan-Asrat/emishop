@@ -84,8 +84,11 @@
 import { useRouter } from 'vue-router';
 import { ref } from 'vue';
 import axios from 'axios';
+import { getOtherPartyOfTrasaction } from '@/utils'
 import { CheckCircle, XCircle, AlertTriangle, ShoppingCart, MessageCircle, Archive } from 'lucide-vue-next';
 import ReportComponent from './ReportComponent.vue';
+import { useUserStore } from '@/stores/user';
+const userStore = useUserStore();
 const emit = defineEmits(['setTransaction'])
 const props = defineProps({
   transaction: {
@@ -167,7 +170,7 @@ const navigateToChat = (transaction) => {
   router.push({
     name: 'chat',
     query: {
-      username: transaction.post.created_by.username,
+      username: getOtherPartyOfTrasaction(userStore.user, transaction).username,
       itemId: transaction.id
     }
   });

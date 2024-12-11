@@ -15,3 +15,12 @@ export const getPostData = (post) => ({
   postedDate: new Date(post.created_at).toLocaleDateString(),
   embedding: post.embedding
 })
+
+export const getOtherPartyOfTrasaction = (user, transaction) => {
+  const createdBy = transaction.post.created_by
+  if(createdBy.id === user.id) {
+    return transaction.buyer
+  }
+  return createdBy
+  
+}

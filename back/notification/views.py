@@ -18,7 +18,7 @@ class ConversationViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['GET'])
     def messages(self, request, pk=None):
         conversation = self.get_object()
-        messages = Message.objects.filter(conversation=conversation).select_related('sender')
+        messages = Message.objects.filter(conversation=conversation).select_related('sender').order_by('-sent_at')
         
         paginated_messages = self.paginate_queryset(messages)
         
