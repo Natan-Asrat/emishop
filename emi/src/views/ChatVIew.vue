@@ -159,8 +159,7 @@ export default {
           const data = response.data;
           console.log("data", data)
           const previousHeight = this.$refs.messagesContainer.scrollHeight;
-
-          this.messages = [...this.messages, ...data.results];
+          this.messages = [...this.messages, ...(data.results)];
           this.hasMoreMessages = data.next !== null;
           this.isLoadingMessages = false;
           nextTick(() => {
