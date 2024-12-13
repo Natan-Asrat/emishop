@@ -166,7 +166,7 @@ const getStatusText = (transaction) => {
   }
   return 'Completed';
 };
-const navigateToChat = (transaction) => {
+const toChat = (transaction) => {
   router.push({
     name: 'chat',
     query: {
@@ -174,6 +174,14 @@ const navigateToChat = (transaction) => {
       itemId: transaction.id
     }
   });
+}
+const navigateToChat = (transaction) => {
+  
+  if(!transaction.seller_accepted){
+    handleAction(transaction, 'accept', () => {toChat(transaction)}) 
+  }else {
+    toChat(transaction)
+  }
 };
 
 const canReceive = (transaction) => {
@@ -181,10 +189,10 @@ const canReceive = (transaction) => {
 };
 
 const canAccept = (transaction) => {
-  return transaction.status === 'pending' && !props.trueForReservationFalseForOrder;
+  return transaction.status === 'pending' && !props.trueForReservationFalseForOrder && !transaction.seller_accepted;
 }
 const canDeliver = (transaction) => {
-  return transaction.status === 'pending' && !props.trueForReservationFalseForOrder;
+  return transaction.status === 'pending' && !props.trueForReservationFalseForOrder && transaction.seller_accepted;
 }
 
 const canCancel = (transaction) => {
@@ -194,7 +202,7 @@ const canCancel = (transaction) => {
 const canReport = (transaction) => {
   return transaction.status === 'pending' && transaction.seller_accepted && props.trueForReservationFalseForOrder;
 };
-const handleAction = async (transaction, action) => {
+const handleAction = async (transaction, action, callback = null) => {
   try {
     switch (action) {
       case 'accept':
@@ -202,6 +210,7 @@ const handleAction = async (transaction, action) => {
         .then(
           response => {
             setTransaction(response.data);
+            if(callback) callback();
           }
         );
         break
