@@ -106,7 +106,7 @@ const search = () => {
   axios.get(`/api/post/posts/?search=${searchQuery.value}`)
     .then(response => {
         // Handle the response (e.g., update the UI with search results)
-        const results = response.data.map(post => (getPostData(post)))
+        const results = response.data.results.map(post => (getPostData(post)))
         feedPostStore.setSearchresults(results)
         noResults.value = results.length === 0;
       })
