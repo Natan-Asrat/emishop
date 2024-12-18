@@ -317,6 +317,7 @@ export default {
     },
     removeImage(index) {
       this.images.splice(index, 1);
+      this.imagePreviews.splice(index, 1);
     },
     closeNotAllowedModal() {
       this.$router.push({name: 'home'})
