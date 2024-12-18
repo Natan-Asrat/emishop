@@ -33,51 +33,75 @@
 >
   <button
     v-if="canAccept(transaction)"
-    @click="handleAction(transaction, 'accept')"
+    @click="!isLoading && handleAction(transaction, 'accept')"
     :disabled="isLoading"
     class="px-3 py-1 bg-green-500 text-white rounded-full text-sm flex items-center space-x-1"
-  >
+    :class="{
+      'opacity-50 cursor-not-allowed': isLoading,
+      'opacity-100 cursor-pointer': !isLoading
+    }"
+    >
     <CheckCircle class="h-4 w-4" />
     <span>Accept</span>
   </button>
   <button
-    @click="navigateToChat(transaction)"
+    @click="!isLoading && navigateToChat(transaction)"
     :disabled="isLoading"
     class="px-3 py-1 bg-blue-500 text-white rounded-full text-sm flex items-center space-x-1"
-  >
+    :class="{
+      'opacity-50 cursor-not-allowed': isLoading,
+      'opacity-100 cursor-pointer': !isLoading
+    }"
+    >
     <MessageCircle class="h-4 w-4" />
     <span>Message</span>
   </button>
   <button
     v-if="canDeliver(transaction)"
-    @click="handleAction(transaction, 'complete')"
+    @click="!isLoading && handleAction(transaction, 'complete')"
     :disabled="isLoading"
     class="px-3 py-1 bg-purple-500 text-white rounded-full text-sm flex items-center space-x-1"
-  >
+    :class="{
+      'opacity-50 cursor-not-allowed': isLoading,
+      'opacity-100 cursor-pointer': !isLoading
+    }"
+    >
     <Archive class="h-4 w-4" />
     <span>Deliver</span>
   </button>
   <button
     v-if="canReceive(transaction)"
-    @click="handleAction(transaction, 'complete')"
+    @click="!isLoading && handleAction(transaction, 'complete')"
     :disabled="isLoading"
     class="px-3 py-1 bg-green-500 text-white rounded-full text-sm flex items-center space-x-1"
-  >
+    :class="{
+      'opacity-50 cursor-not-allowed': isLoading,
+      'opacity-100 cursor-pointer': !isLoading
+    }"
+    >
     <span>Received</span>
   </button>
   <button
     v-if="canCancel(transaction)"
-    @click="handleAction(transaction, 'cancel')"
+    @click="!isLoading && handleAction(transaction, 'cancel')"
     :disabled="isLoading"
     class="px-3 py-1 bg-red-500 text-white rounded-full text-sm flex items-center space-x-1"
-  >
+    :class="{
+      'opacity-50 cursor-not-allowed': isLoading,
+      'opacity-100 cursor-pointer': !isLoading
+    }"
+    >
     <span>Cancel</span>
   </button>
   <button
     v-if="canReport(transaction)"
-    @click="handleAction(transaction, 'report')"
+    @click="!isLoading && handleAction(transaction, 'report')"
     :disabled="isLoading"
     class="px-3 py-1 bg-yellow-500 text-white rounded-full text-sm flex items-center space-x-1"
+    :class="{
+      'opacity-50 cursor-not-allowed': isLoading,
+      'opacity-100 cursor-pointer': !isLoading
+    }"
   >
     <span>Report</span>
   </button>
@@ -209,7 +233,6 @@ const canReport = (transaction) => {
   return transaction.status === 'pending' && transaction.seller_accepted && props.trueForReservationFalseForOrder;
 };
 const handleAction = async (transaction, action, callback = null) => {
-  if(isLoading.value) return
   isLoading.value = true;
   try {
     switch (action) {
