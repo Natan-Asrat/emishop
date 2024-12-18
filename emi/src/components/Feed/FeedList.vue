@@ -46,7 +46,7 @@ const props = defineProps({
     required: true,
   }
 })
-const emits = defineEmits(['resetLastElement', 'openProductDetails'])
+const emits = defineEmits(['resetLastElement', 'openProductDetails', 'searchMore'])
 const showInsufficientCoinsModal = ref(false)
 
 const selectedProduct = ref(null)
@@ -115,6 +115,9 @@ const reserveProduct = async (product) => {
 };
 
 const fetchPosts = async () => {
+  if (feedPostStore.isSearchExpanded && feedPostStore.searchResults.length > 0) {
+    emits('searchMore')
+  } 
   if (feedPostStore.isLoading || !feedPostStore.hasMore) return
 
   feedPostStore.isLoading = true

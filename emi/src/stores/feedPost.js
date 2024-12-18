@@ -8,7 +8,9 @@ export const useFeedPostStore = defineStore({
     isSearchExpanded: false,
     page: 1,
     hasMore: true,
-    isLoading: false
+    isLoading: false,
+    searchPage: 0,
+    hasMoreSearchResults: true;
   }),
   actions: {
     setSearchExpanded(expanded) {
@@ -28,7 +30,8 @@ export const useFeedPostStore = defineStore({
       }
     },
     setSearchresults (results) {
-      this.searchResults = results;
+      this.searchResults.push(...results);
+      
     },
     addPost(post) {
       const exists = this.posts.some(p => p.id === post.id);

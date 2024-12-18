@@ -99,15 +99,17 @@ const redirectToBuyCoins = () => {
   router.push({name: 'buy-coins'})
 }
 const search = () => {
-  if (!searchQuery.value) return;
+  if (!searchQuery.value || isSearching.value || !feedPostStore.hasMoreSearchResults) return;
   isSearching.value = true;
   noResults.value = false;
-  
-  axios.get(`/api/post/posts/?search=${searchQuery.value}`)
+  feedPostStore.searchPage++;
+  axios.get(`/api/post/posts/?search=${searchQuery.value}&page=${feedPostStore.searchPage}`)
     .then(response => {
         // Handle the response (e.g., update the UI with search results)
         const results = response.data.results.map(post => (getPostData(post)))
         feedPostStore.setSearchresults(results)
+        feedPostStore.hasMoreSearchResults = response.data.next !== null
+
         noResults.value = results.length === 0;
       })
       .catch(error => {
@@ -140,6 +142,11 @@ onMounted(() => {
 onUnmounted(() => {
     window.removeEventListener('scroll', handleScroll);
 });
+defineExpose({
+  searchMore: () => {
+    search()
+  }
+})
 </script>
 
 <style scoped>

@@ -1,10 +1,11 @@
 <template>
   <NavbarWrapper @reachedLastElement="reachedLastElement">
 
-    <Navbar />
+    <Navbar ref="navbar" />
     <RecentlyViewed @open="handleRecentlyViewedOpen" v-if="recentProducts && recentProducts.length > 0"  :recentProducts="recentProducts" />
   </NavbarWrapper>
   <FeedList   ref="feedList"
+  @searchMore="searchMore"
   :style="{paddingTop: (recentProducts && recentProducts.length > 0 ) ? '300px' : '100px'}" :reachedLast="reachedLast" @resetLastElement="resetLastElement" />
   <FooterComponent />
 </template>
@@ -31,6 +32,9 @@ export default {
     }
   },
   methods: {
+    searchMore() {
+      this.$refs.navbar.searchMore();
+    },
     handleRecentlyViewedOpen(product) {
       this.$refs.feedList.openProductDetails(product);
     },
