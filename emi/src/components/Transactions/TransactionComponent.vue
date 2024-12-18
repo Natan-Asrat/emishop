@@ -33,75 +33,45 @@
 >
   <button
     v-if="canAccept(transaction)"
-    @click="!transactionStore.isSending && handleAction(transaction, 'accept')"
-    :disabled="transactionStore.isSending"
+    @click="handleAction(transaction, 'accept')"
     class="px-3 py-1 bg-green-500 text-white rounded-full text-sm flex items-center space-x-1"
-    :class="{
-      'opacity-50 cursor-not-allowed': transactionStore.isSending,
-      'opacity-100 cursor-pointer': !transactionStore.isSending
-    }"
     >
     <CheckCircle class="h-4 w-4" />
     <span>Accept</span>
   </button>
   <button
-    @click="!transactionStore.isSending && navigateToChat(transaction)"
-    :disabled="transactionStore.isSending"
+    @click="navigateToChat(transaction)"
     class="px-3 py-1 bg-blue-500 text-white rounded-full text-sm flex items-center space-x-1"
-    :class="{
-      'opacity-50 cursor-not-allowed': transactionStore.isSending,
-      'opacity-100 cursor-pointer': !transactionStore.isSending
-    }"
     >
     <MessageCircle class="h-4 w-4" />
     <span>Message</span>
   </button>
   <button
     v-if="canDeliver(transaction)"
-    @click="!transactionStore.isSending && handleAction(transaction, 'complete')"
-    :disabled="transactionStore.isSending"
+    @click="handleAction(transaction, 'complete')"
     class="px-3 py-1 bg-purple-500 text-white rounded-full text-sm flex items-center space-x-1"
-    :class="{
-      'opacity-50 cursor-not-allowed': transactionStore.isSending,
-      'opacity-100 cursor-pointer': !transactionStore.isSending
-    }"
     >
     <Archive class="h-4 w-4" />
     <span>Deliver</span>
   </button>
   <button
     v-if="canReceive(transaction)"
-    @click="!transactionStore.isSending && handleAction(transaction, 'complete')"
-    :disabled="transactionStore.isSending"
+    @click="handleAction(transaction, 'complete')"
     class="px-3 py-1 bg-green-500 text-white rounded-full text-sm flex items-center space-x-1"
-    :class="{
-      'opacity-50 cursor-not-allowed': transactionStore.isSending,
-      'opacity-100 cursor-pointer': !transactionStore.isSending
-    }"
     >
     <span>Received</span>
   </button>
   <button
     v-if="canCancel(transaction)"
-    @click="!transactionStore.isSending && handleAction(transaction, 'cancel')"
-    :disabled="transactionStore.isSending"
+    @click="handleAction(transaction, 'cancel')"
     class="px-3 py-1 bg-red-500 text-white rounded-full text-sm flex items-center space-x-1"
-    :class="{
-      'opacity-50 cursor-not-allowed': transactionStore.isSending,
-      'opacity-100 cursor-pointer': !transactionStore.isSending
-    }"
     >
     <span>Cancel</span>
   </button>
   <button
     v-if="canReport(transaction)"
-    @click="!transactionStore.isSending && handleAction(transaction, 'report')"
-    :disabled="transactionStore.isSending"
+    @click="handleAction(transaction, 'report')"
     class="px-3 py-1 bg-yellow-500 text-white rounded-full text-sm flex items-center space-x-1"
-    :class="{
-      'opacity-50 cursor-not-allowed': transactionStore.isSending,
-      'opacity-100 cursor-pointer': !transactionStore.isSending
-    }"
   >
     <span>Report</span>
   </button>
@@ -121,7 +91,7 @@ import { useUserStore } from '@/stores/user';
 import { useTransactionsStore } from '@/stores/transactions';
 const transactionStore = useTransactionsStore();
 const userStore = useUserStore();
-const emit = defineEmits(['setTransaction'])
+const emit = defineEmits(['setTransaction', 'setLoading'])
 const props = defineProps({
   transaction: {
     type: Object,
@@ -233,14 +203,15 @@ const canReport = (transaction) => {
   return transaction.status === 'pending' && transaction.seller_accepted && props.trueForReservationFalseForOrder;
 };
 const handleAction = (transaction, action, callback = null) => {
-  transactionStore.setIsSending(true);
   try {
+    emit('setLoading', true);
     switch (action) {
       case 'accept':
         axios.post(`api/transaction/orders/${transaction.id}/accept/`)
         .then(
           response => {
             setTransaction(response.data);
+            emit('setLoading', false)
             if(callback) callback();
           }
         );
@@ -251,6 +222,7 @@ const handleAction = (transaction, action, callback = null) => {
           .then(
             response => {
               setTransaction(response.data);
+              emit('setLoading', false)
             }
           );
         }else{
@@ -258,6 +230,8 @@ const handleAction = (transaction, action, callback = null) => {
           .then(
             response => {
               setTransaction(response.data);
+              emit('setLoading', false)
+
             }
           );
         }
@@ -267,17 +241,18 @@ const handleAction = (transaction, action, callback = null) => {
         .then(
           response => {
             setTransaction(response.data);
+            emit('setLoading', false)
           }
         );
         break;
       case 'report':
         showReportDialog.value = true;
+        emit('setLoading', false);
         break;
     }
-    transactionStore.setIsSending(false);
   } catch (error) {
+    emit('setLoading', false)
     console.error(`Error performing ${action}:`, error);
-    transactionStore.setIsSending(false);
   }
 };
 const setTransaction = (data) => {

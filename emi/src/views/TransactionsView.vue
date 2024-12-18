@@ -53,6 +53,7 @@
     <div class="space-y-4 mb-16">
       <TransactionComponent 
         :trueForReservationFalseForOrder="trueForReservationFalseForOrder" 
+        @setLoading="transactionStore.isLoadingTransactions = $event"
         @removeTransaction="removeTransaction" 
         @setTransaction="handleSetTransaction" 
         v-for="(transaction, index) in filteredTransactions" 
