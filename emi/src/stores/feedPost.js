@@ -10,7 +10,7 @@ export const useFeedPostStore = defineStore({
     hasMore: true,
     isLoading: false,
     searchPage: 0,
-    hasMoreSearchResults: true;
+    hasMoreSearchResults: true
   }),
   actions: {
     setSearchExpanded(expanded) {
