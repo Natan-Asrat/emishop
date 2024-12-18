@@ -154,7 +154,7 @@ class ReservationViewSet(viewsets.ModelViewSet):
             user=notify_user,
             type='status_update',
             title='Reservation Canceled!',
-            message=f"Canceled reservation for item '{reservation.post.title}' by buyer '{reservation.buyer.username}!'",
+            message=f"Canceled reservation for item '{reservation.post.title}' by '{request.user.username}'!",
             reservation=reservation
         )
         
@@ -313,7 +313,7 @@ class OrderViewSet(viewsets.ModelViewSet):
             user=notify_user,
             type='status_update',
             title='Reservation Canceled!',
-            message=f"Canceled reservation for item '{reservation.post.title}' by seller '{reservation.post.created_by.username}!'",
+            message=f"Canceled reservation for item '{reservation.post.title}' by '{request.user.username}'!",
             reservation=reservation
         )
         
