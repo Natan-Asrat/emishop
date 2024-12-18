@@ -174,7 +174,16 @@ class PostViewSet(viewsets.ModelViewSet):
 
         # Save the post
         post = serializer.save(created_by=request.user)
+        import uuid
+        from django.utils import timezone
+
         for image in images:
+            file_extension = image.name.split('.')[-1]
+
+            current_datetime = timezone.now().strftime("%Y-%m-%dT%H-%M-%S")
+            new_filename = f"{uuid.uuid4()}_{current_datetime}.{file_extension}"
+            image.name = new_filename
+
             post.images.create(image=image) 
         # Return the created post data
         response_serializer = PostSerializer(post, context={"request": request})
