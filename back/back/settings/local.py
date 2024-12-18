@@ -10,7 +10,6 @@ ALLOWED_HOSTS = ["*"]
 INSTALLED_APPS += [
     'debug_toolbar',
 ]
-print("INSTALLED_APPS in local:", INSTALLED_APPS)
 
 MIDDLEWARE += [
     "debug_toolbar.middleware.DebugToolbarMiddleware",

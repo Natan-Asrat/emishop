@@ -37,13 +37,12 @@ const deletePost = (post) => {
   axios.delete(`api/post/posts/${post.id}/deactivate/`)
   .then(
     response => {
-      console.log(response)
       window.location.reload()
     }
   )
   .catch(
     error => {
-      console.log(error)
+      console.error(error)
       toastStore.showToast(
               5000,
               "Something went wrong. Please refresh!)",
@@ -74,8 +73,6 @@ const page = ref(1)
 
 
 const handleSetProduct = (product, index) => {
-  console.log("set", product)
-  console.log("prev", feedPostStore.posts[index])
   feedPostStore.changePost(product, index);
 }
 const openProductDetails = (product) => {
@@ -97,7 +94,6 @@ const fetchPosts = async () => {
         page_size: 10  // Match backend default page size
       }
     })
-    console.log("Full response:", response.data)
     
     const newProducts = response.data.results.map(post => ({
       id: post.id,

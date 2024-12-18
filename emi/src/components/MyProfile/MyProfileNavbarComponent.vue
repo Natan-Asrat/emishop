@@ -84,14 +84,13 @@ onMounted(() => {
   axios.get('api/account/users/stats/')
   .then(
     response => {
-      console.log("re", response.data)
       user.value = response.data;
       isLoading.value = false;
     }
   )
   .catch(
     error => {
-      console.log(error);
+      console.error(error);
       toastStore.showToast(
             5000,
             "Something went wrong. Please try again!",

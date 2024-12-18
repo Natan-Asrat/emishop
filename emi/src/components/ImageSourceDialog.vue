@@ -69,8 +69,4 @@ const selectImageSource = (source) => {
   emit('select-source', source)
 };
 
-// Add a watcher to log prop changes
-watch(() => props.isOpen, (newValue) => {
-  console.log('Modal open state changed:', newValue)
-})
 </script>

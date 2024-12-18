@@ -89,7 +89,6 @@ export const useRecommendationStore = defineStore({
       localStorage.setItem('lastSavedDate', this.lastSavedDate)
     },
     saveRecentlyViewed(postId) {
-      console.log("saving", postId)
       const maxInteractions = 5; // Define the maximum size of the recently viewed array
       const existingInteractions = JSON.parse(localStorage.getItem('recentlyViewed')) || [];
 

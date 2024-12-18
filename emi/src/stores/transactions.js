@@ -124,7 +124,6 @@ export const useTransactionsStore = defineStore({
       axios.get('api/transaction/orders/count/')
       .then(
         response => {
-          console.log('counts', response.data)
           this.ordersCount = response.data
         }
       )

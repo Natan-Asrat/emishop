@@ -71,7 +71,7 @@ const sendReport = () => {
   )
   .catch(
     error => {
-      console.log("erro", error)
+      console.error(error)
       toastStore.showToast(
         5000,
         "Something went wrong. Please try again!",

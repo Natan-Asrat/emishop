@@ -8,7 +8,6 @@ load_dotenv()
 def main():
     """Run administrative tasks."""
     debug =  os.environ.get("DEBUG", "true")
-    print("debug", debug)
     os.environ["DEBUG"] = debug
 
     if debug == "true":

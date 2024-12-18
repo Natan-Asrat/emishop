@@ -49,7 +49,6 @@ class ReservationViewSet(viewsets.ModelViewSet):
             )
 
         # Create reservation and update coins/quantity
-        print('Creating reservation')
         reservation = Reservation.objects.create(
             buyer=request.user,
             post=post,
@@ -78,7 +77,6 @@ class ReservationViewSet(viewsets.ModelViewSet):
             'coins_spent': reservation.coins_spent,
             'created_at': reservation.created_at.isoformat()  # or any other fields you want to include
         }
-        print('response', response_data)
 
         return Response(response_data, status=status.HTTP_201_CREATED)
 

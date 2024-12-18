@@ -55,8 +55,6 @@ const router = useRouter();
 const requiredCoins = ref(0)
 
 const handleSetProduct = (product, index) => {
-  console.log("set", product)
-  console.log("prev", feedPostStore.posts[index])
   feedPostStore.changePost(product, index);
 }
 
@@ -135,7 +133,6 @@ const fetchPosts = async () => {
       // Otherwise, get diverse results in batches of 10
       response = await axios.get(`api/post/posts/feed/?page=${feedPostStore.page}&page_size=10`)
     }
-    console.log("Response:", response.data)
     
     const newProducts = response.data.results.map(post => ({
       id: post.id,

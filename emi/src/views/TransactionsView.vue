@@ -108,7 +108,6 @@ export default {
           if (this.currentTab === 'Cancelled') return t.status === 'cancelled';
           return false;
     })
-    console.log("fil", filtered)
     return filtered;
     }
   },

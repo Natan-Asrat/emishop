@@ -96,7 +96,7 @@ onMounted(() => {
         };
 
         ws.value.onclose = () => {
-          console.log("WebSocket connection closed.");
+          console.error("WebSocket connection closed.");
           // Try to reconnect after a delay if token is still valid
           setTimeout(() => {
             if (userStore.user.access) {
@@ -110,7 +110,6 @@ onMounted(() => {
 
         ws.value.onmessage = async (event) => {
           const message = JSON.parse(event.data)
-          console.log('received', message)
           if (message.type === 'notification') {
             const notification = message.object;
             notificationStore.addNotification(notification);
@@ -131,7 +130,6 @@ onMounted(() => {
             }
             let icon
             if (notification.type === 'popup') {
-              console.log("popup")
               isModalVisible.value = true;
               modalContent.value = {
                 title: notification.title,
@@ -231,10 +229,8 @@ const markNotificationAsDelivered = async (notificationId) => {
         { read: true },
       );
       if (response.status === 200) {
-        console.log(`Notification ${notificationId} marked as delivered.`);
-        console.log(response.data);
       } else {
-        console.log(
+        console.error(
           `Failed to mark notification ${notificationId} as delivered.`,
         );
       }

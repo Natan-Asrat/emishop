@@ -77,7 +77,6 @@ def notify_post_update(sender, instance, created, **kwargs):
         channel_layer = get_channel_layer()
         post_id = instance.id
         post_message = f"post_{post_id}"
-        print("inst", instance)
         post_data = Post.objects.get(id=instance.id)
         data = PostSerializer(post_data, context={'setLiked': False}).data
         if post_message in connected_users:

@@ -71,7 +71,6 @@ export const useUserStore = defineStore({
     },
 
     setUserInfo(user) {
-      console.log("setting user")
       this.user.id = user.id;
       this.user.name = user.name;
       this.user.username = user.username;
@@ -81,7 +80,6 @@ export const useUserStore = defineStore({
       localStorage.setItem("user.name", this.user.name);
       localStorage.setItem("user.username", this.user.username);
       localStorage.setItem("user.avatar", this.user.avatar);
-      console.log("set", localStorage.getItem("user.id"))
 
     },
 
@@ -103,7 +101,7 @@ export const useUserStore = defineStore({
         }
 
       }catch(error){
-          console.log(error);
+          console.error(error);
 
           this.removeToken();
         }

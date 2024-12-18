@@ -12,7 +12,6 @@ import django
 from dotenv import load_dotenv
 load_dotenv()
 debug =  os.environ.get("DEBUG", "true")
-print("debug", debug)
 if debug == "true":
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "back.settings.local")
 else:

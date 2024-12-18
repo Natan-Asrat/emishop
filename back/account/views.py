@@ -35,16 +35,10 @@ class UserViewSet(
     @action(detail=False, methods=['get'])
     def myposts(self, request, pk=None):
         user = request.user
-        print(f"User: {user}")  # Debug print
-        print(f"User ID: {user.id}")  # Debug print
-        
         # Get page and page_size from query parameters
         page_number = request.query_params.get('page', 1)
         page_size = request.query_params.get('page_size', 10)
-        
-        print(f"Page Number: {page_number}")
-        print(f"Page Size: {page_size}")
-        
+  
         liked_subquery = Like.objects.filter(
             post=OuterRef("pk"),  # Refers to the current post in the main queryset
             liked_by=user,
@@ -52,11 +46,9 @@ class UserViewSet(
         
         posts = user.posts.filter(is_active=True).annotate(liked=Exists(liked_subquery))
         
-        print(f"Total posts count: {posts.count()}")  # Debug print
         
         paginated_queryset = self.paginate_queryset(posts)
         
-        print(f"Paginated queryset: {paginated_queryset}")  # Debug print
         
         if paginated_queryset is not None:
             serializer = PostSerializer(paginated_queryset, many=True)

@@ -68,7 +68,6 @@ export default {
   },
   computed: {
     sortedMessages() {
-      console.log("mess", this.messages)
       return [...this.messages].sort((a, b) => {
         // Precisely compare timestamps including microseconds
         return new Date(a.sent_at).getTime() - new Date(b.sent_at).getTime();
@@ -86,10 +85,9 @@ export default {
   mounted() {
     const itemId = this.$route.query.itemId;
     if(itemId) {
-      console.log("item id", itemId)
       this.fetchConversation(itemId)
     }else{
-      console.log("no item id")
+      console.error("no item id", itemId)
     }
     if (this.$refs.messagesContainer) {
       this.$refs.messagesContainer.addEventListener('scroll', this.handleScroll);
@@ -111,11 +109,8 @@ export default {
       }
     },
     scrollToBottom() {
-      console.log("scrolling")
       this.$nextTick(() => {
         const container = this.$refs.messagesContainer;
-        console.log("cont", container)
-        console.log("top", container.scrollHeight)
         if (container) {
           container.scrollTo({
             top: container.scrollHeight,
@@ -135,18 +130,15 @@ export default {
           this.hasMoreMessages = true;
         
           this.fetchMessages()
-          console.log("establishing")
           this.establishWebsocket()
         }
       )
 
     },
     fetchMessages() {
-      console.log("fetching messages")
       if (this.isLoadingMessages || !this.conversation) return;
       this.isLoadingMessages = true;
       this.page ++;
-      console.log("page", this.page)  
 
       axios.get(`api/notification/conversations/${this.conversation.id}/messages`, {
         params: {
@@ -157,7 +149,6 @@ export default {
       .then(
         response => {
           const data = response.data;
-          console.log("data", data)
           const previousHeight = this.$refs.messagesContainer.scrollHeight;
           this.messages = [...this.messages, ...(data.results)];
           this.hasMoreMessages = data.next !== null;
@@ -199,7 +190,7 @@ export default {
         };
 
       this.ws.onclose = () => {
-        console.log(`WebSocket connection closed`);
+        console.error(`WebSocket connection closed`);
       };
     },
     sendMessage () {

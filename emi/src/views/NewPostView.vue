@@ -323,15 +323,12 @@ export default {
       this.$router.push({name: 'home'})
     },
     showImageSourceDialog() {
-      console.log('Showing image source dialog');
       this.showImageDialog = true;
     },
     openImageSourceDialog() {
-      console.log('Opening image source dialog');
       this.showImageDialog = true;
     },
     selectImageSource(source) {
-      console.log('Selected image source:', source);
       this.closeImageSourceDialog();
       if (source === 'camera') {
         this.showWebRTCCamera = true;
@@ -340,7 +337,6 @@ export default {
       }
     },
     closeImageSourceDialog() {
-      console.log('Closing image source dialog');
       this.showImageDialog = false;
     },
     removeTag(index) {
@@ -463,7 +459,6 @@ export default {
       axios.get('api/account/users/me/')
       .then(
         response => {
-          console.log("user", response.data)
           this.isLoading = false;
           const reported_on = response.data.reported;
           this.reported = reported_on;
@@ -475,7 +470,6 @@ export default {
       .catch(
         error => {
           this.isLoading = false;
-          console.log("erro", error)
           this.toastStore.showToast(
             5000,
             "Something went wrong. Please try again!",

@@ -68,7 +68,6 @@ export default {
   },
   methods: {
     fetchNotifications() {
-      console.log("fetching", this.currentTab)
       const url = this.currentTab === 'All' 
         ? `api/notification/notifications/?page=${this.page}`
         : `/api/notification/notifications/?type=${this.currentTab.toLowerCase()}&page=${this.page}`;
@@ -76,7 +75,6 @@ export default {
       this.isLoading = true;
       axios.get(url)
         .then(response => {
-          console.log("resp", response.data)
           this.isLoading = false;
           
           // Check if we have more pages
@@ -90,7 +88,7 @@ export default {
           }
         })
         .catch(error => {
-          console.log("error", error)
+          console.error(error)
           this.isLoading = false;
           this.toastStore.showToast(
             5000,
@@ -118,7 +116,6 @@ export default {
       if (this.userStore.user.coins < req) {
         this.requiredCoins = req;
         this.showInsufficientCoinsModal = true;
-        console.log("not enough coins")
         return;
       }
 
@@ -179,7 +176,6 @@ export default {
   watch: {
     currentTab: {
       handler(newTab){
-        console.log("tab", newTab)
         this.fetchNotifications()
       },
       immediate: true,

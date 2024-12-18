@@ -73,7 +73,6 @@ export const useNotificationStore = defineStore({
 
         return result;
       }, [])
-      console.log("grouped", this.groupedNotifications)
 
     },
 
@@ -81,7 +80,6 @@ export const useNotificationStore = defineStore({
       axios.get('api/notification/notifications/count/')
         .then(
           response => {
-            console.log("count", response.data)
             this.count = response.data
           }
         )
