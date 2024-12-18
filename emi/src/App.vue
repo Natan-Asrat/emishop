@@ -119,6 +119,11 @@ onMounted(() => {
               notification.message,
               "bg-green-500 dark:bg-green-500"
             )
+            try {
+              await markNotificationAsDelivered(notification.id);
+            } catch (error) {
+              console.error("Failed to mark notification as delivered:", error);
+            }
             let icon
             if (notification.type === 'popup') {
               console.log("popup")
@@ -166,11 +171,7 @@ onMounted(() => {
               });
             }
 
-            try {
-              await markNotificationAsDelivered(notification.id);
-            } catch (error) {
-              console.error("Failed to mark notification as delivered:", error);
-            }
+            
           } else if (message.type === "post") {
             const post = message.object;
             const postData = {
