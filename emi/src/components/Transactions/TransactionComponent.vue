@@ -33,24 +33,24 @@
 >
   <button
     v-if="canAccept(transaction)"
-    @click="!isLoading && handleAction(transaction, 'accept')"
-    :disabled="isLoading"
+    @click="!isSending && handleAction(transaction, 'accept')"
+    :disabled="isSending"
     class="px-3 py-1 bg-green-500 text-white rounded-full text-sm flex items-center space-x-1"
     :class="{
-      'opacity-50 cursor-not-allowed': isLoading,
-      'opacity-100 cursor-pointer': !isLoading
+      'opacity-50 cursor-not-allowed': isSending,
+      'opacity-100 cursor-pointer': !isSending
     }"
     >
     <CheckCircle class="h-4 w-4" />
     <span>Accept</span>
   </button>
   <button
-    @click="!isLoading && navigateToChat(transaction)"
-    :disabled="isLoading"
+    @click="!isSending && navigateToChat(transaction)"
+    :disabled="isSending"
     class="px-3 py-1 bg-blue-500 text-white rounded-full text-sm flex items-center space-x-1"
     :class="{
-      'opacity-50 cursor-not-allowed': isLoading,
-      'opacity-100 cursor-pointer': !isLoading
+      'opacity-50 cursor-not-allowed': isSending,
+      'opacity-100 cursor-pointer': !isSending
     }"
     >
     <MessageCircle class="h-4 w-4" />
@@ -58,12 +58,12 @@
   </button>
   <button
     v-if="canDeliver(transaction)"
-    @click="!isLoading && handleAction(transaction, 'complete')"
-    :disabled="isLoading"
+    @click="!isSending && handleAction(transaction, 'complete')"
+    :disabled="isSending"
     class="px-3 py-1 bg-purple-500 text-white rounded-full text-sm flex items-center space-x-1"
     :class="{
-      'opacity-50 cursor-not-allowed': isLoading,
-      'opacity-100 cursor-pointer': !isLoading
+      'opacity-50 cursor-not-allowed': isSending,
+      'opacity-100 cursor-pointer': !isSending
     }"
     >
     <Archive class="h-4 w-4" />
@@ -71,36 +71,36 @@
   </button>
   <button
     v-if="canReceive(transaction)"
-    @click="!isLoading && handleAction(transaction, 'complete')"
-    :disabled="isLoading"
+    @click="!isSending && handleAction(transaction, 'complete')"
+    :disabled="isSending"
     class="px-3 py-1 bg-green-500 text-white rounded-full text-sm flex items-center space-x-1"
     :class="{
-      'opacity-50 cursor-not-allowed': isLoading,
-      'opacity-100 cursor-pointer': !isLoading
+      'opacity-50 cursor-not-allowed': isSending,
+      'opacity-100 cursor-pointer': !isSending
     }"
     >
     <span>Received</span>
   </button>
   <button
     v-if="canCancel(transaction)"
-    @click="!isLoading && handleAction(transaction, 'cancel')"
-    :disabled="isLoading"
+    @click="!isSending && handleAction(transaction, 'cancel')"
+    :disabled="isSending"
     class="px-3 py-1 bg-red-500 text-white rounded-full text-sm flex items-center space-x-1"
     :class="{
-      'opacity-50 cursor-not-allowed': isLoading,
-      'opacity-100 cursor-pointer': !isLoading
+      'opacity-50 cursor-not-allowed': isSending,
+      'opacity-100 cursor-pointer': !isSending
     }"
     >
     <span>Cancel</span>
   </button>
   <button
     v-if="canReport(transaction)"
-    @click="!isLoading && handleAction(transaction, 'report')"
-    :disabled="isLoading"
+    @click="!isSending && handleAction(transaction, 'report')"
+    :disabled="isSending"
     class="px-3 py-1 bg-yellow-500 text-white rounded-full text-sm flex items-center space-x-1"
     :class="{
-      'opacity-50 cursor-not-allowed': isLoading,
-      'opacity-100 cursor-pointer': !isLoading
+      'opacity-50 cursor-not-allowed': isSending,
+      'opacity-100 cursor-pointer': !isSending
     }"
   >
     <span>Report</span>
@@ -136,11 +136,11 @@ const props = defineProps({
 })
 const router = useRouter();
 const showReportDialog = ref(false);
-const isLoading = ref(false);
+const isSending = ref(false);
 const closeModal = () => {
   showReportDialog.value = false;
 }
-
+console.log("sending", isSending.value);
 const showActions = (transaction) => {
   return (transaction.status === 'pending' && transaction.seller_accepted) || !props.trueForReservationFalseForOrder;
 };
@@ -233,7 +233,7 @@ const canReport = (transaction) => {
   return transaction.status === 'pending' && transaction.seller_accepted && props.trueForReservationFalseForOrder;
 };
 const handleAction = async (transaction, action, callback = null) => {
-  isLoading.value = true;
+  isSending.value = true;
   try {
     switch (action) {
       case 'accept':
@@ -274,10 +274,10 @@ const handleAction = async (transaction, action, callback = null) => {
         showReportDialog.value = true;
         break;
     }
-    isLoading.value = false;
+    isSending.value = false;
   } catch (error) {
     console.error(`Error performing ${action}:`, error);
-    isLoading.value = false;
+    isSending.value = false;
   }
 };
 const setTransaction = (data) => {
