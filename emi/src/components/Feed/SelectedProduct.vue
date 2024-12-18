@@ -62,7 +62,7 @@ const closeProductDetails = () => {
   emit('closeProductDetails')
 }
 const reserveProduct = (product) => {
-  if(isReserving) return
+  if(props.isReserving) return
   emit('reserveProduct', product)
 }
 </script>

@@ -120,7 +120,7 @@ const incrementQuantity = () => {
 };
 
 const reserveProduct = async () => {
-  if(isReserving) return
+  if(props.isReserving) return
   emit('reserve', props.product);
 };
 
