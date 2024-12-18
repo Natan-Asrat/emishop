@@ -194,7 +194,8 @@ onMounted(() => {
               sellerName: post.created_by.username,
               sellerAvatar: post.created_by.avatar, 
               postedDate: new Date(post.created_at).toLocaleDateString(),
-              embedding: post.embedding
+              embedding: post.embedding,
+              setLiked: post.setLiked
             }
             feedPostStore.replacePost(postData);
             favouritePostStore.replacePost(postData);

@@ -77,7 +77,7 @@ def notify_post_update(sender, instance, created, **kwargs):
         channel_layer = get_channel_layer()
         post_id = instance.id
         post_message = f"post_{post_id}"
-        data = PostSerializer(instance).data
+        data = PostSerializer(instance, context={'setLiked': False}).data
         if post_message in connected_users:
             for user_id in connected_users[post_message]:
                 async_to_sync(channel_layer.group_send)(

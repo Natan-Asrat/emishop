@@ -13,7 +13,7 @@ export const useUserPostsStore = defineStore({
       const index = this.posts.findIndex(p => p.id === post.id);
       const updatedPost = {
         ...post,
-        liked: post.liked !== null ? post.liked : this.posts[index].liked
+        liked: post.setLiked ? post.liked : this.posts[index].liked
       };
       if (index !== -1) {
         this.posts.splice(index, 1, updatedPost);

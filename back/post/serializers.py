@@ -7,14 +7,21 @@ from .utils import generate_presigned_url
 class PostSerializer(serializers.ModelSerializer):
     created_by = UserSerializer(read_only=True)
     images = serializers.SerializerMethodField()  # Change image_url to images
-    liked = serializers.NullBooleanField(read_only=True)  # Change to NullBooleanField
+    liked = serializers.BooleanField(read_only=True, default=False)
+    setLiked = serializers.BooleanField(read_only=True, default=True)
 
     class Meta:
         model = Post
-        fields = ['id', 'is_active', 'liked', 'created_by', 'title', 'images', 'price', 'currency', 'quantity', 'initial_quantity', 'tags', 'embedding', 'created_at', 'updated_at', 'created_at_formatted', 'updated_at_formatted']
+        fields = ['id', 'is_active', 'liked', 'setLiked', 'created_by', 'title', 'images', 'price', 'currency', 'quantity', 'initial_quantity', 'tags', 'embedding', 'created_at', 'updated_at', 'created_at_formatted', 'updated_at_formatted']
 
     def get_liked(self, obj):
-        return None
+        # If no liked data is provided, return False
+        return False
+
+    def get_setLiked(self, obj):
+        # Use context to determine setLiked value
+        return self.context.get('setLiked', False)
+
     def get_images(self, obj):
         image_urls = []
         for image in obj.images.all():
