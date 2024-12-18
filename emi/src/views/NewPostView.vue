@@ -204,8 +204,8 @@ export default {
   setup() {
     const toastStore = useToastStore();
     const compressionOptions = {
-      maxSizeMB: 0.001, // Maximum file size in megabytes
-      maxWidthOrHeight: 1920, // Maximum width or height
+      maxSizeMB: 0.2,
+      maxWidthOrHeight: 1024,
       useWebWorker: true,
       initialQuality: 0.7
     }
@@ -405,9 +405,9 @@ export default {
         formData.append('price', parseFloat(this.price.replace(/,/g, '')) || null);
         formData.append('currency', this.selectedCurrency);
         formData.append('quantity', this.quantity || null);
-        formData.append('tags', JSON.stringify(this.tags)); // Assuming tags are sent as a JSON string
+        formData.append('tags', JSON.stringify(this.tags));
         averageEmbedding.forEach((value, index) => {
-          formData.append(`embedding[${index}]`, value);  // Send each float as a separate field
+          formData.append(`embedding[${index}]`, value);  
         });
         const compressedImages = await this.compressImages(this.images);
         compressedImages.forEach(image => {
@@ -421,9 +421,9 @@ export default {
       }catch(error) {
         console.error('Error generating embeddings:', error);
       } finally {
-        const delay = processingComplete ? 2000 : 0; // If processing completes fast, wait for 2 seconds
+        const delay = processingComplete ? 2000 : 0; 
         await new Promise(resolve => setTimeout(resolve, delay));
-        this.isProcessing = false; // Hide the processing modal
+        this.isProcessing = false; 
       }
     },
     async compressImages(files) {
@@ -440,14 +440,13 @@ export default {
             const compressedFile = await imageCompression(files[i], {
               ...this.compressionOptions,
               onProgress: (progress) => {
-                // Optional: More granular progress tracking
-                this.progress = `Compressing image ${i + 1} of ${files.length}, progress: ${progress}%`
+                this.progress = `Compressing image ${i + 1} of ${files.length}, ${progress}%`
               }
             })
             compressedImages.push(compressedFile)
           } catch (error) {
             console.error(`Error compressing image ${i + 1}:`, error)
-            compressedImages.push(files[i]) // Fallback to original file
+            compressedImages.push(files[i])
           }
         }
         
