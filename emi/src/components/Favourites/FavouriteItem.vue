@@ -1,6 +1,6 @@
 <template>
   <div v-if="product.isActive" class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden product" :data-product-id="product.id" >
-    <img :src="product.image" :alt="product.name" class="w-full h-48 object-cover" @click="openProductDetails(product)" />
+    <img loading="lazy" :src="product.image" :alt="product.name" class="w-full h-48 object-cover" @click="openProductDetails(product)" />
     <div class="p-4">
       <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ product.name }}</h2>
       <p class="text-gray-600 dark:text-gray-400 mt-1">Price: ${{ product.price.toFixed(2) }}</p>

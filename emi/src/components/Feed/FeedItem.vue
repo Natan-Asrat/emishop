@@ -1,6 +1,6 @@
 <template>
   <div v-if="product.isActive" class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden product" :data-product-id="product.id" >
-    <img :src="product.image" :alt="product.name" class="w-full h-48 object-cover" @click="openProductDetails(product)" />
+    <img loading="lazy" :src="product.image" :alt="product.name" class="w-full h-48 object-cover" @click="openProductDetails(product)" />
     <div class="p-4 relative">
       <div v-if="isLoading" class="h-5 w-5 ml-auto right-5 top-5 absolute">
         <Loader2 class="h-5 w-5 animate-spin text-gray-500"/>

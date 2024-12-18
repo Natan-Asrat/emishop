@@ -12,7 +12,7 @@
             class="h-64 w-full rounded-lg"
           >
             <swiper-slide v-for="(image, index) in selectedProduct.images" :key="index">
-              <img :src="image" :alt="`${selectedProduct.name} - Image ${index + 1}`" class="w-full h-full object-cover" />
+              <img loading="lazy" :src="image" :alt="`${selectedProduct.name} - Image ${index + 1}`" class="w-full h-full object-cover" />
             </swiper-slide>
           </swiper>
         </div>

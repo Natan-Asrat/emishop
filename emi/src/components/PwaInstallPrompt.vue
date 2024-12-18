@@ -36,11 +36,11 @@
                 
                 <div class="grid grid-cols-2 gap-4 mb-4">
                   <a href="#" class="flex flex-col items-center p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
-                    <img :src="appstore" alt="App Store" class="w-16 h-16 mb-2">
+                    <img loading="lazy" :src="appstore" alt="App Store" class="w-16 h-16 mb-2">
                     <span class="text-sm font-medium text-gray-700 dark:text-gray-300">App Store</span>
                   </a>
                   <a href="#" class="flex flex-col items-center p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
-                    <img :src="playstore" alt="Play Store" class="w-16 h-16 mb-2">
+                    <img loading="lazy" :src="playstore" alt="Play Store" class="w-16 h-16 mb-2">
                     <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Play Store</span>
                   </a>
                 </div>

@@ -1,7 +1,7 @@
 <template>
   <div class="border-slate-700 px-4 py-3 bg-gray-100 dark:bg-gray-800 flex items-center justify-between  p-4">
     <div class="flex-shrink-0">
-      <img class="h-12 w-12 rounded" :src="logo" alt="Logo" />
+      <img loading="lazy" class="h-12 w-12 rounded" :src="logo" alt="Logo" />
     </div>
     <div class="flex items-center space-x-4">
       <div class="relative search-container">

@@ -30,7 +30,7 @@
       </div>
       
       <div v-else class="image-preview">
-        <img 
+        <img loading="lazy" 
           :src="imageCapture" 
           class="w-full h-full object-cover rounded-lg"
         />

@@ -6,7 +6,7 @@
     </div>
     <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-4">
       <div v-for="(preview, index) in imagePreviews" :key="index" class="relative aspect-square">
-        <img :src="preview" alt="Preview" class="w-full h-full object-cover rounded-lg" />
+        <img loading="lazy" :src="preview" alt="Preview" class="w-full h-full object-cover rounded-lg" />
         <button
           @click="$emit('removeImage', index)"
           class="absolute top-2 right-2 p-1 bg-red-500 rounded-full text-white hover:bg-red-600 transition-colors duration-300"

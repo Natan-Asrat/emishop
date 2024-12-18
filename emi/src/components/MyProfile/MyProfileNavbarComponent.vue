@@ -2,7 +2,7 @@
   <div class="space-y-4 bg-white dark:bg-gray-800 shadow-inner">
     <div v-if="user" class="grid grid-cols-6 p-4">
       <div class="col-span-2 space-y-3">
-        <img :src="user.avatar" alt="" class="ml-auto mr-auto w-24 h-24 rounded-full object-cover">
+        <img loading="lazy" :src="user.avatar" alt="" class="ml-auto mr-auto w-24 h-24 rounded-full object-cover">
         <div>
           <h1 class="text-xl text-center font-semibold whitespace-nowrap text-gray-900 dark:text-gray-100">{{ user.name }}</h1>
           <h2 class="text-sm text-center whitespace-nowrap text-gray-700 dark:text-gray-300">@{{ user.username }}</h2>

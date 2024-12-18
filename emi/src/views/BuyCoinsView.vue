@@ -8,7 +8,7 @@
           class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
           <div class="p-4">
             <div class="flex justify-center mb-3">
-              <img :src="option.image" alt="Coin" class="w-16 h-16"/>
+              <img loading="lazy" :src="option.image" alt="Coin" class="w-16 h-16"/>
             </div>
             <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 text-center">
               {{ option.coins }} {{ option.coins === 1 ? 'Coin' : 'Coins' }}

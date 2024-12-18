@@ -12,7 +12,7 @@
             class="h-64 w-full rounded-lg"
           >
             <swiper-slide v-for="(image, index) in selectedProduct.images" :key="index">
-              <img :src="image" :alt="`${selectedProduct.name} - Image ${index + 1}`" class="w-full h-full object-cover" />
+              <img loading="lazy" :src="image" :alt="`${selectedProduct.name} - Image ${index + 1}`" class="w-full h-full object-cover" />
             </swiper-slide>
           </swiper>
         </div>
@@ -21,7 +21,7 @@
         <p class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">Price: ${{ selectedProduct.price.toFixed(2) }}</p>
         <p class="text-sm text-gray-500 dark:text-gray-500 mb-4">Stock: {{ selectedProduct.stockLeft }} / {{ selectedProduct.totalStock }}</p>
         <div class="flex items-center mb-4">
-          <img :src="selectedProduct.sellerAvatar" alt="Seller Avatar" class="w-10 h-10 rounded-full mr-3" />
+          <img loading="lazy" :src="selectedProduct.sellerAvatar" alt="Seller Avatar" class="w-10 h-10 rounded-full mr-3" />
           <div>
             <p class="font-semibold text-gray-900 dark:text-gray-100">{{ selectedProduct.sellerName }}</p>
             <p class="text-sm text-gray-500 dark:text-gray-500">Posted on {{ selectedProduct.postedDate }}</p>

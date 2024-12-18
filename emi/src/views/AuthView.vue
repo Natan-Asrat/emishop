@@ -40,7 +40,7 @@
                       :disabled="isLoading"
                       class="relative group cursor-pointer disabled:cursor-not-allowed"
                     >
-                      <img 
+                      <img loading="lazy" 
                         v-if="avatarPreview" 
                         :src="avatarPreview" 
                         class="h-20 w-20 rounded-full object-cover border-2 border-gray-200 group-hover:opacity-75 transition-opacity"

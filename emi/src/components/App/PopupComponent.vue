@@ -28,7 +28,7 @@
               <div class="flex flex-col items-center">
                 <!-- <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500 mb-4"></div> -->
                 <div v-if="notification.reservation.post" class="mb-5">
-                  <img :src="notification.reservation.post.images[0]" :alt="notification.reservation.post.title" class="w-full h-48 object-cover"/>
+                  <img loading="lazy" :src="notification.reservation.post.images[0]" :alt="notification.reservation.post.title" class="w-full h-48 object-cover"/>
 
                 </div>
                 <DialogTitle as="h3" class="text-lg font-medium leading-6 text-white text-center">

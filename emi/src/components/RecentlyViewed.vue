@@ -5,7 +5,7 @@
       <div class="flex overflow-x-auto space-x-4 pb-4 scrollbar-hide px-4">
         <div v-for="product in recentProducts" :key="product.id" class="flex-shrink-0" >
           <div @click="open(product)" class="w-20 h-20 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center overflow-hidden">
-            <img :src="product.images[0]" :alt="product.name" class="w-full h-full object-cover" />
+            <img loading="lazy" :src="product.images[0]" :alt="product.name" class="w-full h-full object-cover" />
           </div>
           <p class="mt-2 text-xs text-center text-gray-600 dark:text-gray-400">{{ product.name }}</p>
         </div>

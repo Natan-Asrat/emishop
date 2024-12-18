@@ -2,7 +2,7 @@
   <div @click="click" class="rounded-md p-4 w-full bg-gray-200 dark:bg-gray-800 rounded-md hover:bg-gray-500 dark:hover:bg-gray-500 focus:bg-gray-500 focus:dark:bg-gray-500">
     <h4 :class="[textColor]" class="font-xs mb-3">{{ notification.title }}</h4>
     <div class="flex">
-      <img v-if="image && isMessage" :src="image" alt="" class="ml-4 w-10 h-10 object-cover rounded-full ">
+      <img loading="lazy" v-if="image && isMessage" :src="image" alt="" class="ml-4 w-10 h-10 object-cover rounded-full ">
       <p v-if="isMessage" class="flex-grow dark:text-gray-200 pl-4" style="font-size: 20px;">
         <span v-if="notification?.sender?.username">{{ notification.sender.username }}</span>
         <span v-else>Unknown</span>
@@ -15,7 +15,7 @@
         {{ notification.message }}
       </p>
 
-      <img v-if="image && !isMessage" :src="image" alt="" class="w-20 h-full object-cover rounded-md ">
+      <img loading="lazy" v-if="image && !isMessage" :src="image" alt="" class="w-20 h-full object-cover rounded-md ">
     </div>
     <div class="relative h-6 mt-2">
       <span class="font-xs dark:text-gray-400 right-0 absolute">{{  notification.created_at_formatted }} ago</span>

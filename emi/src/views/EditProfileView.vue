@@ -40,7 +40,7 @@
                   @click="showImageSourceDialog()"
                   class="relative group cursor-pointer"
                 >
-                  <img 
+                  <img loading="lazy" 
                     v-if="avatarPreview || userStore.user.avatar" 
                     :src="avatarPreview || userStore.user.avatar" 
                     class="h-20 w-20 rounded-full object-cover border-2 border-gray-200 group-hover:opacity-75 transition-opacity"
