@@ -209,6 +209,7 @@ const canReport = (transaction) => {
   return transaction.status === 'pending' && transaction.seller_accepted && props.trueForReservationFalseForOrder;
 };
 const handleAction = async (transaction, action, callback = null) => {
+  if(isLoading.value) return
   isLoading.value = true;
   try {
     switch (action) {

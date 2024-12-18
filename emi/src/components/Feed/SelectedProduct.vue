@@ -62,6 +62,7 @@ const closeProductDetails = () => {
   emit('closeProductDetails')
 }
 const reserveProduct = (product) => {
+  if(isReserving) return
   emit('reserveProduct', product)
 }
 </script>

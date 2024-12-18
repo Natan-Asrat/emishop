@@ -76,6 +76,7 @@ const incrementQuantity = () => {
 };
 
 const reserveProduct = async () => {
+  if(isReserving) return
   emit('reserve', props.product);
 };
 
