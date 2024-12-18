@@ -46,7 +46,7 @@ import 'swiper/css'
 import 'swiper/css/pagination'
 const swiperModules = [Pagination]
 
-defineProps({
+const props = defineProps({
   selectedProduct: {
     type: Object,
     required: true
