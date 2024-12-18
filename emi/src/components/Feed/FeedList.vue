@@ -7,6 +7,7 @@
           :key="product.id"
           :product="product"
           :index="index"
+          :isReserving="isReserving"
           @setProduct="handleSetProduct"
           @viewDetails="openProductDetails"
           @reserve="reserveProduct"

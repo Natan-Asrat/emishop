@@ -40,6 +40,7 @@
         </div>
         <button
           @click="reserveProduct()"
+          :disabled="isReserving"
           class="bg-indigo-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
         >
           Reserve
@@ -64,6 +65,11 @@ const props = defineProps({
   },
   index: {
     type: Number,
+    required: true
+  },
+  isReserving: {
+    type: Boolean,
+    default: false,
     required: true
   }
 });

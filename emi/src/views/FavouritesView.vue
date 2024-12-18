@@ -11,6 +11,7 @@
         :key="product.id"
         :product="product"
         :index="index"
+        :isReserving="isReserving"
         @viewDetails="openProductDetails"
         @reserve="reserveProduct"
         @updateQuantity="favouriteStore.updateProductQuantity"
