@@ -3,7 +3,7 @@ from account.serializers import UserSerializer
 from .models import Post, PostImage
 from django.conf import settings
 from urllib.parse import urljoin
-
+from .utils import generate_presigned_url
 class PostSerializer(serializers.ModelSerializer):
     created_by = UserSerializer(read_only=True)
     images = serializers.SerializerMethodField()  # Change image_url to images
@@ -19,10 +19,13 @@ class PostSerializer(serializers.ModelSerializer):
             if image.image:
                 base_url = settings.SITE_URL
                 media_url = settings.MEDIA_URL
-                image_url = urljoin(
-                    base_url, 
-                    media_url + str(image.image)
-                )
+                if settings.FROM_S3 == "true":
+                    image_url = generate_presigned_url(image.image)
+                else:
+                    image_url = urljoin(
+                        base_url, 
+                        media_url + str(image.image)
+                    )
                 image_urls.append(image_url)
         return image_urls
 

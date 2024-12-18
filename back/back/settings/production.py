@@ -162,7 +162,7 @@ if not AWS_S3_REGION_NAME:
 DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 FROM_S3 = os.environ.get("FROM_S3", "false")
 if FROM_S3 == "true":
-    MEDIA_URL = f"https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/media/"
+    MEDIA_URL = f"https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/"
 else:
     MEDIA_URL = "/media/"
 

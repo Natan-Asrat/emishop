@@ -2,7 +2,7 @@ from pathlib import Path
 from django.utils.timezone import timedelta
 import os
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv('../.env')
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 INSTALLED_APPS = [

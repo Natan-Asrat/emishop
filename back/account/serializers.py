@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .models import User
 from django.conf import settings
 from urllib.parse import urljoin
+from .utils import generate_presigned_url
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -24,9 +25,7 @@ class UserSerializer(serializers.ModelSerializer):
             base_url = settings.SITE_URL  
             media_url = settings.MEDIA_URL
             if settings.FROM_S3 == "true":
-                avatar_url = urljoin(
-                    media_url + str(obj.avatar)
-                )  
+                return generate_presigned_url(obj.avatar)
             else:
                 avatar_url = urljoin(
                     base_url, media_url + str(obj.avatar)

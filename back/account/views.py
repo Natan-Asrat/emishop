@@ -18,7 +18,7 @@ from post.models import Like
 from django.db.models import Exists, OuterRef
 from .pagination import CustomPageNumberPagination
 from urllib.parse import urljoin
-
+from .utils import generate_presigned_url
 class UserViewSet(
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
@@ -143,11 +143,7 @@ class UserViewSet(
         # Handle avatar URL based on FROM_S3 setting
         if user.avatar:
             if settings.FROM_S3 == "true":
-                # For S3, use media_url directly
-                avatar_url = urljoin(
-                    settings.MEDIA_URL, 
-                    str(user.avatar)
-                )
+                avatar_url = generate_presigned_url(user.avatar)
             else:
                 # For local, use request.build_absolute_uri
                 avatar_url = request.build_absolute_uri(user.avatar.url)
@@ -179,11 +175,7 @@ class UserViewSet(
         # Avatar URL
         if user.avatar:
             if settings.FROM_S3 == "true":
-                # For S3, use media_url directly
-                avatar_url = urljoin(
-                    settings.MEDIA_URL, 
-                    str(user.avatar)
-                )
+                avatar_url = generate_presigned_url(user.avatar)
             else:
                 # For local, use request.build_absolute_uri
                 avatar_url = request.build_absolute_uri(user.avatar.url)
