@@ -204,7 +204,7 @@ export default {
   setup() {
     const toastStore = useToastStore();
     compressionOptions = {
-      maxSizeMB: 1, // Maximum file size in megabytes
+      maxSizeMB: 0.001, // Maximum file size in megabytes
       maxWidthOrHeight: 1920, // Maximum width or height
       useWebWorker: true,
       initialQuality: 0.7
