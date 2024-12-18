@@ -443,10 +443,23 @@ export default {
                 this.progress = `Compressing image ${i + 1} of ${files.length}, ${progress}%`
               }
             })
-            compressedImages.push(compressedFile)
+            const uuid = crypto.randomUUID();
+            const fileExtension = files[i].name.split('.').pop();
+            const newFileName = `${uuid}_${currentDateTime}.${fileExtension}`;
+            
+            // Create a new File object with the new filename
+            const renamedCompressedFile = new File([compressedFile], newFileName, { type: compressedFile.type });
+            
+            compressedImages.push(renamedCompressedFile)
           } catch (error) {
             console.error(`Error compressing image ${i + 1}:`, error)
-            compressedImages.push(files[i])
+            const uuid = crypto.randomUUID();
+            const fileExtension = files[i].name.split('.').pop();
+            const newFileName = `${uuid}_${currentDateTime}.${fileExtension}`;
+            
+            const renamedOriginalFile = new File([files[i]], newFileName, { type: files[i].type });
+            compressedImages.push(renamedOriginalFile)
+      
           }
         }
         
