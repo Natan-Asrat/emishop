@@ -123,6 +123,11 @@ onMounted(() => {
               await markNotificationAsDelivered(notification.id);
             } catch (error) {
               console.error("Failed to mark notification as delivered:", error);
+              toastStore.showToast(
+                5000,
+                "Error saving notification read! " + error,
+                "bg-red-300 dark:bg-red-300",
+              );
             }
             let icon
             if (notification.type === 'popup') {
