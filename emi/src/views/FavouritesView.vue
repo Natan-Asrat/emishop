@@ -73,7 +73,7 @@ export default {
     setCurrentTab(tab) {
       this.currentTab = tab
     },
-    async reserveProduct(product) {
+    async reserveProduct (product) {
       const req = Math.ceil(product.price * 0.01 * product.quantity);
 
       if (this.userStore.user.coins < req) {
@@ -84,7 +84,7 @@ export default {
 
       try {
         this.isReserving = true;
-        await axios.post(`api/reservations/`, {
+        await axios.post(`api/transaction/reservations/`, {
           post_id: product.id,
           quantity: product.quantity,
         });
@@ -94,7 +94,6 @@ export default {
         product.stockLeft -= product.quantity;
         this.recommendationStore.updatePostInteraction(product.id, 'reserve', product.quantity);
 
-        this.closeProductDetails();
         this.$router.push({name: 'transactions'});
 
       } catch (error) {
@@ -110,7 +109,7 @@ export default {
       } finally {
         this.isReserving = false;
       }
-    },
+    },  
     async fetchFavorites() {
       if (this.favouriteStore.isLoading || !this.favouriteStore.hasMore) return;
 
