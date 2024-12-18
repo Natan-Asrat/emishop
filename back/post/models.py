@@ -8,6 +8,7 @@ import math
 import uuid
 from django.utils.timesince import timesince
 from asgiref.sync import async_to_sync
+from .serializers import PostSerializer
 from channels.layers import get_channel_layer
 connected_users = {}
 # Create your models here.
@@ -75,13 +76,13 @@ def notify_post_update(sender, instance, created, **kwargs):
         channel_layer = get_channel_layer()
         post_id = instance.id
         post_message = f"post_{post_id}"
+        data = PostSerializer(instance).data
         if post_message in connected_users:
             for user_id in connected_users[post_message]:
                 async_to_sync(channel_layer.group_send)(
                     f"notify_{user_id}",
                     {
-                        "type": "notification_handler",
-                        "notification_type": "post",
-                        "post": instance,
+                        "type": "post_notification_handler",
+                        "post": data,
                     },
                 )

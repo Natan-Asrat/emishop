@@ -6,6 +6,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
+from .serializers import NotificationSerializer
 
 # Create your models here.
 class Notification(models.Model):
@@ -74,11 +75,11 @@ def send_notification_to_group(sender, instance, created, **kwargs):
         group_name = f"notify_{user.id}"
 
         channel_layer = get_channel_layer()
+        data = NotificationSerializer(instance).data    
         async_to_sync(channel_layer.group_send)(
             group_name,
             {
-                "type": "notification_handler",
-                "notification_type": "notification",
-                "notification": instance,
+                "type": "notification_notification_handler",
+                "notification": data,
             },
         )

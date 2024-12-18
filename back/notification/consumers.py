@@ -65,21 +65,18 @@ class ChatConsumer(WebsocketConsumer):
                 title=f"You have a new message from '{sender.username}!'",
                 message=data.get('message'),
             )
+        message = MessageSerializer(message).data
         async_to_sync(self.channel_layer.group_send)(
             self.conversation_id,
             {
                 'type': 'chat_message',
                 'message': message,
-                'notification_type': 'chat_message'
             }
         )
     
     def chat_message(self, event):
-        type = event["notification_type"]
-        if type == "chat_message":
-            message = event["message"]
-            serializer = MessageSerializer(message)
-            self.send(text_data=json.dumps({"type": "chat", "object": serializer.data}))
+        message = event["message"]
+        self.send(text_data=json.dumps({"type": "chat", "object": message}))
 
 class NotificationConsumer(WebsocketConsumer):
     def connect(self):
@@ -140,18 +137,15 @@ class NotificationConsumer(WebsocketConsumer):
             self.group_name, self.channel_name
         )
         return super().disconnect(code)
-    def notification_handler(self, event):
-        type = event["notification_type"]
-        if type == "post":
-            post = event["post"]
-            post_data = PostSerializer(post).data
-            message = {"type": "post", "object": post_data}
-            self.send(text_data=json.dumps(message))
-        elif type == "notification":
-            notification = event["notification"]
-            notification_data = NotificationSerializer(notification).data
-            message = {"type": "notification", "object": notification_data}
-            self.send(text_data = json.dumps(message))
+    def post_notification_handler(self, event):
+        post_data = event["post"]
+        message = {"type": "post", "object": post_data}
+        self.send(text_data=json.dumps(message))
+        
+    def notification_notification_handler(self, event):
+        notification_data = event["notification"]
+        message = {"type": "notification", "object": notification_data}
+        self.send(text_data = json.dumps(message))
     def subscribe_to_post_group(self, post_id):
         """Adds the user to the post group if not already added."""
 
