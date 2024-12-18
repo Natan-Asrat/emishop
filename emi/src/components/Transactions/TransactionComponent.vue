@@ -112,7 +112,7 @@
 </template>
 <script setup>
 import { useRouter } from 'vue-router';
-import { ref } from 'vue';
+import { ref, watch, onUnmounted } from 'vue';
 import axios from 'axios';
 import { getOtherPartyOfTrasaction } from '@/utils'
 import { CheckCircle, XCircle, AlertTriangle, ShoppingCart, MessageCircle, Archive } from 'lucide-vue-next';
@@ -140,7 +140,13 @@ const isSending = ref(false);
 const closeModal = () => {
   showReportDialog.value = false;
 }
-console.log("sending", isSending.value);
+const originalValue = isSending.value;
+onUnmounted(() => {
+  isSending.value = originalValue;
+});
+watch(isSending, (newValue) => {
+  console.log('isSending changed:', newValue);
+});
 const showActions = (transaction) => {
   return (transaction.status === 'pending' && transaction.seller_accepted) || !props.trueForReservationFalseForOrder;
 };
@@ -232,7 +238,7 @@ const canCancel = (transaction) => {
 const canReport = (transaction) => {
   return transaction.status === 'pending' && transaction.seller_accepted && props.trueForReservationFalseForOrder;
 };
-const handleAction = async (transaction, action, callback = null) => {
+const handleAction = (transaction, action, callback = null) => {
   isSending.value = true;
   try {
     switch (action) {
