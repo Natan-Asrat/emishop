@@ -112,7 +112,7 @@ const props = defineProps({
 })
 const router = useRouter();
 const showReportDialog = ref(false);
-const isLoading = useRef(false);
+const isLoading = ref(false);
 const closeModal = () => {
   showReportDialog.value = false;
 }
