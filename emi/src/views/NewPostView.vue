@@ -184,6 +184,8 @@ import { useToastStore } from '@/stores/toast';
 import LoadingComponent from '@/components/NewPost/LoadingComponent.vue';
 import { AlertCircle, Info, X, Send, Loader2 } from 'lucide-vue-next'
 import WebRTCCamera from '@/components/WebRTCCamera.vue'
+import imageCompression from 'browser-image-compression'
+
 export default {
   components: {
     NewPostHeader,
@@ -201,8 +203,14 @@ export default {
   },
   setup() {
     const toastStore = useToastStore();
+    compressionOptions = {
+      maxSizeMB: 1, // Maximum file size in megabytes
+      maxWidthOrHeight: 1920, // Maximum width or height
+      useWebWorker: true,
+      initialQuality: 0.7
+    }
     return {
-      toastStore
+      toastStore, compressionOptions
     }
   },
   data() {
@@ -401,8 +409,9 @@ export default {
         averageEmbedding.forEach((value, index) => {
           formData.append(`embedding[${index}]`, value);  // Send each float as a separate field
         });
-        this.images.forEach(image => {
-          formData.append('images', image); // Ensure these are File objects
+        const compressedImages = await this.compressImages(this.images);
+        compressedImages.forEach(image => {
+          formData.append('images', image); 
         });
 
         await axios.post(`api/post/posts/create-new/`, formData);
@@ -416,6 +425,37 @@ export default {
         await new Promise(resolve => setTimeout(resolve, delay));
         this.isProcessing = false; // Hide the processing modal
       }
+    },
+    async compressImages(files) {
+      try {
+        this.isProcessing = true
+        this.progress = 'Compressing Images...'
+        
+        const compressedImages = []
+        for (let i = 0; i < files.length; i++) {
+          this.progress = `Compressing image ${i + 1} of ${files.length}`
+          this.progressPercentage = Math.round(((i + 1) / files.length) * 100)
+          
+          try {
+            const compressedFile = await imageCompression(files[i], {
+              ...compressionOptions,
+              onProgress: (progress) => {
+                // Optional: More granular progress tracking
+                this.progress = `Compressing image ${i + 1} of ${files.length}, progress: ${progress}%`
+              }
+            })
+            compressedImages.push(compressedFile)
+          } catch (error) {
+            console.error(`Error compressing image ${i + 1}:`, error)
+            compressedImages.push(files[i]) // Fallback to original file
+          }
+        }
+        
+        return compressedImages
+      } catch (error) {
+        console.error('Image compression failed:', error)
+        return files
+      } 
     },
     checkReportedOnSeller() {
       this.isLoading = true;
