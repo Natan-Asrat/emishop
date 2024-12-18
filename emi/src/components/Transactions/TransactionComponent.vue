@@ -77,7 +77,11 @@
   </button>
 </div>
 <ReportComponent v-if="showReportDialog" @setTransaction="setTransaction" @closeModal="closeModal" :reservation="transaction"/>
-
+<PopupComponent 
+    v-if="showVerificationModal" 
+    :notification="verificationModalContent"
+    @close="showVerificationModal = false"
+  ></PopupComponent>
   </div>
 </template>
 <script setup>
@@ -87,8 +91,15 @@ import axios from 'axios';
 import { getOtherPartyOfTrasaction } from '@/utils'
 import { CheckCircle, XCircle, AlertTriangle, ShoppingCart, MessageCircle, Archive } from 'lucide-vue-next';
 import ReportComponent from './ReportComponent.vue';
+import PopupComponent from '../App/PopupComponent.vue';
 import { useUserStore } from '@/stores/user';
 import { useTransactionsStore } from '@/stores/transactions';
+const verificationModalContent = {
+  "title": "Pending Verification",
+  "message": "Waiting for the buyer to approve that they have received the item",
+  "reservation": null,
+  "post": null
+}
 const transactionStore = useTransactionsStore();
 const userStore = useUserStore();
 const emit = defineEmits(['setTransaction', 'setLoading'])
@@ -108,6 +119,8 @@ const props = defineProps({
 })
 const router = useRouter();
 const showReportDialog = ref(false);
+const showVerificationModal = ref(false);
+
 const closeModal = () => {
   showReportDialog.value = false;
 }
@@ -230,6 +243,7 @@ const handleAction = (transaction, action, callback = null) => {
           .then(
             response => {
               setTransaction(response.data);
+              showVerificationModal.value = true
               emit('setLoading', false)
 
             }
