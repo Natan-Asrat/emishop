@@ -54,23 +54,21 @@ export const useRecommendationStore = defineStore({
         this.userEmbedding = newEmbedding
 
         this.saveUserData()
-        // fetchMoreProducts() // Placeholder for fetching more products based on new embedding
     },
     performWeightedAveraging(embeddings, lengthOfTemp) {
       const newEmbedding = new Array(this.EMBEDDING_SIZE).fill(0)
       let totalWeight = 0
-      const k = 0.05; // Adjust this for smoother weight transition - smaller k for including
+      const k = 0.05;
       const midpoint = Math.max(0, embeddings.length - lengthOfTemp);
       embeddings.forEach((embedding, index) => {
-        // const weight = (index + 1) / (embeddings.length + 1); linear
-        const weight = 1 / (1 + Math.exp(-k * (index - midpoint))); // set sigmoid with midpoint same as temp length
+        const weight = 1 / (1 + Math.exp(-k * (index - midpoint)));
 
         if (typeof embedding === 'string') {
             try {
                 embedding = JSON.parse(embedding);
             } catch (error) {
                 console.error("Failed to parse embedding as JSON:", error);
-                return; // Exit if parsing fails
+                return;
             }
         }
         embedding.forEach((value, i) => {
@@ -89,31 +87,25 @@ export const useRecommendationStore = defineStore({
       localStorage.setItem('lastSavedDate', this.lastSavedDate)
     },
     saveRecentlyViewed(postId) {
-      const maxInteractions = 5; // Define the maximum size of the recently viewed array
+      const maxInteractions = 5;
       const existingInteractions = JSON.parse(localStorage.getItem('recentlyViewed')) || [];
 
-      // Check if the post is already in the interactions
       const existingIndex = existingInteractions.findIndex(id => id === postId);
 
       if (existingIndex !== -1) {
-        // Remove existing interaction to re-add it to the top
         existingInteractions.splice(existingIndex, 1);
       }
 
-      // Add the new interaction at the beginning
       existingInteractions.unshift(postId);
 
-      // Trim the array to the max size
       if (existingInteractions.length > maxInteractions) {
         existingInteractions.pop();
       }
       console.log
 
-      // Save updated interactions back to localStorage
       localStorage.setItem('recentlyViewed', JSON.stringify(existingInteractions));
     },
     saveTopPostsToRecentlyViewed(topPosts) {
-      // Process each post in topPosts
       if(topPosts != null && topPosts.length > 0){
         topPosts.forEach((postId) => {
           this.saveRecentlyViewed(postId);
@@ -124,7 +116,6 @@ export const useRecommendationStore = defineStore({
 
     updateVisibility(productId, isVisible) {
       if (isVisible) {
-          // If the product becomes visible, set startTime if not already set
           if (!this.visibilityTimes[productId]) {
               this.visibilityTimes[productId] = {
                   startTime: Date.now(),
@@ -132,20 +123,17 @@ export const useRecommendationStore = defineStore({
                   isVisible: true
               };
           } else if (!this.visibilityTimes[productId].isVisible) {
-              // Update startTime only when transitioning from invisible to visible
               this.visibilityTimes[productId].startTime = Date.now();
               this.visibilityTimes[productId].isVisible = true;
           }
 
       } else {
-          // If the product leaves the viewport, calculate time spent and mark as not visible
           if (this.visibilityTimes[productId] && this.visibilityTimes[productId].isVisible) {
-              const visibleTime = (Date.now() - this.visibilityTimes[productId].startTime) / 1000; // convert to seconds
+              const visibleTime = (Date.now() - this.visibilityTimes[productId].startTime) / 1000; 
               this.visibilityTimes[productId].totalVisibleTime += visibleTime;
               this.updateInteractionTime(productId, visibleTime)
 
               this.updatePostInteraction(productId, 'view')
-              // Mark as not visible
               this.visibilityTimes[productId].isVisible = false;
           }
       }

@@ -18,7 +18,6 @@ onMounted(() => {
   if ('serviceWorker' in navigator) {
     wb.value = new Workbox('/sw.js');
 
-    // Add event listeners for various service worker states
     wb.value.addEventListener('waiting', (event) => {
       console.log('A new service worker is waiting to be activated');
       updateAvailable.value = true;
@@ -33,11 +32,9 @@ onMounted(() => {
       console.log('Service worker activated');
     });
 
-    // Register the service worker
     wb.value.register().then((registration) => {
       console.log('Service Worker registered');
       
-      // Check for updates every 5 minutes
       setInterval(() => {
         console.log('Checking for updates...');
         wb.value.update();

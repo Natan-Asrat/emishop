@@ -18,26 +18,22 @@ const navbarRef = ref<HTMLElement>();
 let lastScroll = 0;
 let isScrollingDown = false;
 
-// Start calculating scroll direction and apply translateY
 const handleScroll = () => {
     const navbarH = navbarRef.value?.clientHeight as number;
     const currentScroll = window.scrollY;
 
     if (currentScroll > lastScroll && !isScrollingDown) {
-        // scrolling down
         isScrollingDown = true;
-        navbarTransform.value = `-${navbarH}px`;  // Hide the navbar
+        navbarTransform.value = `-${navbarH}px`;
     } else if (currentScroll < lastScroll && isScrollingDown) {
-        // scrolling up
         isScrollingDown = false;
-        navbarTransform.value = '0';  // Show the navbar
+        navbarTransform.value = '0';
     }
 
-    lastScroll = currentScroll <= 0 ? 0 : currentScroll; // Prevent negative scroll values
+    lastScroll = currentScroll <= 0 ? 0 : currentScroll;
 
-    // Check if the user has reached the bottom of the page
     if ((document.documentElement.scrollHeight - window.scrollY) === window.innerHeight) {
-        emit('reachedLastElement');  // Emit or call a function when the last element is reached
+        emit('reachedLastElement');
     }
 };
 

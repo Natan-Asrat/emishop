@@ -77,10 +77,8 @@ export default {
         .then(response => {
           this.isLoading = false;
           
-          // Check if we have more pages
           this.hasMore = response.data.next !== null;
           
-          // If it's first page, set notifications, otherwise append
           if (this.page === 1) {
             this.notificationStore.setNotifications(response.data.results)
           } else {
@@ -126,7 +124,6 @@ export default {
           quantity: product.quantity,
         });
 
-        // Update local state
         this.userStore.refreshCoins()
         product.stockLeft -= product.quantity;
 

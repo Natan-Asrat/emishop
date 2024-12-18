@@ -26,13 +26,11 @@ export const useNotificationStore = defineStore({
       notifications.forEach(newNotification => {
         const existingIndex = newNotifications.findIndex(nt => nt.id === newNotification.id);
         if (existingIndex !== -1) {
-          newNotifications[existingIndex] = newNotification; // Replace if exists
+          newNotifications[existingIndex] = newNotification;
         } else {
-          newNotifications.push(newNotification); // Add new
+          newNotifications.push(newNotification);
         }
       });
-
-      // Replace with a fresh array reference to ensure reactivity
       this.notifications = newNotifications;
       this.sort()
       this.updateGroupedNotifications()
@@ -57,19 +55,18 @@ export const useNotificationStore = defineStore({
       return "A year ago";
     },
 
-    // Group notifications by time label
     updateGroupedNotifications() {
       this.groupedNotifications = this.notifications.reduce((result, notification) => {
-        const label = this.getTimeLabel(notification.created_at); // Get the time label
-        let group = result.find((g) => g.date === label); // Check if the group already exists
+        const label = this.getTimeLabel(notification.created_at);
+        let group = result.find((g) => g.date === label);
 
         if (!group) {
-          group = { date: label, notifications: [] }; // Create new group
+          group = { date: label, notifications: [] };
           result.push(group);
         }
 
-        group.notifications.push(notification); // Add notification to the group
-        group.notifications.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)); // Sort latest first
+        group.notifications.push(notification);
+        group.notifications.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
         return result;
       }, [])

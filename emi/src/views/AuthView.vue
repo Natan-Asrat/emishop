@@ -317,10 +317,9 @@ const showError = (title, message) => {
 const toggleAuthMode = () => {
   if (isLoading.value) return;
   isSignUp.value = !isSignUp.value;
-  // Clear form
   Object.keys(user).forEach(key => user[key] = '');
   Object.keys(errors).forEach(key => errors[key] = null);
-  avatarPreview.value = ''; // Clear avatar preview
+  avatarPreview.value = '';
 };
 
 const handleFileChange = (event) => {
@@ -328,7 +327,7 @@ const handleFileChange = (event) => {
   if (file) {
     if (!file.type.match('image.*')) {
       showError('Invalid File', 'Please select an image file');
-      event.target.value = ''; // Clear the file input
+      event.target.value = '';
       return;
     }
     
@@ -448,7 +447,6 @@ const selectImageSource = (source) => {
   if (source === 'camera') {
     showWebRTCCamera.value = true;
   } else if (source === 'gallery') {
-    // Trigger file input for gallery selection
     if (fileInput.value) {
       fileInput.value.click();
     }
@@ -456,15 +454,12 @@ const selectImageSource = (source) => {
 }
 
 const handleWebRTCImageCapture = (imageData) => {
-  // Convert base64 to File object
   const blob = dataURItoBlob(imageData);
   const file = new File([blob], 'captured-image.jpg', { type: 'image/jpeg' });
   
-  // Update avatar preview and file
   avatarFile.value = file;
   avatarPreview.value = imageData;
   
-  // Close camera modal
   closeCameraModal();
 }
 

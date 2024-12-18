@@ -36,14 +36,11 @@ export const useTransactionsStore = defineStore({
       this.updateCounts()
       const index = this.transactions.findIndex(tr => tr.id === transaction.id);
       if (index !== -1) {
-        // Replace the existing transaction
         this.transactions[index] = transaction;
       } else {
-        // Add the new transaction
         this.transactions.push(transaction);
       }
 
-      // Ensure reactivity by replacing the array reference
       this.transactions = [...this.transactions];
     },
 
@@ -51,14 +48,11 @@ export const useTransactionsStore = defineStore({
       this.updateCounts()
       const index = this.orders.findIndex(tr => tr.id === transaction.id);
       if (index !== -1) {
-        // Replace the existing transaction
         this.orders[index] = transaction;
       } else {
-        // Add the new transaction
         this.orders.push(transaction);
       }
 
-      // Ensure reactivity by replacing the array reference
       this.orders = [...this.orders];
     },
 
@@ -103,14 +97,12 @@ export const useTransactionsStore = defineStore({
       this.updateCounts()
       this.transactions = this.transactions.filter(transaction => transaction.id !== id);
 
-      // Ensure reactivity by replacing the array reference
       this.transactions = [...this.transactions];
     },
     removeOrder(id) {
       this.updateCounts()
       this.orders = this.orders.filter(transaction => transaction.id !== id);
 
-      // Ensure reactivity by replacing the array reference
       this.orders = [...this.orders];
     },
     getTransactions() {

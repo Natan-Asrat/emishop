@@ -16,6 +16,5 @@ app.use(router)
 axios.defaults.baseURL = import.meta.env.VITE_API_URL;
 
 const userStore = useUserStore();
-// Call initStore to initialize user data from localStorage
 userStore.initStore();
 app.mount('#app')

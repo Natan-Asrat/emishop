@@ -93,11 +93,9 @@ onUnmounted(() => {
 
 async function initCamera() {
   try {
-    // Get available cameras
     const devices = await navigator.mediaDevices.enumerateDevices()
     availableCameras.value = devices.filter(device => device.kind === 'videoinput')
 
-    // Start camera with selected constraints
     const stream = await navigator.mediaDevices.getUserMedia(constraints)
     currentStream.value = stream
     
@@ -155,7 +153,6 @@ function confirmImage() {
   if (imageCapture.value) {
     emit('image-confirmed', imageCapture.value)
     
-    // Stop the video stream after confirmation
     if (videoElement.value && videoElement.value.srcObject) {
       const tracks = videoElement.value.srcObject.getTracks()
       tracks.forEach(track => track.stop())
@@ -164,13 +161,11 @@ function confirmImage() {
 }
 
 function cancelCapture() {
-  // Stop the video stream when cancelling
   if (videoElement.value && videoElement.value.srcObject) {
     const tracks = videoElement.value.srcObject.getTracks()
     tracks.forEach(track => track.stop())
   }
   
-  // Reset image capture and emit close event
   imageCapture.value = null
   emit('close')
 }

@@ -69,7 +69,6 @@ export default {
   computed: {
     sortedMessages() {
       return [...this.messages].sort((a, b) => {
-        // Precisely compare timestamps including microseconds
         return new Date(a.sent_at).getTime() - new Date(b.sent_at).getTime();
       });
     }
@@ -94,7 +93,6 @@ export default {
     }
   },
   beforeUnmount() {
-    // Remove scroll event listener to prevent memory leaks
     if (this.$refs.messagesContainer) {
       this.$refs.messagesContainer.removeEventListener('scroll', this.handleScroll);
     }
@@ -103,7 +101,6 @@ export default {
   methods: {
     handleScroll() {
       const container = this.$refs.messagesContainer;
-      // Check if scrolled to the top
       if (container.scrollTop === 0 && this.hasMoreMessages && !this.isLoadingMessages) {
         this.fetchMessages();
       }
@@ -201,7 +198,7 @@ export default {
         sender_id: this.userStore.user,
         recipient_id: this.$route.query.username,
         reservation_id: this.$route.query.itemId
-      }; // Send via WebSocket
+      };
       this.ws.send(JSON.stringify(messageData));
       this.newMessage = '';
     }

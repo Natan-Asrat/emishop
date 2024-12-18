@@ -56,14 +56,11 @@ export default {
       }
 
       try {
-        // Construct the API URL
         const queryParam = recentlyViewedIds.map(id => encodeURIComponent(id)).join(',');
         const apiUrl = `/api/post/posts/bulk?getposts=${queryParam}`;
 
-        // Make the API call
         const response = await axios.get(apiUrl);
 
-        // Populate the `recentProducts` list with the data from the server
         this.recentProducts = response.data;
       } catch (error) {
         console.error("Failed to load recent products:", error);

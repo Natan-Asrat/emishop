@@ -89,7 +89,6 @@ export default {
           quantity: product.quantity,
         });
 
-        // Update local state
         this.userStore.refreshCoins()
         product.stockLeft -= product.quantity;
         this.recommendationStore.updatePostInteraction(product.id, 'reserve', product.quantity);
@@ -136,14 +135,12 @@ export default {
           embedding: post.embedding
         }));
 
-        // Update store
         if (this.favouriteStore.page === 1) {
           this.favouriteStore.setPosts(newProducts);
         } else {
           this.favouriteStore.addPosts(newProducts);
         }
 
-        // Update pagination
         this.favouriteStore.hasMore = response.data.next !== null;
         if (this.favouriteStore.hasMore) {
           this.favouriteStore.incrementPage();

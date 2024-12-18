@@ -107,10 +107,9 @@ async function handlePayment(option, index) {
     isLoading.value = true;
     loadingIndex.value = index;
     
-    // Create PayPal order through our backend
     const { data: orderData } = await axios.post('/api/account/create-paypal-order/', {
       coins: option.coins,
-      price: option.price.toFixed(2)  // Ensure price is properly formatted
+      price: option.price.toFixed(2) 
     });
 
     if (!orderData.id) {
@@ -121,17 +120,14 @@ async function handlePayment(option, index) {
       createOrder: () => orderData.id,
       onApprove: async (data) => {
         try {
-          // Capture the payment through our backend
           const { data: captureData } = await axios.post('/api/account/capture-paypal-order/', {
             orderId: data.orderID
           });
 
           if (captureData.success) {
-            // Update user's coins in the store
             await userStore.refreshCoins();
             router.push({name: 'myprofile'})
             
-            // Hide PayPal modal
             closePayPalModal();
           } else {
             throw new Error('Payment capture failed');
@@ -155,7 +151,6 @@ async function handlePayment(option, index) {
     container.innerHTML = '';
     await paypalButtons.render('#paypal-button-container');
     
-    // Show the modal
     const modal = document.getElementById('paypal-modal');
     modal.style.display = 'flex';
     isLoading.value = false;

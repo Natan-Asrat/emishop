@@ -152,13 +152,10 @@ export default {
 
         const newTransactions = response.data.results
 
-        // Add new transactions, filtering out duplicates
         this.transactionStore.addTransactions(newTransactions, status)
 
-        // Update has more flag for this specific status
         this.transactionStore.hasMoreTransactions[status] = response.data.next !== null
         
-        // Increment page for this specific status if more exist
         if (this.transactionStore.hasMoreTransactions[status]) {
           this.transactionStore.incrementPage('transactions', status)
         }
@@ -185,13 +182,10 @@ export default {
 
         const newOrders = response.data.results
 
-        // Add new orders, filtering out duplicates
         this.transactionStore.addOrders(newOrders, status)
 
-        // Update has more flag for this specific status
         this.transactionStore.hasMoreOrders[status] = response.data.next !== null
         
-        // Increment page for this specific status if more exist
         if (this.transactionStore.hasMoreOrders[status]) {
           this.transactionStore.incrementPage('orders', status)
         }
@@ -228,7 +222,6 @@ export default {
         const status = newTab.toLowerCase()
         const type = this.trueForReservationFalseForOrder ? 'transactions' : 'orders'
         
-        // Reset pagination for the specific status
         this.transactionStore.resetPagination(type, status)
         
         if(this.trueForReservationFalseForOrder){
@@ -245,7 +238,6 @@ export default {
         const status = this.currentTab.toLowerCase()
         const type = this.trueForReservationFalseForOrder ? 'transactions' : 'orders'
         
-        // Reset pagination for the specific status
         this.transactionStore.resetPagination(type, status)
         
         if(this.trueForReservationFalseForOrder){

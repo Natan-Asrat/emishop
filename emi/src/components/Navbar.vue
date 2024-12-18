@@ -77,22 +77,19 @@ let isScrollingDown = false;
 const isSearching = ref(false);
 const noResults = ref(false);
 
-// Start calculating scroll direction and apply translateY
 const handleScroll = () => {
     const navbarH = navbarRef.value?.clientHeight as number;
     const currentScroll = window.scrollY;
 
     if (currentScroll > lastScroll && !isScrollingDown) {
-        // scrolling down
         isScrollingDown = true;
-        navbarTransform.value = `-${navbarH}px`;  // Hide the navbar
+        navbarTransform.value = `-${navbarH}px`;
     } else if (currentScroll < lastScroll && isScrollingDown) {
-        // scrolling up
         isScrollingDown = false;
-        navbarTransform.value = '0';  // Show the navbar
+        navbarTransform.value = '0';
     }
 
-    lastScroll = currentScroll <= 0 ? 0 : currentScroll; // Prevent negative scroll values
+    lastScroll = currentScroll <= 0 ? 0 : currentScroll;
 };
 
 const redirectToBuyCoins = () => {
@@ -105,7 +102,6 @@ const search = () => {
   feedPostStore.searchPage++;
   axios.get(`/api/post/posts/?search=${searchQuery.value}&page=${feedPostStore.searchPage}`)
     .then(response => {
-        // Handle the response (e.g., update the UI with search results)
         const results = response.data.results.map(post => (getPostData(post)))
         feedPostStore.setSearchresults(results)
         feedPostStore.hasMoreSearchResults = response.data.next !== null
@@ -113,7 +109,6 @@ const search = () => {
         noResults.value = results.length === 0;
       })
       .catch(error => {
-        // Handle any errors
         console.error("There was an error with the search:", error);
       })
       .finally(() => {

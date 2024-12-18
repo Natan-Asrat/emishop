@@ -68,7 +68,7 @@ const openProductDetails = (product) => {
 const closeProductDetails = () => {
   if (selectedProduct.value) {
     const endTime = Date.now()
-    const timeSpent = (endTime - selectedProduct.value.startViewTime) / 1000 // Convert to seconds
+    const timeSpent = (endTime - selectedProduct.value.startViewTime) / 1000
     recommendationStore.updateInteractionTime(selectedProduct.value.id, timeSpent)
   }
   selectedProduct.value = null
@@ -89,7 +89,6 @@ const reserveProduct = async (product) => {
       quantity: product.quantity,
     });
 
-    // Update local state
     userStore.refreshCoins()
     product.stockLeft -= product.quantity;
     recommendationStore.updatePostInteraction(product.id, 'reserve', product.quantity);
@@ -124,13 +123,11 @@ const fetchPosts = async () => {
     let response
 
     if (mainEmbeddings !== null && mainEmbeddings.length >= 60) {
-      // If we have enough interaction data, send user embedding in batches of 10
       response = await axios.post(`api/post/posts/feed/?page=${feedPostStore.page}`, {
         user_embedding: recommendationStore.userEmbedding,
         page_size: 10
       })
     } else {
-      // Otherwise, get diverse results in batches of 10
       response = await axios.get(`api/post/posts/feed/?page=${feedPostStore.page}&page_size=10`)
     }
     
@@ -152,20 +149,17 @@ const fetchPosts = async () => {
       embedding: post.embedding
     }))
 
-    // Update store with new products
     if (feedPostStore.page === 1) {
       feedPostStore.setPosts(newProducts)
     } else {
       feedPostStore.addPosts(newProducts)
     }
 
-    // Update pagination
     feedPostStore.hasMore = response.data.next !== null
     if (feedPostStore.hasMore) {
       feedPostStore.incrementPage()
     }
 
-    // Track interactions
     for(const product of newProducts){
       recommendationStore.updatePostInteraction(product.id, 'view')
     }
@@ -177,7 +171,6 @@ const fetchPosts = async () => {
   }
 }
 
-// Handle scroll
 const handleScroll = () => {
   if (feedPostStore.isLoading || !feedPostStore.hasMore) return;
   
@@ -188,7 +181,6 @@ const handleScroll = () => {
   }
 }
 
-// Lifecycle hooks
 onMounted(() => {
   feedPostStore.resetPagination()
   fetchPosts()

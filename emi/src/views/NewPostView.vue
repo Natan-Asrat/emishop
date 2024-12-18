@@ -268,7 +268,6 @@ export default {
         currency: ''
       };
 
-      // Title validation
       if (!this.title.trim()) {
         this.errors.title = 'Title is required';
         isValid = false;
@@ -277,13 +276,11 @@ export default {
         isValid = false;
       }
 
-      // Tags validation
       if (this.tags.length < 3) {
         this.errors.tags = 'Please add at least 3 tags';
         isValid = false;
       }
 
-      // Price validation
       if (!this.formattedPrice) {
         this.errors.price = 'Price is required';
         isValid = false;
@@ -292,19 +289,16 @@ export default {
         isValid = false;
       }
 
-      // Currency validation
       if (!this.selectedCurrency) {
         this.errors.currency = 'Please select a currency';
         isValid = false;
       }
 
-      // Image validation
       if (!this.validateImages()) {
         isValid = false;
       }
 
       if (!isValid) {
-        // Show the first error in toast
         const firstError = Object.values(this.errors).find(error => error !== '');
         this.toastStore.showToast(
           5000,
@@ -392,7 +386,7 @@ export default {
         this.progress = 'Generating embeddings'
         const embeddings = await model.embed(this.tags);
         this.progress = 'Uploading post'
-        const tagEmbeddings = embeddings.arraySync(); // Convert to a JavaScript array
+        const tagEmbeddings = embeddings.arraySync();
 
         const averageEmbedding = tagEmbeddings.reduce((acc, curr) =>
           acc.map((val, i) => val + curr[i]), new Array(512).fill(0))

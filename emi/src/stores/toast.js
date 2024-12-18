@@ -17,12 +17,11 @@ export const useToastStore = defineStore({
       this.classes = `${classes || ""} -translate-y-28`;
       this.isVisible = true;
 
-      // Hide toast after duration
       setTimeout(() => {
         this.classes = this.classes.replace(" -translate-y-28", "");
         setTimeout(() => {
           this.isVisible = false;
-        }, this.ms); // Match the CSS transition duration
+        }, this.ms);
       }, 500);
     },
   },

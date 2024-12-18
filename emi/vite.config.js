@@ -4,7 +4,6 @@ import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
 import { VitePWA } from 'vite-plugin-pwa'
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [
     vue(),
@@ -64,7 +63,7 @@ export default defineConfig({
         skipWaiting: false,
         clientsClaim: true,
         cleanupOutdatedCaches: true,
-        globPatterns: [], // No automatic caching
+        globPatterns: [],
         navigateFallback: null,
         runtimeCaching: [
           {
@@ -75,31 +74,29 @@ export default defineConfig({
               networkTimeoutSeconds: 10,
               expiration: {
                 maxEntries: 32,
-                maxAgeSeconds: 24 * 60 * 60 // 24 hours
+                maxAgeSeconds: 24 * 60 * 60
               }
             }
           },
           {
-            // Cache images but prefer network
             urlPattern: /\.(png|jpg|jpeg|svg|gif|webp)$/i,
             handler: 'NetworkFirst',
             options: {
               cacheName: 'image-cache',
               expiration: {
                 maxEntries: 50,
-                maxAgeSeconds: 24 * 60 * 60 // 24 hours
+                maxAgeSeconds: 24 * 60 * 60
               }
             }
           },
           {
-            // Cache static assets but prefer network
             urlPattern: /\.(js|css|ico)$/,
             handler: 'NetworkFirst',
             options: {
               cacheName: 'static-cache',
               expiration: {
                 maxEntries: 32,
-                maxAgeSeconds: 24 * 60 * 60 // 24 hours
+                maxAgeSeconds: 24 * 60 * 60
               }
             }
           }

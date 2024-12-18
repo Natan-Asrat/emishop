@@ -25,12 +25,10 @@
 <script setup>
 import MyPostItem from '@/components/MyProfile/MyPostItem.vue';
 import axios from 'axios';
-// import { useRouter } from 'vue-router';
 import { onMounted, ref, onUnmounted  } from 'vue';
 import { useUserPostsStore } from '@/stores/userPost';
 import { useToastStore } from '@/stores/toast';
 import SpinnerComponent from '@/components/SpinnerComponent.vue';
-// import { useUserStore } from '@/stores/user';
 import SelectedProduct from '@/components/MyProfile/SelectedProduct.vue';
 const toastStore = useToastStore();
 const deletePost = (post) => {
@@ -54,19 +52,8 @@ const deletePost = (post) => {
 }
 
 const feedPostStore = useUserPostsStore();
-// const userStore = useUserStore();
-// const props = defineProps({
-//   reachedLast: {
-//     type: Boolean,
-//     required: true,
-//   }
-// })
-// const emits = defineEmits(['resetLastElement', 'openProductDetails'])
-// const showInsufficientCoinsModal = ref(false)
-
 const selectedProduct = ref(null)
 const isDeleting = ref(false);
-// const router = useRouter();
 const isLoading = ref(false);
 const hasMore = ref(true)
 const page = ref(1)
@@ -91,7 +78,7 @@ const fetchPosts = async () => {
     let response = await axios.get(`api/account/users/myposts/`, {
       params: {
         page: feedPostStore.page,
-        page_size: 10  // Match backend default page size
+        page_size: 10 
       }
     })
     
@@ -118,7 +105,6 @@ const fetchPosts = async () => {
       feedPostStore.addPosts(newProducts)
     }
 
-    // Update hasMore based on the 'next' field in the response
     feedPostStore.hasMore = response.data.next !== null
     if (feedPostStore.hasMore) {
       feedPostStore.incrementPage()

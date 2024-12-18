@@ -170,7 +170,6 @@ const selectImageSource = (source) => {
   if (source === 'camera') {
     showWebRTCCamera.value = true;
   } else if (source === 'gallery') {
-    // Trigger file input for gallery selection
     if (fileInput.value) {
       fileInput.value.click();
     }
@@ -178,15 +177,12 @@ const selectImageSource = (source) => {
 }
 
 const handleWebRTCImageCapture = (imageData) => {
-  // Convert base64 to File object
   const blob = dataURItoBlob(imageData);
   const file = new File([blob], 'captured-image.jpg', { type: 'image/jpeg' });
   
-  // Update avatar preview and file
   form.avatar = file;
   avatarPreview.value = imageData;
   
-  // Close camera modal
   closeCameraModal();
 }
 
@@ -216,7 +212,7 @@ const handleFileChange = (event) => {
 };
 
 const submitForm = async () => {
-  errors.splice(0); // Clear errors
+  errors.splice(0);
   if (changePassword.value && form.password1 !== form.password2) {
     errors.push("Passwords do not match");
     return;
@@ -248,7 +244,6 @@ const submitForm = async () => {
   }
 };
 
-// Expose fileInput ref to template
 defineExpose({
   fileInput
 });

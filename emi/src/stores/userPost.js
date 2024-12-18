@@ -20,7 +20,6 @@ export const useUserPostsStore = defineStore({
       }
     },
     addPost(post) {
-      // Only add if not already exists
       if (!this.posts.find(p => p.id === post.id)) {
         this.posts.push(post);
       }

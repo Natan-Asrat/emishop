@@ -49,8 +49,6 @@ const props = defineProps({
 const deletePost = () => {
   isDeleting.value = true;
   emit('deletePost', props.product);
-  // Since the actual deletion happens in the parent component,
-  // we'll reset the loading state after a short delay
   setTimeout(() => {
     isDeleting.value = false;
   }, 2000);

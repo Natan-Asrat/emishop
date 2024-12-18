@@ -74,10 +74,8 @@ const checkScreenSize = () => {
 onMounted(() => {
   if (token) {
     axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-    // First verify the token is still valid
     axios.get('/api/account/users/me/')
       .then(() => {
-        // Only establish WebSocket connection if token is valid
         ws.value = new WebSocket(
           `${WS_BASE_URL}/ws/notifications/${userStore.user.id}?token=${token}`
         );
@@ -97,7 +95,6 @@ onMounted(() => {
 
         ws.value.onclose = () => {
           console.error("WebSocket connection closed.");
-          // Try to reconnect after a delay if token is still valid
           setTimeout(() => {
             if (userStore.user.access) {
               console.log("Attempting to reconnect WebSocket...");
@@ -157,24 +154,20 @@ onMounted(() => {
               icon = '/logo.png'
             }
             if (Notification.permission === "granted") {
-              // Show a notification with the browser's default sound
               new Notification(notification.title, {
                 body: notification.message,
                 icon,
               });
             } else {
-              // If permissions are not granted, request permission
               Notification.requestPermission().then((permission) => {
                 if (permission === "granted") {
                   new Notification(notification.title, {
                     body: notification.message,
-                    icon, // Optional: path to an icon for the notification
+                    icon,
                   });
                 }
               });
             }
-
-            
           } else if (message.type === "post") {
             const post = message.object;
             const postData = {
@@ -244,12 +237,10 @@ const onAuthSuccess = () => {
 };
 
 const logout = () => {
-  // clearSession();
   userStore.clearToken();
   isAuthenticated.value = false;
 };
 
-// Expose logout method to be used by child components
 defineExpose({ logout });
 </script>
 
