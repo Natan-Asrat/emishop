@@ -8,7 +8,6 @@ import math
 import uuid
 from django.utils.timesince import timesince
 from asgiref.sync import async_to_sync
-from .serializers import PostSerializer
 from channels.layers import get_channel_layer
 connected_users = {}
 # Create your models here.
@@ -72,6 +71,8 @@ class Like(models.Model):
 @receiver(post_save, sender=Post)
 def notify_post_update(sender, instance, created, **kwargs):
     # Only send notifications if this is an update (not a creation)
+    from .serializers import PostSerializer
+
     if not created:
         channel_layer = get_channel_layer()
         post_id = instance.id

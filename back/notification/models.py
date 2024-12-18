@@ -6,7 +6,6 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
-from .serializers import NotificationSerializer
 
 # Create your models here.
 class Notification(models.Model):
@@ -67,6 +66,7 @@ class Message(models.Model):
 
 @receiver(post_save, sender=Notification)
 def send_notification_to_group(sender, instance, created, **kwargs):
+    from .serializers import NotificationSerializer
     if created:
         # Fetch the user who the notification is for
         user = instance.user
