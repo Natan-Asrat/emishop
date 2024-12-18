@@ -33,24 +33,24 @@
 >
   <button
     v-if="canAccept(transaction)"
-    @click="!isSending && handleAction(transaction, 'accept')"
-    :disabled="isSending"
+    @click="!transactionStore.isSending && handleAction(transaction, 'accept')"
+    :disabled="transactionStore.isSending"
     class="px-3 py-1 bg-green-500 text-white rounded-full text-sm flex items-center space-x-1"
     :class="{
-      'opacity-50 cursor-not-allowed': isSending,
-      'opacity-100 cursor-pointer': !isSending
+      'opacity-50 cursor-not-allowed': transactionStore.isSending,
+      'opacity-100 cursor-pointer': !transactionStore.isSending
     }"
     >
     <CheckCircle class="h-4 w-4" />
     <span>Accept</span>
   </button>
   <button
-    @click="!isSending && navigateToChat(transaction)"
-    :disabled="isSending"
+    @click="!transactionStore.isSending && navigateToChat(transaction)"
+    :disabled="transactionStore.isSending"
     class="px-3 py-1 bg-blue-500 text-white rounded-full text-sm flex items-center space-x-1"
     :class="{
-      'opacity-50 cursor-not-allowed': isSending,
-      'opacity-100 cursor-pointer': !isSending
+      'opacity-50 cursor-not-allowed': transactionStore.isSending,
+      'opacity-100 cursor-pointer': !transactionStore.isSending
     }"
     >
     <MessageCircle class="h-4 w-4" />
@@ -58,12 +58,12 @@
   </button>
   <button
     v-if="canDeliver(transaction)"
-    @click="!isSending && handleAction(transaction, 'complete')"
-    :disabled="isSending"
+    @click="!transactionStore.isSending && handleAction(transaction, 'complete')"
+    :disabled="transactionStore.isSending"
     class="px-3 py-1 bg-purple-500 text-white rounded-full text-sm flex items-center space-x-1"
     :class="{
-      'opacity-50 cursor-not-allowed': isSending,
-      'opacity-100 cursor-pointer': !isSending
+      'opacity-50 cursor-not-allowed': transactionStore.isSending,
+      'opacity-100 cursor-pointer': !transactionStore.isSending
     }"
     >
     <Archive class="h-4 w-4" />
@@ -71,36 +71,36 @@
   </button>
   <button
     v-if="canReceive(transaction)"
-    @click="!isSending && handleAction(transaction, 'complete')"
-    :disabled="isSending"
+    @click="!transactionStore.isSending && handleAction(transaction, 'complete')"
+    :disabled="transactionStore.isSending"
     class="px-3 py-1 bg-green-500 text-white rounded-full text-sm flex items-center space-x-1"
     :class="{
-      'opacity-50 cursor-not-allowed': isSending,
-      'opacity-100 cursor-pointer': !isSending
+      'opacity-50 cursor-not-allowed': transactionStore.isSending,
+      'opacity-100 cursor-pointer': !transactionStore.isSending
     }"
     >
     <span>Received</span>
   </button>
   <button
     v-if="canCancel(transaction)"
-    @click="!isSending && handleAction(transaction, 'cancel')"
-    :disabled="isSending"
+    @click="!transactionStore.isSending && handleAction(transaction, 'cancel')"
+    :disabled="transactionStore.isSending"
     class="px-3 py-1 bg-red-500 text-white rounded-full text-sm flex items-center space-x-1"
     :class="{
-      'opacity-50 cursor-not-allowed': isSending,
-      'opacity-100 cursor-pointer': !isSending
+      'opacity-50 cursor-not-allowed': transactionStore.isSending,
+      'opacity-100 cursor-pointer': !transactionStore.isSending
     }"
     >
     <span>Cancel</span>
   </button>
   <button
     v-if="canReport(transaction)"
-    @click="!isSending && handleAction(transaction, 'report')"
-    :disabled="isSending"
+    @click="!transactionStore.isSending && handleAction(transaction, 'report')"
+    :disabled="transactionStore.isSending"
     class="px-3 py-1 bg-yellow-500 text-white rounded-full text-sm flex items-center space-x-1"
     :class="{
-      'opacity-50 cursor-not-allowed': isSending,
-      'opacity-100 cursor-pointer': !isSending
+      'opacity-50 cursor-not-allowed': transactionStore.isSending,
+      'opacity-100 cursor-pointer': !transactionStore.isSending
     }"
   >
     <span>Report</span>
@@ -118,6 +118,8 @@ import { getOtherPartyOfTrasaction } from '@/utils'
 import { CheckCircle, XCircle, AlertTriangle, ShoppingCart, MessageCircle, Archive } from 'lucide-vue-next';
 import ReportComponent from './ReportComponent.vue';
 import { useUserStore } from '@/stores/user';
+import { useTransactionsStore } from '@/stores/transactions';
+const transactionStore = useTransactionsStore();
 const userStore = useUserStore();
 const emit = defineEmits(['setTransaction'])
 const props = defineProps({
@@ -136,17 +138,9 @@ const props = defineProps({
 })
 const router = useRouter();
 const showReportDialog = ref(false);
-const isSending = ref(false);
 const closeModal = () => {
   showReportDialog.value = false;
 }
-const originalValue = isSending.value;
-onUnmounted(() => {
-  isSending.value = originalValue;
-});
-watch(isSending, (newValue) => {
-  console.log('isSending changed:', newValue);
-});
 const showActions = (transaction) => {
   return (transaction.status === 'pending' && transaction.seller_accepted) || !props.trueForReservationFalseForOrder;
 };
@@ -239,7 +233,7 @@ const canReport = (transaction) => {
   return transaction.status === 'pending' && transaction.seller_accepted && props.trueForReservationFalseForOrder;
 };
 const handleAction = (transaction, action, callback = null) => {
-  isSending.value = true;
+  transactionStore.setIsSending(true);
   try {
     switch (action) {
       case 'accept':
@@ -280,10 +274,10 @@ const handleAction = (transaction, action, callback = null) => {
         showReportDialog.value = true;
         break;
     }
-    isSending.value = false;
+    transactionStore.setIsSending(false);
   } catch (error) {
     console.error(`Error performing ${action}:`, error);
-    isSending.value = false;
+    transactionStore.setIsSending(false);
   }
 };
 const setTransaction = (data) => {

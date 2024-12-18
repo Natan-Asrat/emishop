@@ -8,6 +8,7 @@ export const useTransactionsStore = defineStore({
     orders: [],
     reservationsCount: null,
     ordersCount: null,
+    isSending: false,
     transactionPages: {
       pending: 1,
       completed: 1,
@@ -32,6 +33,9 @@ export const useTransactionsStore = defineStore({
     isLoadingOrders: false,
   }),
   actions: {
+    setIsSending(value){
+      this.isSending = value
+    },
     addTransaction(transaction) {
       this.updateCounts()
       const index = this.transactions.findIndex(tr => tr.id === transaction.id);
