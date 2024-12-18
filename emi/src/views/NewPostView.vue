@@ -203,7 +203,7 @@ export default {
   },
   setup() {
     const toastStore = useToastStore();
-    compressionOptions = {
+    const compressionOptions = {
       maxSizeMB: 0.001, // Maximum file size in megabytes
       maxWidthOrHeight: 1920, // Maximum width or height
       useWebWorker: true,
@@ -438,7 +438,7 @@ export default {
           
           try {
             const compressedFile = await imageCompression(files[i], {
-              ...compressionOptions,
+              ...this.compressionOptions,
               onProgress: (progress) => {
                 // Optional: More granular progress tracking
                 this.progress = `Compressing image ${i + 1} of ${files.length}, progress: ${progress}%`
