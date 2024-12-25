@@ -47,7 +47,7 @@ class ChatConsumer(WebsocketConsumer):
                 user = receiver,
                 sender = sender,
                 type='message',
-                title=f"You have a new message from '{sender.username}!'",
+                title=f"@{sender.username}",
                 message=data.get('message'),
                 reservation_id = reservation_id
             )
