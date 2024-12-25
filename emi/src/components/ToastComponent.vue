@@ -9,7 +9,19 @@ const store = useToastStore();
     :class="store.classes"
     class="transition ease-in-out shadow-lg delay-2000 duration-2000 px-6 py-3 fixed top-4 right-1/2 translate-x-1/2 rounded-lg z-[9999]"
   >
+  <div v-if="store.type == 'message'" class="flex gap-4">
+    <img class="w-12 h-12 rounded-full object-cover" :src="store.avatar" alt="avatar"> 
+    <div>
+      <h2 class="font-bold max-w-[90px] truncate">{{store.title}}</h2>
+      <p class="ml-2 max-w-[90px] truncate">    {{ store.message }}    </p>
+
+    </div>
+
+  </div>
+  <div v-else>
     {{ store.message }}
+
+  </div>
   </div>
 </template>
 

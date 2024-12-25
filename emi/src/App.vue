@@ -110,11 +110,24 @@ onMounted(() => {
           if (message.type === 'notification') {
             const notification = message.object;
             notificationStore.addNotification(notification);
-            toastStore.showToast(
-              5000,
-              notification.message,
-              "bg-green-500 dark:bg-green-500"
-            )
+            if(notification.type === 'message'){
+              toastStore.showToast(
+                5000,
+                notification.message,
+                "bg-green-500 dark:bg-green-500",
+                'message',
+                notification.sender.avatar,
+                "@"+notification.sender.username
+              )
+              console.log('notif', notification)
+            }else{
+              toastStore.showToast(
+                5000,
+                notification.message,
+                "bg-green-500 dark:bg-green-500"
+              )
+
+            }
             try {
               await markNotificationAsDelivered(notification.id);
             } catch (error) {
