@@ -167,21 +167,33 @@ onMounted(() => {
             } else {
               icon = '/logo.png'
             }
-            if (Notification.permission === "granted") {
-              new Notification(notification.title, {
-                body: notification.message,
-                icon,
+            if ('serviceWorker' in navigator && Notification.permission === "granted") {
+              navigator.serviceWorker.ready.then((registration) => {
+                registration.showNotification(notification.title, {
+                  body: notification.message,
+                  icon,
+                });
               });
             } else {
               Notification.requestPermission().then((permission) => {
                 if (permission === "granted") {
-                  new Notification(notification.title, {
-                    body: notification.message,
-                    icon,
-                  });
+                  if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.ready.then((registration) => {
+                      registration.showNotification(notification.title, {
+                        body: notification.message,
+                        icon,
+                      });
+                    });
+                  } else {
+                    new Notification(notification.title, {
+                      body: notification.message,
+                      icon,
+                    });
+                  }
                 }
               });
             }
+
           } else if (message.type === "post") {
             const post = message.object;
             const postData = {
