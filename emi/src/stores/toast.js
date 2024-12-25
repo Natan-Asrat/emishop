@@ -10,11 +10,12 @@ export const useToastStore = defineStore({
     isVisible: false,
     title: '',
     type: '',
-    avatar: ''
+    avatar: '',
+    notification: null
   }),
 
   actions: {
-    showToast(ms, message, classes, type='', avatar='', title='') {
+    showToast(ms, message, classes, type='', avatar='', title='', notification=null) {
       this.ms = parseInt(ms);
       this.message = message;
       this.classes = `${classes || ""} -translate-y-28`;
@@ -22,6 +23,7 @@ export const useToastStore = defineStore({
       this.title = title;
       this.avatar = avatar;
       this.type = type;
+      this.notification = notification;
 
       setTimeout(() => {
         this.classes = this.classes.replace(" -translate-y-28", "");

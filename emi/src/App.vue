@@ -114,10 +114,11 @@ onMounted(() => {
               toastStore.showToast(
                 5000,
                 notification.message,
-                "bg-green-500 dark:bg-green-500",
+                "bg-green-500 dark:bg-green-500 duration-4000",
                 'message',
                 notification.sender.avatar,
-                "@"+notification.sender.username
+                "@"+notification.sender.username,
+                notification
               )
               console.log('notif', notification)
             }else{

@@ -1,10 +1,22 @@
 <script setup>
 import { useToastStore } from "@/stores/toast";
+import { useRouter } from "vue-router";
+const router = useRouter();
 const store = useToastStore();
+const gotoMessage = () => {
+  router.push({
+      name: 'chat',
+      query: {
+        username: store.notification.sender.username,
+        itemId: store.notification?.reservation?.id
+      }
+    });
+}
 </script>
 
 <template>
   <div
+    @click="store.type=='message' ? gotoMessage() : store.isVisible = false"
     v-if="store.isVisible"
     :class="store.classes"
     class="transition ease-in-out shadow-lg delay-2000 duration-2000 px-6 py-3 fixed top-4 right-1/2 translate-x-1/2 rounded-lg z-[9999]"
