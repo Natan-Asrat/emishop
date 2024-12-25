@@ -1,0 +1,13 @@
+[
+    {
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "com.emishopping.www.twa",
+        "sha256_cert_fingerprints": [
+          "E1:B0:06:A7:71:33:CD:81:EC:A1:04:53:BD:6B:A0:B6:3A:FE:AB:2C:A8:9A:F8:FF:34:91:57:5D:EA:35:C8:84"
+        ]
+      }
+    }
+  ]
+  
