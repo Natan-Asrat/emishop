@@ -21,9 +21,9 @@ export default defineConfig({
         'playstore.png'
       ],
       manifest: {
-        name: 'Emi Shop',
-        short_name: 'Emi Shop',
-        description: 'Emi Shop',
+        name: 'Emi Shopping',
+        short_name: 'Emi Shopping',
+        description: 'Emi Shopping',
         theme_color: '#036c84',
         background_color: '#036c84',
         icons: [

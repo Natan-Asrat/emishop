@@ -280,7 +280,7 @@ defineExpose({ logout });
           
           <div class="mt-4">
             <p class="text-gray-600 dark:text-gray-300">
-              Emi Shop is designed for the best experience on mobile devices. 
+              Emi Shopping is designed for the best experience on mobile devices. 
               Please access the app from your phone or tablet for optimal usage.
             </p>
             
