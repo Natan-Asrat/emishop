@@ -64,7 +64,7 @@ const closeModal = () => {
 };
 
 const checkScreenSize = () => {
-  if (window.innerWidth > 768) {
+  if (window.innerWidth > 768 && !location.href.includes('privacy')) {
     showMobileWarning.value = true;
   } else {
     showMobileWarning.value = false;

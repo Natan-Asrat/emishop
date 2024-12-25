@@ -34,6 +34,11 @@ const router = createRouter({
       component: () => import('@/views/ChatVIew.vue')
     },
     {
+      path: '/privacypolicy',
+      name: 'privacypolicy',
+      component: () => import('@/views/PrivacyPolicy.vue')
+    },
+    {
       path: '/notifications',
       name: 'notifications',
       component: () => import('@/views/NotificationView.vue')
