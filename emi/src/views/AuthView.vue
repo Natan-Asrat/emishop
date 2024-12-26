@@ -237,12 +237,39 @@ autocapitalize="none"
                 </div>
 
                 <div class="mt-4">
+                  
+                  <Transition
+                    as="div"
+                    v-if="isDropdownOpen"
+                    :show="isDropdownOpen"
+                    enter="transition ease-out duration-200"
+                    enter-from="opacity-0 translate-y-1"
+                    enter-to="opacity-100 translate-y-0"
+                    leave="transition ease-in duration-150"
+                    leave-from="opacity-100 translate-y-0"
+                    leave-to="opacity-0 translate-y-1"
+                  >
+                    <div class="mt-2 p-4 rounded-md bg-gray-100 text-sm text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+                      {{ errorDetails }}
+                    </div>
+                  </Transition>
+                </div>
+
+                <div class="mt-4 flex justify-between">
                   <button
                     type="button"
                     class="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                     @click="closeErrorModal"
                   >
                     Got it
+                  </button>
+                  <button
+                    type="button"
+                    v-if="errorDetails"
+                    @click="isDropdownOpen = !isDropdownOpen"
+                    class="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                  >
+                  {{ isDropdownOpen ? 'Hide Details' : 'View Details'}}
                   </button>
                 </div>
               </DialogPanel>
@@ -251,6 +278,7 @@ autocapitalize="none"
         </div>
       </Dialog>
     </TransitionRoot>
+
 
     <ImageSourceDialog 
       :isOpen="showImageDialog" 
@@ -280,7 +308,9 @@ const toastStore = useToastStore();
 const isSignUp = ref(false);
 const isLoading = ref(false);
 const isErrorModalOpen = ref(false);
+const isDropdownOpen = ref(false);
 const errorTitle = ref('');
+const errorDetails = ref('');
 const errorMessage = ref('');
 const avatarPreview = ref('');
 const showImageDialog = ref(false);
@@ -310,10 +340,13 @@ const closeErrorModal = () => {
   isErrorModalOpen.value = false;
 };
 
-const showError = (title, message) => {
+const showError = (title, message, description='') => {
   errorTitle.value = title;
   errorMessage.value = message;
   isErrorModalOpen.value = true;
+  if(description) {
+    errorDetails.value = description;
+  }
 };
 
 const toggleAuthMode = () => {
@@ -427,7 +460,7 @@ const handleAuth = async () => {
       const errorMessage = error.response?.data?.username?.[0] || 
                          error.response?.data?.message || 
                          "An error occurred during registration.";
-      showError('Registration Error', errorMessage);
+      showError('Registration Error', errorMessage, error);
     } else {
       showError('Login Error', error.response?.data?.message || "Invalid login credentials");
     }
