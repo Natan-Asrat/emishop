@@ -225,7 +225,7 @@ export default {
       currentTag: '',
       selectedCurrency: '',
       price: '',
-      currencies: ['USD', 'EUR', 'GBP', 'JPY'],
+      currencies: ['USD'],
       quantity: 1,
       isProcessing: false,
       commissionRate: 0.01,
