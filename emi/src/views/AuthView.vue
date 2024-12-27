@@ -1,6 +1,7 @@
 <template>
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
     <div class="w-full max-w-md space-y-8">
+      <p class="text-center dark:text-white mt-4 w-[80%] mx-auto">If you're having problems, please set Chrome as your default browser.</p>
       <div class="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg">
         <div>
           <h2 class="text-3xl font-bold text-center text-gray-900 dark:text-gray-100 mb-6">
