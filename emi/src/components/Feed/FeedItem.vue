@@ -10,10 +10,18 @@
         <HeartHandshakeIcon v-else @click="unlike" class="h-5 w-5 ml-auto right-5 top-5 absolute text-green-300"/>
       </template>
       <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ product.name }}</h2>
-      <p class="text-gray-600 dark:text-gray-400 mt-1">Price: ${{ product.price.toFixed(2) }}</p>
+      <p class="text-gray-600 dark:text-gray-400 mt-1">
+        Price: ${{ new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(product.price) }}
+      </p>
       <p class="text-sm text-gray-700 dark:text-gray-300 mt-1">
-        Stock: <span :class="{'text-red-600 font-bold shadow-xl shadow-white animate-pulse': (product.stockLeft < product.totalStock * 0.1) || (product.stockLeft <= 2 && product.totalStock > 3), 'text-xs': product.stockLeft !== product.totalStock}">{{ product.stockLeft }}</span>
-        / {{ product.totalStock }}
+        Stock: <span :class="{'text-red-600 font-bold shadow-xl shadow-white animate-pulse': (product.stockLeft < product.totalStock * 0.1) || (product.stockLeft <= 2 && product.totalStock > 3), 'text-xs': product.stockLeft !== product.totalStock}">
+          {{
+          new Intl.NumberFormat('en-US').format(product.stockLeft)  
+          }}
+        </span>
+        / {{
+            new Intl.NumberFormat('en-US').format(product.totalStock)
+          }}
       </p>
       <div class="mt-4 flex items-center justify-between">
         <div class="flex items-center">

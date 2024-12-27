@@ -123,7 +123,9 @@
         </div>
         <div v-if="showQuantityWarning" class="mt-2 flex items-center space-x-2 bg-blue-50 dark:bg-blue-900/30 p-2 rounded">
           <Info class="h-4 w-4 text-blue-900 dark:text-yellow-400" />
-          <p class="text-sm text-blue-900 dark:text-yellow-400 font-semibold">Make sure you have {{ quantity }} items</p>
+          <p class="text-sm text-blue-900 dark:text-yellow-400 font-semibold">Make sure you have {{ 
+            new Intl.NumberFormat('en-US').format(quantity)
+           }} items</p>
         </div>
       </div>
 

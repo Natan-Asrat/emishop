@@ -18,8 +18,16 @@
         </div>
         <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">{{ selectedProduct.name }}</h2>
         <p class="text-gray-600 dark:text-gray-400 mb-4">{{ selectedProduct.description }}</p>
-        <p class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">Price: ${{ selectedProduct.price.toFixed(2) }}</p>
-        <p class="text-sm text-gray-500 dark:text-gray-500 mb-4">Stock: {{ selectedProduct.stockLeft }} / {{ selectedProduct.totalStock }}</p>
+        <p class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+          Price: ${{ new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(selectedProduct.price) }}
+        </p>
+        <p class="text-sm text-gray-500 dark:text-gray-500 mb-4">
+          Stock: {{ 
+          new Intl.NumberFormat('en-US').format(selectedProduct.stockLeft)  
+          }} / {{
+            new Intl.NumberFormat('en-US').format(selectedProduct.totalStock)
+          }}
+        </p>
         <button
           @click="deleteProduct(selectedProduct)"
           :disabled="isDeleting"

@@ -3,9 +3,15 @@
     <img loading="lazy" :src="product.image" :alt="product.name" class="w-full h-48 object-cover" @click="openProductDetails(product)" />
     <div class="p-4">
       <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ product.name }}</h2>
-      <p class="text-gray-600 dark:text-gray-400 mt-1">Price: ${{ product.price.toFixed(2) }}</p>
+      <p class="text-gray-600 dark:text-gray-400 mt-1">
+        Price: ${{ new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(product.price) }}
+      </p>
       <p class="text-sm text-gray-500 dark:text-gray-500 mt-1">
-        Stock: {{ product.stockLeft }} / {{ product.totalStock }}
+        Stock: {{ 
+          new Intl.NumberFormat('en-US').format(product.stockLeft)  
+          }} / {{
+            new Intl.NumberFormat('en-US').format(product.totalStock)
+          }}
       </p>
       <div class="mt-4 flex items-center justify-between">
         <div class="flex items-center">
