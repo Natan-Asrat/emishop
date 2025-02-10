@@ -9,14 +9,12 @@ echo "Creating run.sh script..."
 cat <<EOL > "$PROJECT_DIR/run.sh"
 #!/bin/bash
 
-# Load environment variables from /etc/environment
-source /etc/environment
-
 # Activate the virtual environment (optional)
 source venv/bin/activate
 
 # Start Daphne (replace with your ASGI app)
-exec daphne back.asgi:application --bind 0.0.0.0 --port 8000
+exec env $(cat ./environment | xargs) daphne -b 0.0.0.0 -p 8000 back.asgi:application
+
 EOL
 
 # Make run.sh executable by everyone

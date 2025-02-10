@@ -1,9 +1,13 @@
 */venv
 .env
+environment
 */media
 */.env
+*/environment
 db.sqlite3
 */db.sqlite3
+run.sh
+*/run.sh
 # Logs
 logs
 *.log
@@ -13,6 +17,7 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 */__pycache__
+__pycache__/
 node_modules
 .DS_Store
 dist

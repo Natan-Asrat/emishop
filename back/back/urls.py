@@ -5,11 +5,11 @@ from django.conf.urls.static import static
 from django.conf import settings
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
-    path('api/account/', include('account.urls')),
-    path('api/post/', include('post.urls')),
-    path('api/transaction/', include('transaction.urls')),
-    path('api/notification/', include('notification.urls'))
+    path("emishop/admin/", admin.site.urls),
+    path('emishop/api/account/', include('account.urls')),
+    path('emishop/api/post/', include('post.urls')),
+    path('emishop/api/transaction/', include('transaction.urls')),
+    path('emishop/api/notification/', include('notification.urls'))
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
